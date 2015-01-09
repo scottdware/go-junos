@@ -1,7 +1,7 @@
 package junos
 
-// RPCCommand lists the commands that will be called.
-var RPCCommand = map[string]string{
+// rpcCommand lists the commands that will be called.
+var rpcCommand = map[string]string{
 	"lock":                             "<rpc><lock><target><candidate/></target></lock></rpc>",
 	"unlock":                           "<rpc><unlock><target><candidate/></target></unlock></rpc>",
 	"command":                          "<rpc><command format=\"text\">%s</command></rpc>",

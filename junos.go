@@ -45,7 +45,7 @@ func NewSession(host, user, password string) *Session {
 
 // Lock locks the candidate configuration.
 func (s *Session) Lock() error {
-	resp, err := s.Conn.Exec(RPCCommand["lock"])
+	resp, err := s.Conn.Exec(rpcCommand["lock"])
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -61,7 +61,7 @@ func (s *Session) Lock() error {
 
 // Unlock unlocks the candidate configuration.
 func (s *Session) Unlock() error {
-	resp, err := s.Conn.Exec(RPCCommand["unlock"])
+	resp, err := s.Conn.Exec(rpcCommand["unlock"])
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -78,7 +78,7 @@ func (s *Session) Unlock() error {
 // GetRollbackConfig returns the configuration of the given rollback state.
 func (s *Session) GetRollbackConfig(number int) (string, error) {
 	rb := &rollbackXML{}
-	command := fmt.Sprintf(RPCCommand["get-rollback-information"], number)
+	command := fmt.Sprintf(rpcCommand["get-rollback-information"], number)
 	reply, err := s.Conn.Exec(command)
 
 	if err != nil {
@@ -102,7 +102,7 @@ func (s *Session) GetRollbackConfig(number int) (string, error) {
 // RollbackDiff compares the current active configuration to a given rollback configuration.
 func (s *Session) RollbackDiff(compare int) (string, error) {
 	rb := &rollbackXML{}
-	command := fmt.Sprintf(RPCCommand["get-rollback-information-compare"], compare)
+	command := fmt.Sprintf(rpcCommand["get-rollback-information-compare"], compare)
 	reply, err := s.Conn.Exec(command)
 
 	if err != nil {
@@ -126,7 +126,7 @@ func (s *Session) RollbackDiff(compare int) (string, error) {
 // GetRescueConfig returns the rescue configuration.
 func (s *Session) GetRescueConfig() (string, error) {
 	rescue := &rescueXML{}
-	reply, err := s.Conn.Exec(RPCCommand["get-rescue-information"])
+	reply, err := s.Conn.Exec(rpcCommand["get-rescue-information"])
 
 	if err != nil {
 		log.Fatal(err)
@@ -158,9 +158,9 @@ func (s *Session) Command(cmd, format string) (string, error) {
 
 	switch format {
 	case "xml":
-		command = fmt.Sprintf(RPCCommand["command-xml"], cmd)
+		command = fmt.Sprintf(rpcCommand["command-xml"], cmd)
 	default:
-		command = fmt.Sprintf(RPCCommand["command"], cmd)
+		command = fmt.Sprintf(rpcCommand["command"], cmd)
 	}
 	reply, err := s.Conn.Exec(command)
 	if err != nil {
