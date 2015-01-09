@@ -27,7 +27,6 @@ type RescueXML struct {
 
 // CommandXML parses our operational command responses.
 type CommandXML struct {
-	// XML string `xml:"rpc-reply,omitempty"`
 	Config string `xml:",innerxml"`
 }
 
