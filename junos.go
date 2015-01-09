@@ -23,23 +23,25 @@ func NewSession(host, user, password string) *Session {
 }
 
 func (s *Session) Lock() {
-    fmt.Printf("%+v\n", s.Conn)
-	// resp, err := s.Conn.Exec("<rpc><lock-configuration/></rpc>")
+	resp, err := s.Conn.Exec("<rpc><get-software-information/></rpc>")
 
-	// if err != nil {
-		// fmt.Printf("Error: %+v\n", err)
-	// }
+	if err != nil {
+		fmt.Printf("Error: %+v\n", err)
+	}
     
-    // fmt.Printf("%+v\n", resp)
+    fmt.Printf("%+v\n", resp)
 }
 
 func (s *Session) Unlock() {
-    fmt.Printf("%+v\n", s.Conn)
-	// resp, err := s.Conn.Exec("<rpc><unlock-configuration/></rpc>")
+	resp, err := s.Conn.Exec("<rpc><get-software-information/></rpc>")
 
-	// if err != nil {
-		// fmt.Printf("Error: %+v\n", err)
-	// }
+	if err != nil {
+		fmt.Printf("Error: %+v\n", err)
+	}
     
-    // fmt.Printf("%+v\n", resp)
+    fmt.Printf("%+v\n", resp)
+}
+
+func (s *Session) Close() {
+    s.Conn.Close()
 }
