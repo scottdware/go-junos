@@ -18,7 +18,7 @@ func NewSession(host, user, password string) *Session {
     }
     defer s.Close()
 
-	return junos{Conn: s}
+	return &junos{Conn: s}
 }
 
 func (s *Session) Lock() {
