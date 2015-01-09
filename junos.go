@@ -13,9 +13,15 @@ type Session struct {
 	Conn *netconf.Session
 }
 
-// RollbackXML parses our configuration after requesting it via rollback.
+// RollbackXML parses our rollback configuration.
 type RollbackXML struct {
 	XMLName xml.Name `xml:"rollback-information"`
+	Config  string   `xml:"configuration-information>configuration-output"`
+}
+
+// RescueXML parses our rescue configuration.
+type RescueXML struct {
+	XMLName xml.Name `xml:"rescue-information"`
 	Config  string   `xml:"configuration-information>configuration-output"`
 }
 
@@ -33,33 +39,37 @@ func NewSession(host, user, password string) *Session {
 }
 
 // Lock locks the candidate configuration.
-func (s *Session) Lock() {
+func (s *Session) Lock() error {
 	lockRPC := "<rpc><lock><target><candidate/></target></lock></rpc>"
-	resp, _ := s.Conn.Exec(lockRPC)
-	// if err != nil {
-	// log.Fatal(err)
-	// }
+	resp, err := s.Conn.Exec(lockRPC)
+	if err != nil {
+        log.Fatal(err)
+	}
 
 	if resp.Ok == false {
 		for _, m := range resp.Errors {
-			fmt.Printf("%s\n", m.Message)
+			return errors.New(m.Message)
 		}
 	}
+    
+    return nil
 }
 
 // Unlock unlocks the candidate configuration.
-func (s *Session) Unlock() {
+func (s *Session) Unlock() error {
 	unlockRPC := "<rpc><unlock><target><candidate/></target></unlock></rpc>"
-	resp, _ := s.Conn.Exec(unlockRPC)
-	// if err != nil {
-	// fmt.Printf("Error: %+v\n", err)
-	// }
+	resp, err := s.Conn.Exec(unlockRPC)
+	if err != nil {
+        log.Fatal(err)
+	}
 
 	if resp.Ok == false {
 		for _, m := range resp.Errors {
-			fmt.Printf("%s\n", m.Message)
+			return errors.New(m.Message)
 		}
 	}
+    
+    return nil
 }
 
 // GetRollbackConfig returns the configuration of the given rollback state.
@@ -84,6 +94,58 @@ func (s *Session) GetRollbackConfig(number int) (string, error) {
 	}
 
 	return rb.Config, nil
+}
+
+// RollbackDiff compares the current active configuration to a given rollback configuration.
+func (s *Session) RollbackDiff(compare int) (string, error) {
+	rb := &RollbackXML{}
+	rpcCommand := fmt.Sprintf("<rpc><get-rollback-information><rollback>0</rollback><compare>%d</compare><format>text</format></get-rollback-information></rpc>", compare)
+	reply, err := s.Conn.Exec(rpcCommand)
+    
+    if err != nil {
+        log.Fatal(err)
+    }
+    
+	if reply.Ok == false {
+		for _, m := range reply.Errors {
+			return "", errors.New(m.Message)
+		}
+	}
+
+	err = xml.Unmarshal([]byte(reply.Data), rb)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return rb.Config, nil
+}
+
+// GetRescueConfig returns the rescue configuration.
+func (s *Session) GetRescueConfig() (string, error) {
+	rescue := &RescueXML{}
+	rpcCommand := fmt.Sprintf("<rpc><get-rescue-information><format>text</format></get-rescue-information></rpc>")
+	reply, err := s.Conn.Exec(rpcCommand)
+    
+    if err != nil {
+        log.Fatal(err)
+    }
+    
+	if reply.Ok == false {
+		for _, m := range reply.Errors {
+			return "", errors.New(m.Message)
+		}
+	}
+
+	err = xml.Unmarshal([]byte(reply.Data), rescue)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+    if rescue.Config == "" {
+        return "No rescue configuration set.", nil
+    }
+    
+	return rescue.Config, nil
 }
 
 // Close disconnects and closes the session to our Junos device.
