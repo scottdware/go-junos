@@ -11,15 +11,14 @@ type Session struct {
 }
 
 func NewSession(host, user, password string) *Session {
-    sess := &Session{}
     s, err := netconf.DialSSH(host, netconf.SSHConfigPassword(user, password))
     if err != nil {
         log.Fatal(err)
     }
-    // defer s.Close()
-    sess.Conn = s
 
-	return sess
+    return &Session{
+        Conn: s,
+    }
 }
 
 func (s *Session) Lock() {
