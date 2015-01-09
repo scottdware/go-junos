@@ -16,7 +16,7 @@ func NewSession(host, user, password string) *Session {
     if err != nil {
         log.Fatal(err)
     }
-    defer s.Close()
+    // defer s.Close()
     sess.Conn = s
 
 	return sess
