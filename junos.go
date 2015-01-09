@@ -28,6 +28,8 @@ func (s *Session) Lock() {
 	if err != nil {
 		fmt.Printf("Error: %+v\n", err)
 	}
+    
+    fmt.Printf("%+v\n", resp)
 }
 
 func (s *Session) Unlock() {
@@ -36,4 +38,6 @@ func (s *Session) Unlock() {
 	if err != nil {
 		fmt.Printf("Error: %+v\n", err)
 	}
+    
+    fmt.Printf("%+v\n", resp)
 }
