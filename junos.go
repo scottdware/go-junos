@@ -27,7 +27,7 @@ type RescueXML struct {
 
 // CommandXML parses our operational command responses.
 type CommandXML struct {
-    Config string `xml:",innerxml"`
+	Config string `xml:",innerxml"`
 }
 
 // NewSession establishes a new connection to a Junos device that we will use
@@ -152,29 +152,29 @@ func (s *Session) GetRescueConfig() (string, error) {
 
 // Command runs any operational mode command, such as "show", "request", etc..
 func (s *Session) Command(cmd string) (string, error) {
-    c := &CommandXML{}
-    command := fmt.Sprintf(RPCCommand["command"], cmd)
-    reply, err := s.Conn.Exec(command)
-    if err != nil {
-        log.Fatal(err)
-    }
-    
+	c := &CommandXML{}
+	command := fmt.Sprintf(RPCCommand["command"], cmd)
+	reply, err := s.Conn.Exec(command)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	if reply.Ok == false {
 		for _, m := range reply.Errors {
 			return "", errors.New(m.Message)
 		}
 	}
-    
-    err = xml.Unmarshal([]byte(reply.Data), &c)
-    if err != nil {
-        log.Fatal(err)
-    }
-    
-    if c.Config == "" {
-        return "No output available.", nil
-    }
-    
-    return c.Config, nil
+
+	err = xml.Unmarshal([]byte(reply.Data), &c)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if c.Config == "" {
+		return "No output available.", nil
+	}
+
+	return c.Config, nil
 }
 
 // Close disconnects and closes the session to our Junos device.
