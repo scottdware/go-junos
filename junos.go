@@ -27,6 +27,7 @@ type RescueXML struct {
 
 // CommandXML parses our operational command responses.
 type CommandXML struct {
+	// XML string `xml:"rpc-reply,omitempty"`
 	Config string `xml:",innerxml"`
 }
 
@@ -151,9 +152,16 @@ func (s *Session) GetRescueConfig() (string, error) {
 }
 
 // Command runs any operational mode command, such as "show", "request", etc..
-func (s *Session) Command(cmd string) (string, error) {
+func (s *Session) Command(cmd, format string) (string, error) {
 	c := &CommandXML{}
-	command := fmt.Sprintf(RPCCommand["command"], cmd)
+	var command string
+
+	switch format {
+	case "xml":
+		command = fmt.Sprintf(RPCCommand["command-xml"], cmd)
+	default:
+		command = fmt.Sprintf(RPCCommand["command"], cmd)
+	}
 	reply, err := s.Conn.Exec(command)
 	if err != nil {
 		log.Fatal(err)
