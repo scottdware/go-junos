@@ -1,3 +1,4 @@
+// Package junos allows configuration of Juniper Networks' Junos devices.
 package junos
 
 import (
