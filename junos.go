@@ -123,8 +123,8 @@ func (s *Session) RollbackDiff(compare int) (string, error) {
 // GetRescueConfig returns the rescue configuration.
 func (s *Session) GetRescueConfig() (string, error) {
 	rescue := &RescueXML{}
-	rpcCommand := fmt.Sprintf("<rpc><get-rescue-information><format>text</format></get-rescue-information></rpc>")
-	reply, err := s.Conn.Exec(rpcCommand)
+	command := RPCCommand["get-rescue-information"]
+	reply, err := s.Conn.Exec(command)
     
     if err != nil {
         log.Fatal(err)
