@@ -27,7 +27,7 @@ func (s *Session) Lock() {
 		fmt.Printf("Error: %+v\n", err)
 	}
     
-    fmt.Println(resp["Data"])
+    fmt.Println(resp)
 }
 
 func (s *Session) Unlock() {
@@ -36,7 +36,7 @@ func (s *Session) Unlock() {
 		fmt.Printf("Error: %+v\n", err)
 	}
     
-    fmt.Println(resp["Data"])
+    fmt.Println(resp)
 }
 
 func (s *Session) Close() {
