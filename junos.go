@@ -40,8 +40,7 @@ func NewSession(host, user, password string) *Session {
 
 // Lock locks the candidate configuration.
 func (s *Session) Lock() error {
-	lockRPC := "<rpc><lock><target><candidate/></target></lock></rpc>"
-	resp, err := s.Conn.Exec(lockRPC)
+	resp, err := s.Conn.Exec(RPCCommand["lock"])
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -57,8 +56,7 @@ func (s *Session) Lock() error {
 
 // Unlock unlocks the candidate configuration.
 func (s *Session) Unlock() error {
-	unlockRPC := "<rpc><unlock><target><candidate/></target></unlock></rpc>"
-	resp, err := s.Conn.Exec(unlockRPC)
+	resp, err := s.Conn.Exec(RPCCommand["unlock"])
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -75,7 +73,7 @@ func (s *Session) Unlock() error {
 // GetRollbackConfig returns the configuration of the given rollback state.
 func (s *Session) GetRollbackConfig(number int) (string, error) {
 	rb := &RollbackXML{}
-	rpcCommand := fmt.Sprintf("<rpc><get-rollback-information><rollback>%d</rollback><format>text</format></get-rollback-information></rpc>", number)
+	rpcCommand := fmt.Sprintf(RPCCommand["get-rollback-information"], number)
 	reply, err := s.Conn.Exec(rpcCommand)
 
 	if err != nil {
@@ -99,7 +97,7 @@ func (s *Session) GetRollbackConfig(number int) (string, error) {
 // RollbackDiff compares the current active configuration to a given rollback configuration.
 func (s *Session) RollbackDiff(compare int) (string, error) {
 	rb := &RollbackXML{}
-	rpcCommand := fmt.Sprintf("<rpc><get-rollback-information><rollback>0</rollback><compare>%d</compare><format>text</format></get-rollback-information></rpc>", compare)
+	rpcCommand := fmt.Sprintf(RPCCommand["get-rollback-information-compare"], compare)
 	reply, err := s.Conn.Exec(rpcCommand)
 
 	if err != nil {
