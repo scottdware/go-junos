@@ -64,17 +64,21 @@ func (s *Session) Unlock() {
 
 // GetRollbackConfig returns the configuration of the given rollback state.
 func (s *Session) GetRollbackConfig(number int) (string, error) {
-	rpcCommand := fmt.Sprintf("<rpc><get-rollback-information><rollback>%d</rollback><format>text</format></get-rollback-information></rpc>", number)
-	reply, _ := s.Conn.Exec(rpcCommand)
 	rb := &RollbackXML{}
-
+	rpcCommand := fmt.Sprintf("<rpc><get-rollback-information><rollback>%d</rollback><format>text</format></get-rollback-information></rpc>", number)
+	reply, err := s.Conn.Exec(rpcCommand)
+    
+    if err != nil {
+        log.Fatal(err)
+    }
+    
 	if reply.Ok == false {
 		for _, m := range reply.Errors {
 			return "", errors.New(m.Message)
 		}
 	}
 
-	err := xml.Unmarshal([]byte(reply.Data), rb)
+	err = xml.Unmarshal([]byte(reply.Data), rb)
 	if err != nil {
 		log.Fatal(err)
 	}
