@@ -1,4 +1,5 @@
-// Package junos allows configuration of Juniper Networks' Junos devices.
+// Package junos allows configuration of Junos devices, as well as
+// the ability to run commands on-demand.
 package junos
 
 import (
