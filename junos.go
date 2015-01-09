@@ -1,5 +1,5 @@
 // Package junos allows configuration of Junos devices, as well as
-// the ability to run commands on-demand.
+// the ability to run commands.
 package junos
 
 import (
