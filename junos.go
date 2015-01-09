@@ -31,7 +31,7 @@ func (s *Session) Lock() {
 }
 
 func (s *Session) Unlock() {
-	resp, err := s.Conn.Exec("<rpc><unlock-configuration/></rpc>")
+	resp, err := s.Conn.Exec("<rpc><unlock><target><candidate/></target></unlock></rpc>")
 	if err != nil {
 		fmt.Printf("Error: %+v\n", err)
 	}
