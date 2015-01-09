@@ -22,7 +22,7 @@ func NewSession(host, user, password string) *Session {
 }
 
 func (s *Session) Lock() {
-	resp, err := s.Conn.Exec("<rpc><lock-configuration/></rpc>")
+	resp, err := s.Conn.Exec("<rpc><lock><target><candidate/></target></lock></rpc>")
 	if err != nil {
 		fmt.Printf("Error: %+v\n", err)
 	}
