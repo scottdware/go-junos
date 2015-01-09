@@ -43,7 +43,7 @@ func (s *Session) Lock() error {
 	lockRPC := "<rpc><lock><target><candidate/></target></lock></rpc>"
 	resp, err := s.Conn.Exec(lockRPC)
 	if err != nil {
-        log.Fatal(err)
+		log.Fatal(err)
 	}
 
 	if resp.Ok == false {
@@ -51,8 +51,8 @@ func (s *Session) Lock() error {
 			return errors.New(m.Message)
 		}
 	}
-    
-    return nil
+
+	return nil
 }
 
 // Unlock unlocks the candidate configuration.
@@ -60,7 +60,7 @@ func (s *Session) Unlock() error {
 	unlockRPC := "<rpc><unlock><target><candidate/></target></unlock></rpc>"
 	resp, err := s.Conn.Exec(unlockRPC)
 	if err != nil {
-        log.Fatal(err)
+		log.Fatal(err)
 	}
 
 	if resp.Ok == false {
@@ -68,8 +68,8 @@ func (s *Session) Unlock() error {
 			return errors.New(m.Message)
 		}
 	}
-    
-    return nil
+
+	return nil
 }
 
 // GetRollbackConfig returns the configuration of the given rollback state.
@@ -77,11 +77,11 @@ func (s *Session) GetRollbackConfig(number int) (string, error) {
 	rb := &RollbackXML{}
 	rpcCommand := fmt.Sprintf("<rpc><get-rollback-information><rollback>%d</rollback><format>text</format></get-rollback-information></rpc>", number)
 	reply, err := s.Conn.Exec(rpcCommand)
-    
-    if err != nil {
-        log.Fatal(err)
-    }
-    
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	if reply.Ok == false {
 		for _, m := range reply.Errors {
 			return "", errors.New(m.Message)
@@ -101,11 +101,11 @@ func (s *Session) RollbackDiff(compare int) (string, error) {
 	rb := &RollbackXML{}
 	rpcCommand := fmt.Sprintf("<rpc><get-rollback-information><rollback>0</rollback><compare>%d</compare><format>text</format></get-rollback-information></rpc>", compare)
 	reply, err := s.Conn.Exec(rpcCommand)
-    
-    if err != nil {
-        log.Fatal(err)
-    }
-    
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	if reply.Ok == false {
 		for _, m := range reply.Errors {
 			return "", errors.New(m.Message)
@@ -125,11 +125,11 @@ func (s *Session) GetRescueConfig() (string, error) {
 	rescue := &RescueXML{}
 	command := RPCCommand["get-rescue-information"]
 	reply, err := s.Conn.Exec(command)
-    
-    if err != nil {
-        log.Fatal(err)
-    }
-    
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	if reply.Ok == false {
 		for _, m := range reply.Errors {
 			return "", errors.New(m.Message)
@@ -141,10 +141,10 @@ func (s *Session) GetRescueConfig() (string, error) {
 		log.Fatal(err)
 	}
 
-    if rescue.Config == "" {
-        return "No rescue configuration set.", nil
-    }
-    
+	if rescue.Config == "" {
+		return "No rescue configuration set.", nil
+	}
+
 	return rescue.Config, nil
 }
 
