@@ -152,6 +152,7 @@ func (s *Session) GetRescueConfig() (string, error) {
 }
 
 // Command runs any operational mode command, such as "show", "request", etc..
+// format is either "text" or "xml".
 func (s *Session) Command(cmd, format string) (string, error) {
 	c := &CommandXML{}
 	var command string
