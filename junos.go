@@ -13,20 +13,20 @@ type Session struct {
 	Conn *netconf.Session
 }
 
-// RollbackXML parses our rollback configuration.
-type RollbackXML struct {
+// rollbackXML parses our rollback configuration.
+type rollbackXML struct {
 	XMLName xml.Name `xml:"rollback-information"`
 	Config  string   `xml:"configuration-information>configuration-output"`
 }
 
 // RescueXML parses our rescue configuration.
-type RescueXML struct {
+type rescueXML struct {
 	XMLName xml.Name `xml:"rescue-information"`
 	Config  string   `xml:"configuration-information>configuration-output"`
 }
 
 // CommandXML parses our operational command responses.
-type CommandXML struct {
+type commandXML struct {
 	Config string `xml:",innerxml"`
 }
 
@@ -77,7 +77,7 @@ func (s *Session) Unlock() error {
 
 // GetRollbackConfig returns the configuration of the given rollback state.
 func (s *Session) GetRollbackConfig(number int) (string, error) {
-	rb := &RollbackXML{}
+	rb := &rollbackXML{}
 	command := fmt.Sprintf(RPCCommand["get-rollback-information"], number)
 	reply, err := s.Conn.Exec(command)
 
@@ -101,7 +101,7 @@ func (s *Session) GetRollbackConfig(number int) (string, error) {
 
 // RollbackDiff compares the current active configuration to a given rollback configuration.
 func (s *Session) RollbackDiff(compare int) (string, error) {
-	rb := &RollbackXML{}
+	rb := &rollbackXML{}
 	command := fmt.Sprintf(RPCCommand["get-rollback-information-compare"], compare)
 	reply, err := s.Conn.Exec(command)
 
@@ -125,7 +125,7 @@ func (s *Session) RollbackDiff(compare int) (string, error) {
 
 // GetRescueConfig returns the rescue configuration.
 func (s *Session) GetRescueConfig() (string, error) {
-	rescue := &RescueXML{}
+	rescue := &rescueXML{}
 	reply, err := s.Conn.Exec(RPCCommand["get-rescue-information"])
 
 	if err != nil {
@@ -153,7 +153,7 @@ func (s *Session) GetRescueConfig() (string, error) {
 // Command runs any operational mode command, such as "show", "request", etc..
 // format is either "text" or "xml".
 func (s *Session) Command(cmd, format string) (string, error) {
-	c := &CommandXML{}
+	c := &commandXML{}
 	var command string
 
 	switch format {
