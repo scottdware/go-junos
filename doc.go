@@ -38,5 +38,17 @@ Run operational mode commands, such as "show."
 
 When you specify "text," the output will be just like it is on the CLI:
 
+    node0:
+    --------------------------------------------------------------------------
+    Hostname: firewall-1
+    Model: srx240h2
+    JUNOS Software Release [12.1X47-D10.4]
+
+    node1:
+    --------------------------------------------------------------------------
+    Hostname: firewall-2
+    Model: srx240h2
+    JUNOS Software Release [12.1X47-D10.4]
+
 */
 package junos
