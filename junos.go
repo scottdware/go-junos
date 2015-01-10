@@ -87,11 +87,12 @@ func (s *Session) Unlock() error {
 
 // RollbackConfig loads and commits the configuration of a given rollback or rescue state.
 func (s *Session) RollbackConfig(option interface{}) error {
+    var command string
 	switch option.(type) {
 	case int:
-		command := fmt.Sprintf(rpcCommand["rollback-config"], number)
+		command = fmt.Sprintf(rpcCommand["rollback-config"], option)
 	case string:
-		command := fmt.Sprintf(rpcCommand["rescue-config"])
+		command = fmt.Sprintf(rpcCommand["rescue-config"])
 	}
 
 	reply, err := s.Conn.Exec(command)
@@ -99,7 +100,7 @@ func (s *Session) RollbackConfig(option interface{}) error {
 		log.Fatal(err)
 	}
 
-	err = Commit()
+	err = s.Commit()
 	if err != nil {
 		return err
 	}
