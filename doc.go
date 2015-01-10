@@ -10,6 +10,12 @@ Locking the configuration
 		log.Fatal(err)
 	}
 
+Loading a configuration file with "set" commands
+	err = jnpr.Configure("config.txt")
+	if err != nil {
+		fmt.Printf("Error: %s", err)
+	}
+
 Commiting the configuration
 	err = jnpr.Commit()
 	if err != nil {
