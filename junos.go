@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/Juniper/go-netconf/netconf"
+	"io/ioutil"
 	"log"
 )
 
@@ -85,9 +86,31 @@ func (s *Session) Unlock() error {
 	return nil
 }
 
+// Configure loads a configuration file in "set" format.
+func (s *Session) Configure(file string) error {
+	data, err := ioutil.ReadFile(file)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	command := fmt.Sprintf(rpcCommand["configure-set"], string(data))
+	reply, err := s.Conn.Exec(command)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if reply.Ok == false {
+		for _, m := range reply.Errors {
+			return errors.New(m.Message)
+		}
+	}
+
+	return nil
+}
+
 // RollbackConfig loads and commits the configuration of a given rollback or rescue state.
 func (s *Session) RollbackConfig(option interface{}) error {
-    var command string
+	var command string
 	switch option.(type) {
 	case int:
 		command = fmt.Sprintf(rpcCommand["rollback-config"], option)
