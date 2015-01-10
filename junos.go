@@ -76,7 +76,7 @@ func (s *Session) Unlock() error {
 	return nil
 }
 
-// GetRollbackConfig returns the configuration of the given rollback state.
+// GetRollbackConfig returns the configuration of a given rollback configuration.
 func (s *Session) GetRollbackConfig(number int) (string, error) {
 	rb := &rollbackXML{}
 	command := fmt.Sprintf(rpcCommand["get-rollback-information"], number)
@@ -124,7 +124,7 @@ func (s *Session) RollbackDiff(compare int) (string, error) {
 	return rb.Config, nil
 }
 
-// GetRescueConfig returns the rescue configuration.
+// GetRescueConfig returns the rescue configuration if one has been set.
 func (s *Session) GetRescueConfig() (string, error) {
 	rescue := &rescueXML{}
 	reply, err := s.Conn.Exec(rpcCommand["get-rescue-information"])
@@ -186,7 +186,7 @@ func (s *Session) Command(cmd, format string) (string, error) {
 	return c.Config, nil
 }
 
-// Close disconnects and closes the session to our Junos device.
+// Close disconnects our session to the device.
 func (s *Session) Close() {
 	s.Conn.Close()
 }
