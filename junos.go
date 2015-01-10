@@ -44,15 +44,31 @@ func NewSession(host, user, password string) *Session {
 	}
 }
 
-// Lock locks the candidate configuration.
-func (s *Session) Lock() error {
-	resp, err := s.Conn.Exec(rpcCommand["lock"])
+// Commit commits the configuration.
+func (s *Session) Commit() error {
+	reply, err := s.Conn.Exec(rpcCommand["commit"])
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	if resp.Ok == false {
-		for _, m := range resp.Errors {
+	if reply.Ok == false {
+		for _, m := range reply.Errors {
+			return errors.New(m.Message)
+		}
+	}
+
+	return nil
+}
+
+// Lock locks the candidate configuration.
+func (s *Session) Lock() error {
+	reply, err := s.Conn.Exec(rpcCommand["lock"])
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if reply.Ok == false {
+		for _, m := range reply.Errors {
 			return errors.New(m.Message)
 		}
 	}
@@ -76,28 +92,32 @@ func (s *Session) Unlock() error {
 	return nil
 }
 
-// RollbackConfig returns the configuration of a given rollback configuration.
-func (s *Session) RollbackConfig(number int) (string, error) {
-	rb := &rollbackXML{}
-	command := fmt.Sprintf(rpcCommand["get-rollback-information"], number)
-	reply, err := s.Conn.Exec(command)
+// RollbackConfig loads and commits the configuration of a given rollback or rescue state.
+func (s *Session) RollbackConfig(option interface{}) error {
+	switch option.(type) {
+	case int:
+		command := fmt.Sprintf(rpcCommand["rollback-config"], number)
+	case string:
+		command := fmt.Sprintf(rpcCommand["rescue-config"])
+	}
 
+	reply, err := s.Conn.Exec(command)
 	if err != nil {
 		log.Fatal(err)
+	}
+
+	err = Commit()
+	if err != nil {
+		return err
 	}
 
 	if reply.Ok == false {
 		for _, m := range reply.Errors {
-			return "", errors.New(m.Message)
+			return errors.New(m.Message)
 		}
 	}
 
-	err = xml.Unmarshal([]byte(reply.Data), rb)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	return rb.Config, nil
+	return nil
 }
 
 // RollbackDiff compares the current active configuration to a given rollback configuration.
@@ -122,33 +142,6 @@ func (s *Session) RollbackDiff(compare int) (string, error) {
 	}
 
 	return rb.Config, nil
-}
-
-// RescueConfig returns the rescue configuration if one has been set.
-func (s *Session) RescueConfig() (string, error) {
-	rescue := &rescueXML{}
-	reply, err := s.Conn.Exec(rpcCommand["get-rescue-information"])
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	if reply.Ok == false {
-		for _, m := range reply.Errors {
-			return "", errors.New(m.Message)
-		}
-	}
-
-	err = xml.Unmarshal([]byte(reply.Data), rescue)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	if rescue.Config == "" {
-		return "No rescue configuration set.", nil
-	}
-
-	return rescue.Config, nil
 }
 
 // Command runs any operational mode command, such as "show" or "request."
