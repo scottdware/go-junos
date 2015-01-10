@@ -29,7 +29,7 @@ Compare the current configuration to a rollback config.
 	}
 	fmt.Println(diff)
     
-The output will be exactly as it is running the "| compare" command on the CLI:
+The output from `RollbackDiff()` will be exactly as it is running the "| compare" command on the CLI:
 
     [edit forwarding-options helpers bootp server 192.168.10.2]
     -     routing-instance srx-vr;
