@@ -1,7 +1,7 @@
 /*
 Package junos allows you to run commands on and configure Junos devices.
 
-Establish our session
+Establishing a session
 	jnpr := junos.NewSession(host, user, password)
 
 Lock config
@@ -16,27 +16,27 @@ Unlock config
 		log.Fatal(err)
 	}
 
-Rollback diff compare
+Compare the current configuration to a rollback config.
 	diff, err := jnpr.RollbackDiff(3)
 	if err != nil {
 		fmt.Printf("Error: %s", err)
 	}
 	fmt.Println(diff)
 
-Rollback config
+Rollback to an older configuration.
 	err := jnpr.RollbackConfig(2)
 	if err != nil {
 		fmt.Printf("Error: %s", err)
-	}s
+	}
 
-Show command
+Run operational mode commands, such as "show."
 	output, err := jnpr.Command("show version", "text")
 	if err != nil {
 		fmt.Printf("Error: %s", err)
 	}
 	fmt.Println(output)
 
-Close the connection
-	jnpr.Close()
+When you specify "text," the output will be just like it is on the CLI:
+
 */
 package junos
