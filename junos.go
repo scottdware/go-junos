@@ -86,7 +86,8 @@ func (s *Session) Unlock() error {
 	return nil
 }
 
-// Configure loads a configuration file in "set" format.
+// Configure loads a given configuration file where the commands are
+// in "set" format.
 func (s *Session) Configure(file string) error {
 	data, err := ioutil.ReadFile(file)
 	if err != nil {
