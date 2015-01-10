@@ -1,5 +1,7 @@
 ## go-junos
 
+[![GoDoc](https://godoc.org/github.com/scottdware/go-junos?status.svg)](https://godoc.org/github.com/scottdware/go-junos)
+
 A Go package that interacts with Junos devices (i.e. configuration, etc.)
 
 This package makes all of it's calls over [Netconf][1] using the [go-netconf][2] package from 
