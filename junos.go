@@ -76,8 +76,8 @@ func (s *Session) Unlock() error {
 	return nil
 }
 
-// GetRollbackConfig returns the configuration of a given rollback configuration.
-func (s *Session) GetRollbackConfig(number int) (string, error) {
+// RollbackConfig returns the configuration of a given rollback configuration.
+func (s *Session) RollbackConfig(number int) (string, error) {
 	rb := &rollbackXML{}
 	command := fmt.Sprintf(rpcCommand["get-rollback-information"], number)
 	reply, err := s.Conn.Exec(command)
@@ -124,8 +124,8 @@ func (s *Session) RollbackDiff(compare int) (string, error) {
 	return rb.Config, nil
 }
 
-// GetRescueConfig returns the rescue configuration if one has been set.
-func (s *Session) GetRescueConfig() (string, error) {
+// RescueConfig returns the rescue configuration if one has been set.
+func (s *Session) RescueConfig() (string, error) {
 	rescue := &rescueXML{}
 	reply, err := s.Conn.Exec(rpcCommand["get-rescue-information"])
 
