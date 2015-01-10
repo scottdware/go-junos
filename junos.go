@@ -1,5 +1,4 @@
-// Package junos allows configuration of Junos devices, as well as
-// the ability to run commands.
+// Package junos allows you to run commands and configure Junos devices.
 package junos
 
 import (
