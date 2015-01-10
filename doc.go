@@ -4,13 +4,19 @@ Package junos allows you to run commands on and configure Junos devices.
 Establishing a session
 	jnpr := junos.NewSession(host, user, password)
 
-Lock config
+Locking the configuration
 	err := jnpr.Lock()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-Unlock config
+Commiting the configuration
+	err = jnpr.Commit()
+	if err != nil {
+		log.Fatal(err)
+	}
+    
+Unlocking the configuration
 	err = jnpr.Unlock()
 	if err != nil {
 		log.Fatal(err)
