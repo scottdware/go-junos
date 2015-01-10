@@ -14,15 +14,9 @@ type Session struct {
 	Conn *netconf.Session
 }
 
-// rollbackXML parses our rollback configuration.
+// rollbackXML parses our rollback diff configuration.
 type rollbackXML struct {
 	XMLName xml.Name `xml:"rollback-information"`
-	Config  string   `xml:"configuration-information>configuration-output"`
-}
-
-// RescueXML parses our rescue configuration.
-type rescueXML struct {
-	XMLName xml.Name `xml:"rescue-information"`
 	Config  string   `xml:"configuration-information>configuration-output"`
 }
 
