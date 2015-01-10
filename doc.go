@@ -22,6 +22,27 @@ Compare the current configuration to a rollback config.
 		fmt.Printf("Error: %s", err)
 	}
 	fmt.Println(diff)
+    
+The output will be exactly as it is running the "| compare" command on the CLI:
+
+    [edit forwarding-options helpers bootp server 192.168.10.2]
+    -     routing-instance srx-vr;
+    [edit forwarding-options helpers bootp server 192.168.10.3]
+    -     routing-instance srx-vr;
+    [edit security address-book global]
+         address server1 { ... }
+    +    address dc-console 192.168.20.15/32;
+    +    address dc-laptop 192.168.22.7/32;
+    [edit security zones security-zone vendors interfaces]
+          reth0.1000 { ... }
+    +     reth0.520 {
+    +         host-inbound-traffic {
+    +             system-services {
+    +                 dhcp;
+    +                 ping;
+    +             }
+    +         }
+    +     }
 
 Rollback to an older configuration.
 	err := jnpr.RollbackConfig(2)
