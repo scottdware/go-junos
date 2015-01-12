@@ -8,9 +8,9 @@ A Go package that interacts with Junos devices and allows you to do the followin
 * Run operational mode commands, such as `show`, `request`, etc..
 * Compare the active configuration to a given rollback config.
 * Rollback the configuration to a given state or a "rescue" config.
-* Configure devices by uploading a file with commands in "set" format.
+* Configure devices by uploading a file locally or using a FTP/HTTP url.
 
-Visit the [GoDoc][4] page for example usage and documentation.
+Visit the [GoDoc][4] page for package documentation.
 
 > This package makes all of it's calls over [Netconf][1] using the [go-netconf][2] package from [Juniper Networks][3]
 
