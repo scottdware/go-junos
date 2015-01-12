@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-// Session holds the connection information to our Junos device.
+// Junos holds the connection information to our Junos device.
 type Junos struct {
 	*netconf.Session
 }
@@ -54,7 +54,7 @@ func NewSession(host, user, password string) *Junos {
 func (j *Junos) Commit() error {
 	reply, err := j.Exec(rpcCommand["commit"])
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	if reply.Ok == false {
@@ -70,7 +70,7 @@ func (j *Junos) Commit() error {
 func (j *Junos) Lock() error {
 	reply, err := j.Exec(rpcCommand["lock"])
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	if reply.Ok == false {
@@ -86,7 +86,7 @@ func (j *Junos) Lock() error {
 func (j *Junos) Unlock() error {
 	resp, err := j.Exec(rpcCommand["unlock"])
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	if resp.Ok == false {
@@ -109,7 +109,7 @@ func (j *Junos) LoadConfig(path, format string) error {
 		} else {
 			data, err := ioutil.ReadFile(path)
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
 
 			command = fmt.Sprintf(rpcCommand["load-config-local-set"], string(data))
@@ -120,7 +120,7 @@ func (j *Junos) LoadConfig(path, format string) error {
 		} else {
 			data, err := ioutil.ReadFile(path)
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
 
 			command = fmt.Sprintf(rpcCommand["load-config-local-text"], string(data))
@@ -131,7 +131,7 @@ func (j *Junos) LoadConfig(path, format string) error {
 		} else {
 			data, err := ioutil.ReadFile(path)
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
 
 			command = fmt.Sprintf(rpcCommand["load-config-local-xml"], string(data))
@@ -140,7 +140,7 @@ func (j *Junos) LoadConfig(path, format string) error {
 
 	reply, err := j.Exec(command)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	if reply.Ok == false {
@@ -164,7 +164,7 @@ func (j *Junos) RollbackConfig(option interface{}) error {
 
 	reply, err := j.Exec(command)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	err = j.Commit()
@@ -186,9 +186,8 @@ func (j *Junos) RollbackDiff(compare int) (string, error) {
 	rb := &rollbackXML{}
 	command := fmt.Sprintf(rpcCommand["get-rollback-information-compare"], compare)
 	reply, err := j.Exec(command)
-
 	if err != nil {
-		log.Fatal(err)
+		return "", err
 	}
 
 	if reply.Ok == false {
@@ -199,7 +198,7 @@ func (j *Junos) RollbackDiff(compare int) (string, error) {
 
 	err = xml.Unmarshal([]byte(reply.Data), rb)
 	if err != nil {
-		log.Fatal(err)
+		return "", err
 	}
 
 	return rb.Config, nil
@@ -219,7 +218,7 @@ func (j *Junos) Command(cmd, format string) (string, error) {
 	}
 	reply, err := j.Exec(command)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	if reply.Ok == false {
@@ -230,7 +229,7 @@ func (j *Junos) Command(cmd, format string) (string, error) {
 
 	err = xml.Unmarshal([]byte(reply.Data), &c)
 	if err != nil {
-		log.Fatal(err)
+		return "", err
 	}
 
 	if c.Config == "" {
@@ -245,12 +244,12 @@ func (j *Junos) Close() {
 	j.Transport.Close()
 }
 
-// Facts displays basic information about the device, such as software, hardware, etc.
+// Software displays basic information about the device, such as software, hardware, etc.
 func (j *Junos) Software() (*software, error) {
 	data := &software{}
 	reply, err := j.Exec(rpcCommand["software"])
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	if reply.Ok == false {
@@ -261,7 +260,7 @@ func (j *Junos) Software() (*software, error) {
 
 	err = xml.Unmarshal([]byte(reply.Data), &data)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	return data, nil
