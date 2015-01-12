@@ -26,26 +26,27 @@ import (
 )
 
 func main() {
+    // Establish a connection to a device.
 	jnpr := junos.NewSession("srx-1", "admin", "juniper123")
     defer jnpr.Close()
 
-    // Compare the current running config to "rollback 1"
+    // Compare the current running config to "rollback 1."
 	diff, _ := jnpr.RollbackDiff(1)
 	fmt.Println(diff)
 
-    // Load a configuration file with "set" commands, and commit it
+    // Load a configuration file with "set" commands, and commit it.
 	err := jnpr.LoadConfig("C:/Configs/juniper.txt", "set", true)
 	if err != nil {
 		fmt.Println(err)
 	}
     
-    // Rollback to a previous config
+    // Rollback to a previous config.
     err = jnpr.RollbackConfig(5)
     if err != nil {
         fmt.Println(err)
     }
     
-    // Run a command and return the results in "text" format (similar to CLI)
+    // Run a command and return the results in "text" format (similar to CLI).
     output, err := jnpr.Command("show security ipsec inactive-tunnels", "text")
     if err != nil {
         fmt.Println(err)
