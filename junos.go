@@ -20,12 +20,14 @@ type commandXML struct {
 	Config string `xml:",innerxml"`
 }
 
+// commitError parses any errors during the commit process.
 type commitError struct {
 	Path    string `xml:"error-path"`
 	Element string `xml:"error-info>bad-element"`
 	Message string `xml:"error-message"`
 }
 
+// commitResults stores our errors if we have any.
 type commitResults struct {
 	XMLName xml.Name      `xml:"commit-results"`
 	Errors  []commitError `xml:"rpc-error"`
@@ -35,17 +37,6 @@ type commitResults struct {
 type rollbackXML struct {
 	XMLName xml.Name `xml:"rollback-information"`
 	Config  string   `xml:"configuration-information>configuration-output"`
-}
-
-type routingEngine struct {
-	Name    string `xml:"re-name"`
-	Model   string `xml:"software-information>product-model"`
-	Type    string `xml:"software-information>package-information>name"`
-	Version string `xml:"software-information>package-information>comment"`
-}
-
-type software struct {
-	RES []routingEngine `xml:"multi-routing-engine-item"`
 }
 
 // Close disconnects our session to the device.
@@ -348,28 +339,6 @@ func (j *Junos) RollbackDiff(compare int) (string, error) {
 	}
 
 	return rb.Config, nil
-}
-
-// Software displays basic information about the device, such as software, hardware, etc.
-func (j *Junos) Software() (*software, error) {
-	data := &software{}
-	reply, err := j.Exec(rpcCommand["software"])
-	if err != nil {
-		return nil, err
-	}
-
-	if reply.Errors != nil {
-		for _, m := range reply.Errors {
-			return nil, errors.New(m.Message)
-		}
-	}
-
-	err = xml.Unmarshal([]byte(reply.Data), &data)
-	if err != nil {
-		return nil, err
-	}
-
-	return data, nil
 }
 
 // Unlock unlocks the candidate configuration.
