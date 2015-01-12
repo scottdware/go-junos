@@ -50,6 +50,13 @@ func main() {
     if err != nil {
         fmt.Println(err)
     }
+    
+    // Run a command and return the results in "text" format (similar to CLI)
+    output, err := jnpr.Command("show security ipsec inactive-tunnels", "text")
+    if err != nil {
+        fmt.Println(err)
+    }
+    fmt.Println(output)
 }
 ```
 
