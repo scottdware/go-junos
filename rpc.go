@@ -12,5 +12,6 @@ var rpcCommand = map[string]string{
 	"lock":            "<rpc><lock><target><candidate/></target></lock></rpc>",
 	"rescue-config":   "<rpc><load-configuration rescue=\"rescue\"/></rpc>",
 	"rollback-config": "<rpc><load-configuration rollback=\"%d\"/></rpc>",
+	"software":        "<rpc><get-software-information/></rpc>",
 	"unlock":          "<rpc><unlock><target><candidate/></target></unlock></rpc>",
 }
