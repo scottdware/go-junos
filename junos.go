@@ -159,7 +159,9 @@ func (j *Junos) RollbackConfig(option interface{}) error {
 	case int:
 		command = fmt.Sprintf(rpcCommand["rollback-config"], option)
 	case string:
-		command = fmt.Sprintf(rpcCommand["rescue-config"])
+        if option == "rescue" {
+            command = fmt.Sprintf(rpcCommand["rescue-config"])
+        }
 	}
 
 	reply, err := j.Exec(command)
