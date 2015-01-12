@@ -7,6 +7,7 @@ import (
 	"github.com/Juniper/go-netconf/netconf"
 	"io/ioutil"
 	"log"
+	"strings"
 )
 
 // Session holds the connection information to our Junos device.
@@ -97,15 +98,46 @@ func (j *Junos) Unlock() error {
 	return nil
 }
 
-// Configure loads a given configuration file where the commands are
-// in "set" format.
-func (j *Junos) Configure(file string) error {
-	data, err := ioutil.ReadFile(file)
-	if err != nil {
-		log.Fatal(err)
+// LoadConfig loads a given configuration file locally or from
+// an FTP or HTTP server. Format is either "set" or "text."
+func (j *Junos) LoadConfig(path, format string) error {
+	var command string
+	switch format {
+	case "set":
+		if strings.Contains(path, "tp://") {
+			command = fmt.Sprintf(rpcCommand["load-config-url-set"], path)
+		} else {
+			data, err := ioutil.ReadFile(path)
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			command = fmt.Sprintf(rpcCommand["load-config-local-set"], string(data))
+		}
+	case "text":
+		if strings.Contains(path, "tp://") {
+			command = fmt.Sprintf(rpcCommand["load-config-url-text"], path)
+		} else {
+			data, err := ioutil.ReadFile(path)
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			command = fmt.Sprintf(rpcCommand["load-config-local-text"], string(data))
+		}
+	case "xml":
+		if strings.Contains(path, "tp://") {
+			command = fmt.Sprintf(rpcCommand["load-config-url-xml"], path)
+		} else {
+			data, err := ioutil.ReadFile(path)
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			command = fmt.Sprintf(rpcCommand["load-config-local-xml"], string(data))
+		}
 	}
 
-	command := fmt.Sprintf(rpcCommand["configure-set"], string(data))
 	reply, err := j.Exec(command)
 	if err != nil {
 		log.Fatal(err)
