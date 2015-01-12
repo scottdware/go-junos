@@ -218,7 +218,7 @@ func (j *Junos) Command(cmd, format string) (string, error) {
 	}
 	reply, err := j.Exec(command)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	if reply.Ok == false {
