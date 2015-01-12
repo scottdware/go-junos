@@ -10,8 +10,8 @@ import (
 )
 
 // Session holds the connection information to our Junos device.
-type Session struct {
-	Conn *netconf.Session
+type Junos struct {
+	*netconf.Session
 }
 
 // rollbackXML parses our rollback diff configuration.
@@ -25,22 +25,33 @@ type commandXML struct {
 	Config string `xml:",innerxml"`
 }
 
+type software struct {
+	RES []routingEngine `xml:"multi-routing-engine-item"`
+}
+
+type routingEngine struct {
+	Name    string `xml:"re-name"`
+	Model   string `xml:"software-information>product-model"`
+	Type    string `xml:"software-information>package-information>name"`
+	Version string `xml:"software-information>package-information>comment"`
+}
+
 // NewSession establishes a new connection to a Junos device that we will use
 // to run our commands against.
-func NewSession(host, user, password string) *Session {
+func NewSession(host, user, password string) *Junos {
 	s, err := netconf.DialSSH(host, netconf.SSHConfigPassword(user, password))
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	return &Session{
-		Conn: s,
+	return &Junos{
+		s,
 	}
 }
 
 // Commit commits the configuration.
-func (s *Session) Commit() error {
-	reply, err := s.Conn.Exec(rpcCommand["commit"])
+func (j *Junos) Commit() error {
+	reply, err := j.Exec(rpcCommand["commit"])
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -55,8 +66,8 @@ func (s *Session) Commit() error {
 }
 
 // Lock locks the candidate configuration.
-func (s *Session) Lock() error {
-	reply, err := s.Conn.Exec(rpcCommand["lock"])
+func (j *Junos) Lock() error {
+	reply, err := j.Exec(rpcCommand["lock"])
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -71,8 +82,8 @@ func (s *Session) Lock() error {
 }
 
 // Unlock unlocks the candidate configuration.
-func (s *Session) Unlock() error {
-	resp, err := s.Conn.Exec(rpcCommand["unlock"])
+func (j *Junos) Unlock() error {
+	resp, err := j.Exec(rpcCommand["unlock"])
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -88,14 +99,14 @@ func (s *Session) Unlock() error {
 
 // Configure loads a given configuration file where the commands are
 // in "set" format.
-func (s *Session) Configure(file string) error {
+func (j *Junos) Configure(file string) error {
 	data, err := ioutil.ReadFile(file)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	command := fmt.Sprintf(rpcCommand["configure-set"], string(data))
-	reply, err := s.Conn.Exec(command)
+	reply, err := j.Exec(command)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -110,7 +121,7 @@ func (s *Session) Configure(file string) error {
 }
 
 // RollbackConfig loads and commits the configuration of a given rollback or rescue state.
-func (s *Session) RollbackConfig(option interface{}) error {
+func (j *Junos) RollbackConfig(option interface{}) error {
 	var command string
 	switch option.(type) {
 	case int:
@@ -119,12 +130,12 @@ func (s *Session) RollbackConfig(option interface{}) error {
 		command = fmt.Sprintf(rpcCommand["rescue-config"])
 	}
 
-	reply, err := s.Conn.Exec(command)
+	reply, err := j.Exec(command)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	err = s.Commit()
+	err = j.Commit()
 	if err != nil {
 		return err
 	}
@@ -139,10 +150,10 @@ func (s *Session) RollbackConfig(option interface{}) error {
 }
 
 // RollbackDiff compares the current active configuration to a given rollback configuration.
-func (s *Session) RollbackDiff(compare int) (string, error) {
+func (j *Junos) RollbackDiff(compare int) (string, error) {
 	rb := &rollbackXML{}
 	command := fmt.Sprintf(rpcCommand["get-rollback-information-compare"], compare)
-	reply, err := s.Conn.Exec(command)
+	reply, err := j.Exec(command)
 
 	if err != nil {
 		log.Fatal(err)
@@ -164,7 +175,7 @@ func (s *Session) RollbackDiff(compare int) (string, error) {
 
 // Command runs any operational mode command, such as "show" or "request."
 // Format is either "text" or "xml".
-func (s *Session) Command(cmd, format string) (string, error) {
+func (j *Junos) Command(cmd, format string) (string, error) {
 	c := &commandXML{}
 	var command string
 
@@ -174,7 +185,7 @@ func (s *Session) Command(cmd, format string) (string, error) {
 	default:
 		command = fmt.Sprintf(rpcCommand["command"], cmd)
 	}
-	reply, err := s.Conn.Exec(command)
+	reply, err := j.Exec(command)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -198,6 +209,28 @@ func (s *Session) Command(cmd, format string) (string, error) {
 }
 
 // Close disconnects our session to the device.
-func (s *Session) Close() {
-	s.Conn.Close()
+func (j *Junos) Close() {
+	j.Transport.Close()
+}
+
+// Facts displays basic information about the device, such as software, hardware, etc.
+func (j *Junos) Software() (*software, error) {
+	data := &software{}
+	reply, err := j.Exec(rpcCommand["software"])
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if reply.Ok == false {
+		for _, m := range reply.Errors {
+			return nil, errors.New(m.Message)
+		}
+	}
+
+	err = xml.Unmarshal([]byte(reply.Data), &data)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return data, nil
 }
