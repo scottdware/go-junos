@@ -17,8 +17,20 @@ Loading a configuration file where the commands are in "set" format.
 		fmt.Printf("Error: %s", err)
 	}
 
-Commiting the configuration.
+Commiting the configuration in multiple ways.
 	err = jnpr.Commit()
+	if err != nil {
+		log.Fatal(err)
+	}
+    
+    // Commit at a specific time (i.e. 3 PM)
+    err = jnpr.CommitAt("15:00:00")
+	if err != nil {
+		log.Fatal(err)
+	}
+    
+    // Rollback the config after 15 minutes if no other commit is issued.
+    err = jnpr.CommitConfirmed(15)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -44,18 +56,8 @@ The output from RollbackDiff() will be exactly as it is running the "| compare" 
     -     routing-instance srx-vr;
     [edit security address-book global]
          address server1 { ... }
-    +    address dc-console 192.168.20.15/32;
-    +    address dc-laptop 192.168.22.7/32;
-    [edit security zones security-zone vendors interfaces]
-          reth0.1000 { ... }
-    +     reth0.520 {
-    +         host-inbound-traffic {
-    +             system-services {
-    +                 dhcp;
-    +                 ping;
-    +             }
-    +         }
-    +     }
+    +    address pc1 192.168.20.15/32;
+    +    address pc2 192.168.22.7/32;
 
 Rollback to an older configuration.
 	err := jnpr.RollbackConfig(2)
