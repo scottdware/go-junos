@@ -1,5 +1,5 @@
 /*
-Package junos allows you to run commands on and configure Junos devices.
+Package junos allows you to interact with Junos devices.
 
 Establishing a session
     jnpr := junos.NewSession(host, user, password)
