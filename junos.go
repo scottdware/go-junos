@@ -99,7 +99,7 @@ func (j *Junos) Unlock() error {
 }
 
 // LoadConfig loads a given configuration file locally or from
-// an FTP or HTTP server. Format is either "set" or "text."
+// an FTP or HTTP server. Format is either "set" "text" or "xml."
 func (j *Junos) LoadConfig(path, format string) error {
 	var command string
 	switch format {
