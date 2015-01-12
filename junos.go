@@ -1,3 +1,4 @@
+// Package junos allows you to interact with Junos devices.
 package junos
 
 import (
