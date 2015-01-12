@@ -11,7 +11,7 @@ Locking the configuration.
 	}
 
 Loading a configuration file where the commands are in "set" format.
-	err = jnpr.Configure("config.txt")
+	err = jnpr.LoadConfig("config.txt", "set")
 	if err != nil {
 		fmt.Printf("Error: %s", err)
 	}
