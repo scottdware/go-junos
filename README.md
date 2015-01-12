@@ -39,28 +39,14 @@ func main() {
 	diff, _ := jnpr.RollbackDiff(1)
 	fmt.Println(diff)
 
-    err := jnpr.Lock()
-    if err != nil {
-        fmt.Println(err)
-    }
-    
-    // Load a configuration file with "set" commands
-	err = jnpr.LoadConfig("C:/Configs/juniper.txt", "set", false)
+    // Load a configuration file with "set" commands, and commit it
+	err := jnpr.LoadConfig("C:/Configs/juniper.txt", "set", true)
 	if err != nil {
 		fmt.Println(err)
 	}
     
-    err = jnpr.CommitCheck()
-    if err != nil {
-        fmt.Println(err)
-    }
-    
-    err = jnpr.Commit()
-    if err != nil {
-        fmt.Println(err)
-    }
-    
-    err = jnpr.Unlock()
+    // Rollback to a previous config
+    err = jnpr.RollbackConfig(5)
     if err != nil {
         fmt.Println(err)
     }
