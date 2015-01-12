@@ -50,10 +50,10 @@ func main() {
 		fmt.Println(err)
 	}
     
-    // err = jnpr.CommitCheck()
-    // if err != nil {
-        // fmt.Println(err)
-    // }
+    err = jnpr.CommitCheck()
+    if err != nil {
+        fmt.Println(err)
+    }
     
     err = jnpr.Commit()
     if err != nil {
