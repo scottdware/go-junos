@@ -22,13 +22,13 @@ Commiting the configuration in multiple ways.
 	if err != nil {
 		log.Fatal(err)
 	}
-    
+
     // Commit at a specific time (i.e. 3 PM)
     err = jnpr.CommitAt("15:00:00")
 	if err != nil {
 		log.Fatal(err)
 	}
-    
+
     // Rollback the config after 15 minutes if no other commit is issued.
     err = jnpr.CommitConfirmed(15)
 	if err != nil {
