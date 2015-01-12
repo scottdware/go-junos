@@ -2,7 +2,7 @@
 Package junos allows you to run commands on and configure Junos devices.
 
 Establishing a session
-	jnpr := junos.NewSession(host, user, password)
+    jnpr := junos.NewSession(host, user, password)
     defer jnpr.Close()
 
 Locking the configuration.
@@ -22,7 +22,7 @@ Commiting the configuration.
 	if err != nil {
 		log.Fatal(err)
 	}
-    
+
 Unlocking the configuration.
 	err = jnpr.Unlock()
 	if err != nil {
@@ -35,7 +35,7 @@ Compare the current configuration to a rollback config.
 		fmt.Printf("Error: %s", err)
 	}
 	fmt.Println(diff)
-    
+
 The output from RollbackDiff() will be exactly as it is running the "| compare" command on the CLI:
 
     [edit forwarding-options helpers bootp server 192.168.10.2]
