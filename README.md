@@ -25,14 +25,8 @@ import (
 	"os"
 )
 
-var (
-	host     = os.Args[1]
-	user     = os.Args[2]
-	password = os.Args[3]
-)
-
 func main() {
-	jnpr := junos.NewSession(host, user, password)
+	jnpr := junos.NewSession("srx-1", "admin", "juniper123")
     defer jnpr.Close()
 
     // Compare the current running config to "rollback 1"
