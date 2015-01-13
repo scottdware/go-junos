@@ -21,6 +21,15 @@ one, then you can use the RollbackDiff() function.
     
 This will output exactly how it does on the CLI when you "| compare."
 
+Rolling Back to a Previous State
+
+You can also rollback to a previous state, by using the RollbackConfig() function:
+
+    err := jnpr.RollbackConfig(3)
+    if err != nil {
+        fmt.Println(err)
+    }
+
 Device Configuration
 
 When configuring a device, it is good practice to lock the configuration database,
