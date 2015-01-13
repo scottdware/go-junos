@@ -8,7 +8,7 @@ A Go package that interacts with Junos devices and allows you to do the followin
 * Run operational mode commands, such as `show`, `request`, etc..
 * Compare the active configuration to a given rollback config.
 * Rollback the configuration to a given state or a "rescue" config.
-* Configure devices by uploading a file locally or using a FTP/HTTP url.
+* Configure devices by uploading a local file or from an FTP/HTTP server.
 
 Visit the [GoDoc][4] page for package documentation.
 
