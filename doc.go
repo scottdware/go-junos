@@ -31,7 +31,13 @@ the RollbackConfig() function:
         fmt.Println(err)
     }
 
-    // Rollback to the "rescue" configuration if one is set.
+    // Create a rescue config from the active configuration.
+    jnpr.Rescue("save")
+
+    // You can also delete a rescue config.
+    jnpr.Rescue("delete")
+
+    // Rollback to the "rescue" configuration.
     err := jnpr.RollbackConfig("rescue")
     if err != nil {
         fmt.Println(err)
