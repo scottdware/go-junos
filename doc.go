@@ -23,6 +23,27 @@ This will output exactly how it does on the CLI when you "| compare."
 
 Device Configuration
 
+When configuring a device, it is good practice to lock the configuration database,
+load the config, commit the configuration, and then unlock the configuration database.
+
+You can do this with the following functions:
+
+    Lock(), Commit(), Unlock()
+    
+There are multiple ways to commit a configuration as well:
+
+    // Commit the configuration as normal
+    Commit()
+    
+    // Check the configuration for any syntax errors (NOTE: you must still issue a Commit())
+    CommitCheck()
+
+    // Commit at a later time, i.e. 4:30 PM
+    CommitAt("16:30:00")
+    
+    // Rollback configuration if a Commit() is not issued within the given <minutes>.
+    CommitConfirmed(15)
+    
 You can configure the Junos device by uploading a local file, or pulling from an
 FTP/HTTP server. The LoadConfig() function takes three arguments:
 
