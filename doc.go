@@ -18,14 +18,21 @@ one, then you can use the RollbackDiff() function.
         fmt.Println(err)
     }
     fmt.Println(diff)
-    
+
 This will output exactly how it does on the CLI when you "| compare."
 
 Rolling Back to a Previous State
 
-You can also rollback to a previous state, by using the RollbackConfig() function:
+You can also rollback to a previous state, or the "rescue" configuration by using
+the RollbackConfig() function:
 
     err := jnpr.RollbackConfig(3)
+    if err != nil {
+        fmt.Println(err)
+    }
+
+    // Rollback to the "rescue" configuration if one is set.
+    err := jnpr.RollbackConfig("rescue")
     if err != nil {
         fmt.Println(err)
     }
@@ -38,41 +45,41 @@ load the config, commit the configuration, and then unlock the configuration dat
 You can do this with the following functions:
 
     Lock(), Commit(), Unlock()
-    
+
 There are multiple ways to commit a configuration as well:
 
     // Commit the configuration as normal
     Commit()
-    
+
     // Check the configuration for any syntax errors (NOTE: you must still issue a Commit())
     CommitCheck()
 
     // Commit at a later time, i.e. 4:30 PM
     CommitAt("16:30:00")
-    
+
     // Rollback configuration if a Commit() is not issued within the given <minutes>.
     CommitConfirmed(15)
-    
+
 You can configure the Junos device by uploading a local file, or pulling from an
 FTP/HTTP server. The LoadConfig() function takes three arguments:
 
     filename or URL, format, and commit-on-load
-    
+
 If you specify a URL, it must be in the following format:
 
     ftp://user@password:path-to-file
     http://user@password/path-to-file
-    
+
 The format of the commands within the file must be one of the following types:
 
     set
     // system name-server 1.1.1.1
-    
+
     text
     // system {
     //     name-server 1.1.1.1;
     // }
-    
+
     xml
     // <system>
     //     <name-server>
@@ -90,8 +97,8 @@ using the Commit() function.
         fmt.Println(err)
     }
     jnpr.Unlock()
-    
-You don't have to use Lock() and Unlock() if you wish, but if by chance someone 
+
+You don't have to use Lock() and Unlock() if you wish, but if by chance someone
 else tries to edit the device configuration at the same time, there can be conflics
 and most likely an error will be returned.
 */
