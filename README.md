@@ -12,7 +12,7 @@ A Go package that interacts with Junos devices and allows you to do the followin
 
 Visit the [GoDoc][4] page for package documentation.
 
-> **Note** This package makes all of it's calls over [Netconf][1] using the [go-netconf][2] package from [Juniper Networks][3]
+> **Note:** This package makes all of it's calls over [Netconf][1] using the [go-netconf][2] package from [Juniper Networks][3]
 
 Example
 -------
