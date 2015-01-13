@@ -74,14 +74,16 @@ The format of the commands within the file must be one of the following types:
 If the third option is "true" then after the configuration is loaded, a commit
 will be issued. If set to "false," you will have to commit the configuration
 using the Commit() function.
-    
-Using the LoadConfig() function, here's how you would do this.
 
+    jnpr.Lock()
     err := jnpr.LoadConfig("path-to-file.txt", "set", true)
     if err != nil {
         fmt.Println(err)
     }
+    jnpr.Unlock()
     
-If th
+You don't have to use Lock() and Unlock() if you wish, but if by chance someone 
+else tries to edit the device configuration at the same time, there can be conflics
+and most likely an error will be returned.
 */
 package junos
