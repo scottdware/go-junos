@@ -10,7 +10,7 @@ A Go package that interacts with Junos devices and allows you to do the followin
 * Rollback the configuration to a given state or a "rescue" config.
 * Configure devices by uploading a local file or from an FTP/HTTP server.
 
-Visit the [GoDoc][4] page for package documentation.
+Visit the [GoDoc][4] page for complete package documentation.
 
 > **Note:** This package makes all of it's calls over [Netconf][1] using the [go-netconf][2] package from [Juniper Networks][3]
 
