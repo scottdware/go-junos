@@ -288,6 +288,23 @@ func NewSession(host, user, password string) *Junos {
 	}
 }
 
+// Rescue will create or delete the rescue configuration given "save" or "delete."
+func (j *Junos) Rescue(action string) error {
+	command := fmt.Sprintf("rescue-%s", action)
+	reply, err := j.Exec(rpcCommand[command])
+	if err != nil {
+		return err
+	}
+
+	if reply.Errors != nil {
+		for _, m := range reply.Errors {
+			return errors.New(m.Message)
+		}
+	}
+
+	return nil
+}
+
 // RollbackConfig loads and commits the configuration of a given rollback or rescue state.
 func (j *Junos) RollbackConfig(option interface{}) error {
 	var command string
