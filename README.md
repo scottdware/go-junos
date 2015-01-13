@@ -34,6 +34,9 @@ func main() {
 	diff, _ := jnpr.RollbackDiff(1)
 	fmt.Println(diff)
 
+    // Create a rescue configuration.
+    jnpr.Rescue("save")
+    
     // Load a configuration file with "set" commands, and commit it.
 	err := jnpr.LoadConfig("C:/Configs/juniper.txt", "set", true)
 	if err != nil {
@@ -42,6 +45,12 @@ func main() {
     
     // Rollback to a previous config.
     err = jnpr.RollbackConfig(5)
+    if err != nil {
+        fmt.Println(err)
+    }
+    
+    // or 
+    err = jnpr.RollbackConfig("rescue")
     if err != nil {
         fmt.Println(err)
     }
