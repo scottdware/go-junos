@@ -212,7 +212,7 @@ func (j *Junos) LoadConfig(path, format string, commit bool) error {
 				return err
 			}
 
-			command = fmt.Sprintf(rpcCommand["load-config-local-set"], string(data))
+			command = fmt.Sprintf(rpcCommand["config-file-set"], string(data))
 		}
 	case "text":
 		if strings.Contains(path, "tp://") {
@@ -223,7 +223,7 @@ func (j *Junos) LoadConfig(path, format string, commit bool) error {
 				return err
 			}
 
-			command = fmt.Sprintf(rpcCommand["load-config-local-text"], string(data))
+			command = fmt.Sprintf(rpcCommand["config-file-text"], string(data))
 		}
 	case "xml":
 		if strings.Contains(path, "tp://") {
@@ -234,7 +234,7 @@ func (j *Junos) LoadConfig(path, format string, commit bool) error {
 				return err
 			}
 
-			command = fmt.Sprintf(rpcCommand["load-config-local-xml"], string(data))
+			command = fmt.Sprintf(rpcCommand["config-file-xml"], string(data))
 		}
 	}
 
