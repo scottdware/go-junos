@@ -1,6 +1,4 @@
 /*
-package junos
-
 Package junos provides automation for Junos (Juniper Networks) devices.
 
 Establishing A Session
@@ -22,5 +20,12 @@ one, then you can use the RollbackDiff() function.
     fmt.Println(diff)
     
 This will output exactly how it does on the CLI when you "| compare."
+
+Device Configuration
+
+You can configure the Junos device by uploading a local file, or pulling from an
+FTP/HTTP server. The commands within the config file can be any of the following types:
+    set, text, or xml
+
 */
 package junos
