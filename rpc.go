@@ -21,6 +21,8 @@ var rpcCommand = map[string]string{
 	"get-rollback-information-compare": "<rpc><get-rollback-information><rollback>0</rollback><compare>%d</compare><format>text</format></get-rollback-information></rpc>",
 	"lock":            "<rpc><lock><target><candidate/></target></lock></rpc>",
 	"rescue-config":   "<rpc><load-configuration rescue=\"rescue\"/></rpc>",
+	"rescue-delete":   "<rpc><request-delete-rescue-configuration/></rpc>",
+	"rescue-save":     "<rpc><request-save-rescue-configuration/></rpc>",
 	"rollback-config": "<rpc><load-configuration rollback=\"%d\"/></rpc>",
 	"software":        "<rpc><get-software-information/></rpc>",
 	"unlock":          "<rpc><unlock><target><candidate/></target></unlock></rpc>",
