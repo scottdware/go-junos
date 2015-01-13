@@ -1,4 +1,4 @@
-// Package junos allows you to interact with Junos devices.
+// Package junos provides automation for Junos (Juniper Networks) devices.
 package junos
 
 import (
