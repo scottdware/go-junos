@@ -44,6 +44,42 @@ func (j *Junos) Close() {
 	j.Transport.Close()
 }
 
+// Command runs any operational mode command, such as "show" or "request."
+// Format is either "text" or "xml".
+func (j *Junos) Command(cmd, format string) (string, error) {
+	c := &commandXML{}
+	var command string
+	errMessage := "No output available. Please check the syntax of your command."
+
+	switch format {
+	case "xml":
+		command = fmt.Sprintf(rpcCommand["command-xml"], cmd)
+	default:
+		command = fmt.Sprintf(rpcCommand["command"], cmd)
+	}
+	reply, err := j.Exec(command)
+	if err != nil {
+		return errMessage, err
+	}
+
+	if reply.Errors != nil {
+		for _, m := range reply.Errors {
+			return errMessage, errors.New(m.Message)
+		}
+	}
+
+	err = xml.Unmarshal([]byte(reply.Data), &c)
+	if err != nil {
+		return errMessage, err
+	}
+
+	if c.Config == "" {
+		return errMessage, nil
+	}
+
+	return c.Config, nil
+}
+
 // Commit commits the configuration.
 func (j *Junos) Commit() error {
 	errs := &commitResults{}
@@ -160,41 +196,6 @@ func (j *Junos) CommitConfirm(delay int) error {
 	}
 
 	return nil
-}
-
-// Command runs any operational mode command, such as "show" or "request."
-// Format is either "text" or "xml".
-func (j *Junos) Command(cmd, format string) (string, error) {
-	c := &commandXML{}
-	var command string
-
-	switch format {
-	case "xml":
-		command = fmt.Sprintf(rpcCommand["command-xml"], cmd)
-	default:
-		command = fmt.Sprintf(rpcCommand["command"], cmd)
-	}
-	reply, err := j.Exec(command)
-	if err != nil {
-		return "", err
-	}
-
-	if reply.Errors != nil {
-		for _, m := range reply.Errors {
-			return "", errors.New(m.Message)
-		}
-	}
-
-	err = xml.Unmarshal([]byte(reply.Data), &c)
-	if err != nil {
-		return "", err
-	}
-
-	if c.Config == "" {
-		return "No output available.", nil
-	}
-
-	return c.Config, nil
 }
 
 // LoadConfig loads a given configuration file locally or from
