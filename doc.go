@@ -11,9 +11,9 @@ To connect to a Junos device, the process is fairly straightforward.
 Compare Rollback Configurations
 
 If you want to view the difference between the current configuration and a rollback
-one, then you can use the RollbackDiff() function.
+one, then you can use the ConfigDiff() function.
 
-    diff, err := jnpr.RollbackDiff(3)
+    diff, err := jnpr.ConfigDiff(3)
     if err != nil {
         fmt.Println(err)
     }
