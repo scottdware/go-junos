@@ -64,7 +64,7 @@ There are multiple ways to commit a configuration as well:
     CommitAt("16:30:00")
 
     // Rollback configuration if a Commit() is not issued within the given <minutes>.
-    CommitConfirmed(15)
+    CommitConfirm(15)
 
 You can configure the Junos device by uploading a local file, or pulling from an
 FTP/HTTP server. The LoadConfig() function takes three arguments:
