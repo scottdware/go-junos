@@ -31,7 +31,7 @@ func main() {
     defer jnpr.Close()
 
     // Compare the current running config to "rollback 1."
-	diff, _ := jnpr.RollbackDiff(1)
+	diff, _ := jnpr.ConfigDiff(1)
 	fmt.Println(diff)
 
     // Create a rescue configuration.
