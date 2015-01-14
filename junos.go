@@ -34,7 +34,7 @@ type commitResults struct {
 }
 
 // rollbackXML parses our rollback diff configuration.
-type rollbackXML struct {
+type diffXML struct {
 	XMLName xml.Name `xml:"rollback-information"`
 	Config  string   `xml:"configuration-information>configuration-output"`
 }
@@ -198,6 +198,29 @@ func (j *Junos) CommitConfirm(delay int) error {
 	return nil
 }
 
+// ConfigDiff compares the current active configuration to a given rollback configuration.
+func (j *Junos) ConfigDiff(compare int) (string, error) {
+	rb := &diffXML{}
+	command := fmt.Sprintf(rpcCommand["get-rollback-information-compare"], compare)
+	reply, err := j.Exec(command)
+	if err != nil {
+		return "", err
+	}
+
+	if reply.Errors != nil {
+		for _, m := range reply.Errors {
+			return "", errors.New(m.Message)
+		}
+	}
+
+	err = xml.Unmarshal([]byte(reply.Data), rb)
+	if err != nil {
+		return "", err
+	}
+
+	return rb.Config, nil
+}
+
 // LoadConfig loads a given configuration file locally or from
 // an FTP or HTTP server. Format is either "set" "text" or "xml."
 func (j *Junos) LoadConfig(path, format string, commit bool) error {
@@ -334,29 +357,6 @@ func (j *Junos) RollbackConfig(option interface{}) error {
 	}
 
 	return nil
-}
-
-// RollbackDiff compares the current active configuration to a given rollback configuration.
-func (j *Junos) RollbackDiff(compare int) (string, error) {
-	rb := &rollbackXML{}
-	command := fmt.Sprintf(rpcCommand["get-rollback-information-compare"], compare)
-	reply, err := j.Exec(command)
-	if err != nil {
-		return "", err
-	}
-
-	if reply.Errors != nil {
-		for _, m := range reply.Errors {
-			return "", errors.New(m.Message)
-		}
-	}
-
-	err = xml.Unmarshal([]byte(reply.Data), rb)
-	if err != nil {
-		return "", err
-	}
-
-	return rb.Config, nil
 }
 
 // Unlock unlocks the candidate configuration.
