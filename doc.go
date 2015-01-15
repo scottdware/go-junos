@@ -76,6 +76,11 @@ If you specify a URL, it must be in the following format:
     ftp://<username>:<password>@hostname/pathname/file-name
     http://<username>:<password>@hostname/pathname/file-name
 
+    Note: The default value for the FTP path variable is the user’s home directory. Thus,
+    by default the file path to the configuration file is relative to the user directory.
+    To specify an absolute path when using FTP, start the path with the characters %2F;
+    for example: ftp://username:password@hostname/%2Fpath/filename.
+    
 The format of the commands within the file must be one of the following types:
 
     set
