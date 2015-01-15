@@ -73,8 +73,8 @@ FTP/HTTP server. The LoadConfig() function takes three arguments:
 
 If you specify a URL, it must be in the following format:
 
-    ftp://user:password@server/path/to/file
-    http://user:password@server/path/to/file
+    ftp://<username>:<password>@hostname/pathname/file-name
+    http://<username>:<password>@hostname/pathname/file-name
 
 The format of the commands within the file must be one of the following types:
 
