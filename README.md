@@ -30,6 +30,10 @@ func main() {
 	jnpr := junos.NewSession("srx-1", "admin", "juniper123")
     defer jnpr.Close()
 
+    // View only the security section of the configuration in text format.
+    security, _ := jnpr.GetConfig("text", "security")
+    fmt.Println(security)
+    
     // Compare the current running config to "rollback 1."
 	diff, _ := jnpr.ConfigDiff(1)
 	fmt.Println(diff)
