@@ -8,6 +8,22 @@ To connect to a Junos device, the process is fairly straightforward.
     jnpr := junos.NewSession(host, user, password)
     defer jnpr.Close()
 
+Viewing The Configuration
+
+    // Output format can be "text" or "xml"
+    config, err := jnpr.GetConfig("text", "full")
+    if err != nil {
+        fmt.Println(err)
+    }
+    fmt.Println(config)
+
+    // Viewing only a certain part of the configuration
+    routing, err := jnpr.GetConfig("text", "routing-instances")
+    if err != nil {
+        fmt.Println(err)
+    }
+    fmt.Println(routing)
+
 Compare Rollback Configurations
 
 If you want to view the difference between the current configuration and a rollback
@@ -80,7 +96,7 @@ If you specify a URL, it must be in the following format:
     by default the file path to the configuration file is relative to the user directory.
     To specify an absolute path when using FTP, start the path with the characters %2F;
     for example: ftp://username:password@hostname/%2Fpath/filename.
-    
+
 The format of the commands within the file must be one of the following types:
 
     set
