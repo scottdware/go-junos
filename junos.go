@@ -263,7 +263,7 @@ func (j *Junos) LoadConfig(path, format string, commit bool) error {
 	switch format {
 	case "set":
 		if strings.Contains(path, "tp://") {
-			command = fmt.Sprintf(rpcCommand["load-config-url-set"], path)
+			command = fmt.Sprintf(rpcCommand["config-url-set"], path)
 		} else {
 			data, err := ioutil.ReadFile(path)
 			if err != nil {
@@ -274,7 +274,7 @@ func (j *Junos) LoadConfig(path, format string, commit bool) error {
 		}
 	case "text":
 		if strings.Contains(path, "tp://") {
-			command = fmt.Sprintf(rpcCommand["load-config-url-text"], path)
+			command = fmt.Sprintf(rpcCommand["config-url-text"], path)
 		} else {
 			data, err := ioutil.ReadFile(path)
 			if err != nil {
@@ -285,7 +285,7 @@ func (j *Junos) LoadConfig(path, format string, commit bool) error {
 		}
 	case "xml":
 		if strings.Contains(path, "tp://") {
-			command = fmt.Sprintf(rpcCommand["load-config-url-xml"], path)
+			command = fmt.Sprintf(rpcCommand["config-url-xml"], path)
 		} else {
 			data, err := ioutil.ReadFile(path)
 			if err != nil {
