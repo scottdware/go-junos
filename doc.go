@@ -10,6 +10,10 @@ To connect to a Junos device, the process is fairly straightforward.
 
 Viewing The Configuration
 
+To View the entire configuration, use the keyword "full" for the second
+argument. If anything else outside of "full" is specified, it will return
+the configuration of that section only. So "security" would return everything
+under the "security" stanza.
 
     // Output format can be "text" or "xml"
     config, err := jnpr.GetConfig("text", "full")
