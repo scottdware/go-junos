@@ -221,6 +221,41 @@ func (j *Junos) ConfigDiff(compare int) (string, error) {
 	return rb.Config, nil
 }
 
+// GetConfig returns the full configuration, or starting a given <section>.
+// Format can either be "text" or "xml."
+func (j *Junos) GetConfig(format, section string) (string, error) {
+	command := fmt.Sprintf("<rpc><get-configuration format=\"%s\"><configuration>", format)
+
+	if section == "full" {
+		command += "</configuration></get-configuration></rpc>"
+	} else {
+		command += fmt.Sprintf("<%s/></configuration></get-configuration></rpc>", section)
+	}
+
+	reply, err := j.Exec(command)
+	if err != nil {
+		return "", err
+	}
+
+	if reply.Errors != nil {
+		for _, m := range reply.Errors {
+			return "", errors.New(m.Message)
+		}
+	}
+
+	if format == "text" {
+		output := &commandXML{}
+		err = xml.Unmarshal([]byte(reply.Data), output)
+		if err != nil {
+			return "", err
+		}
+
+		return output.Config, nil
+	}
+
+	return reply.Data, nil
+}
+
 // LoadConfig loads a given configuration file locally or from
 // an FTP or HTTP server. Format is either "set" "text" or "xml."
 func (j *Junos) LoadConfig(path, format string, commit bool) error {
