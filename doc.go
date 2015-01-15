@@ -10,6 +10,7 @@ To connect to a Junos device, the process is fairly straightforward.
 
 Viewing The Configuration
 
+
     // Output format can be "text" or "xml"
     config, err := jnpr.GetConfig("text", "full")
     if err != nil {
