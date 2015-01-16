@@ -65,6 +65,9 @@ func main() {
         fmt.Println(err)
     }
     fmt.Println(output)
+    
+    // Show platform and software information
+    jnpr.Facts()
 }
 ```
 
