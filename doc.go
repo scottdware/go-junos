@@ -134,6 +134,17 @@ You don't have to use Lock() and Unlock() if you wish, but if by chance someone
 else tries to edit the device configuration at the same time, there can be conflics
 and most likely an error will be returned.
 
+Running Commands
+
+You can run operational mode commands such as "show" and "request" by using the
+Command() function. Output formats can be "text" or "xml."
+
+    // Results returned in text format
+    output, err := jnpr.Command("show chassis hardware", "text")
+    
+    // Results returned in XML format
+    output, err := jnpr.Command("show chassis hardware", "xml")
+
 Viewing Platform and Software Information
 
 When you call the Facts() function, it prints out the platform and software information:
