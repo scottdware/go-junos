@@ -7,12 +7,17 @@ import (
 	"github.com/Juniper/go-netconf/netconf"
 	"io/ioutil"
 	"log"
+	"regexp"
 	"strings"
 )
 
-// Junos holds the connection information to our Junos device.
+// Junos holds the connection information to our Junos device, as well
+// as the platform and software version it is running.
 type Junos struct {
-	*netconf.Session
+	Session  *netconf.Session
+	Hostname string
+	MultiRE  bool
+	Platform []routingEngine
 }
 
 // CommandXML parses our operational command responses.
@@ -39,9 +44,44 @@ type diffXML struct {
 	Config  string   `xml:"configuration-information>configuration-output"`
 }
 
+// routingEngine holds the device hardware and software information.
+type routingEngine struct {
+	Model   string
+	Version string
+}
+
+// multiRE parses our XML if we have multiple routing engines.
+type softwareMultiRE struct {
+	XMLName xml.Name              `xml:"multi-routing-engine-results"`
+	RE      []softwareRouteEngine `xml:"multi-routing-engine-item>software-information"`
+}
+
+// routeEngine holds all of our routing engine information.
+type softwareRouteEngine struct {
+	XMLName     xml.Name              `xml:"software-information"`
+	Hostname    string                `xml:"host-name"`
+	Platform    string                `xml:"product-model"`
+	PackageInfo []softwarePackageInfo `xml:"package-information"`
+}
+
+// packageInfo holds our software information per routing engine.
+type softwarePackageInfo struct {
+	XMLName         xml.Name `xml:"package-information"`
+	PackageName     []string `xml:"name"`
+	SoftwareVersion []string `xml:"comment"`
+}
+
+// singleRE parses our XML if we only have one routing engine.
+type softwareSingleRE struct {
+	XMLName     xml.Name              `xml:"software-information"`
+	Hostname    string                `xml:"host-name"`
+	Platform    string                `xml:"product-model"`
+	PackageInfo []softwarePackageInfo `xml:"package-information"`
+}
+
 // Close disconnects our session to the device.
 func (j *Junos) Close() {
-	j.Transport.Close()
+	j.Session.Transport.Close()
 }
 
 // Command runs any operational mode command, such as "show" or "request."
@@ -57,7 +97,7 @@ func (j *Junos) Command(cmd, format string) (string, error) {
 	default:
 		command = fmt.Sprintf(rpcCommand["command"], cmd)
 	}
-	reply, err := j.Exec(command)
+	reply, err := j.Session.Exec(command)
 	if err != nil {
 		return errMessage, err
 	}
@@ -83,7 +123,7 @@ func (j *Junos) Command(cmd, format string) (string, error) {
 // Commit commits the configuration.
 func (j *Junos) Commit() error {
 	errs := &commitResults{}
-	reply, err := j.Exec(rpcCommand["commit"])
+	reply, err := j.Session.Exec(rpcCommand["commit"])
 	if err != nil {
 		return err
 	}
@@ -113,7 +153,7 @@ func (j *Junos) Commit() error {
 func (j *Junos) CommitAt(time string) error {
 	errs := &commitResults{}
 	command := fmt.Sprintf(rpcCommand["commit-at"], time)
-	reply, err := j.Exec(command)
+	reply, err := j.Session.Exec(command)
 	if err != nil {
 		return err
 	}
@@ -142,7 +182,7 @@ func (j *Junos) CommitAt(time string) error {
 // CommitCheck checks the configuration for syntax errors.
 func (j *Junos) CommitCheck() error {
 	errs := &commitResults{}
-	reply, err := j.Exec(rpcCommand["commit-check"])
+	reply, err := j.Session.Exec(rpcCommand["commit-check"])
 	if err != nil {
 		return err
 	}
@@ -172,7 +212,7 @@ func (j *Junos) CommitCheck() error {
 func (j *Junos) CommitConfirm(delay int) error {
 	errs := &commitResults{}
 	command := fmt.Sprintf(rpcCommand["commit-confirm"], delay)
-	reply, err := j.Exec(command)
+	reply, err := j.Session.Exec(command)
 	if err != nil {
 		return err
 	}
@@ -202,7 +242,7 @@ func (j *Junos) CommitConfirm(delay int) error {
 func (j *Junos) ConfigDiff(compare int) (string, error) {
 	rb := &diffXML{}
 	command := fmt.Sprintf(rpcCommand["get-rollback-information-compare"], compare)
-	reply, err := j.Exec(command)
+	reply, err := j.Session.Exec(command)
 	if err != nil {
 		return "", err
 	}
@@ -221,6 +261,31 @@ func (j *Junos) ConfigDiff(compare int) (string, error) {
 	return rb.Config, nil
 }
 
+// Facts returns information about the device, such as model and software.
+func (j *Junos) Facts() {
+	var str string
+	fpcRegex := regexp.MustCompile(`^(EX).*`)
+	srxRegex := regexp.MustCompile(`^(SRX).*`)
+	mRegex := regexp.MustCompile(`^(M[X]?).*`)
+	for i, p := range j.Platform {
+		model := p.Model
+		version := p.Version
+		switch model {
+		case fpcRegex.FindString(model):
+			str += fmt.Sprintf("fpc%d\n--------------------------------------------------------------------------\n", i)
+			str += fmt.Sprintf("Hostname: %s\nModel: %s\nVersion: %s\n\n", j.Hostname, model, version)
+		case srxRegex.FindString(model):
+			str += fmt.Sprintf("node%d\n--------------------------------------------------------------------------\n", i)
+			str += fmt.Sprintf("Hostname: %s\nModel: %s\nVersion: %s\n\n", j.Hostname, model, version)
+		case mRegex.FindString(model):
+			str += fmt.Sprintf("re%d\n--------------------------------------------------------------------------\n", i)
+			str += fmt.Sprintf("Hostname: %s\nModel: %s\nVersion: %s\n\n", j.Hostname, model, version)
+		}
+	}
+
+	fmt.Println(str)
+}
+
 // GetConfig returns the full configuration, or starting a given <section>.
 // Format can either be "text" or "xml."
 func (j *Junos) GetConfig(format, section string) (string, error) {
@@ -232,7 +297,7 @@ func (j *Junos) GetConfig(format, section string) (string, error) {
 		command += fmt.Sprintf("<%s/></configuration></get-configuration></rpc>", section)
 	}
 
-	reply, err := j.Exec(command)
+	reply, err := j.Session.Exec(command)
 	if err != nil {
 		return "", err
 	}
@@ -296,7 +361,7 @@ func (j *Junos) LoadConfig(path, format string, commit bool) error {
 		}
 	}
 
-	reply, err := j.Exec(command)
+	reply, err := j.Session.Exec(command)
 	if err != nil {
 		return err
 	}
@@ -319,7 +384,7 @@ func (j *Junos) LoadConfig(path, format string, commit bool) error {
 
 // Lock locks the candidate configuration.
 func (j *Junos) Lock() error {
-	reply, err := j.Exec(rpcCommand["lock"])
+	reply, err := j.Session.Exec(rpcCommand["lock"])
 	if err != nil {
 		return err
 	}
@@ -334,22 +399,75 @@ func (j *Junos) Lock() error {
 }
 
 // NewSession establishes a new connection to a Junos device that we will use
-// to run our commands against.
-func NewSession(host, user, password string) *Junos {
+// to run our commands against. NewSession also gathers software information
+// pertaining to the device.
+func NewSession(host, user, password string) (*Junos, error) {
+	rex := regexp.MustCompile(`^.*\[(.*)\]`)
 	s, err := netconf.DialSSH(host, netconf.SSHConfigPassword(user, password))
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	return &Junos{
-		s,
+	reply, err := s.Exec(rpcCommand["version"])
+	if err != nil {
+		return nil, err
+	}
+
+	if reply.Errors != nil {
+		for _, m := range reply.Errors {
+			return nil, errors.New(m.Message)
+		}
+	}
+
+	if strings.Contains(reply.Data, "multi-routing-engine-results") {
+		facts := &softwareMultiRE{}
+		err = xml.Unmarshal([]byte(reply.Data), facts)
+		if err != nil {
+			return nil, err
+		}
+
+		numRE := len(facts.RE)
+		hostname := facts.RE[0].Hostname
+		res := make([]routingEngine, 0, numRE)
+
+		for i := 0; i < numRE; i++ {
+			version := rex.FindStringSubmatch(facts.RE[i].PackageInfo[0].SoftwareVersion[0])
+			model := strings.ToUpper(facts.RE[i].Platform)
+			res = append(res, routingEngine{Model: model, Version: version[1]})
+		}
+
+		return &Junos{
+			Session:  s,
+			Hostname: hostname,
+			MultiRE:  true,
+			Platform: res,
+		}, nil
+	} else {
+		facts := &softwareSingleRE{}
+		err = xml.Unmarshal([]byte(reply.Data), facts)
+		if err != nil {
+			return nil, err
+		}
+
+		res := make([]routingEngine, 1)
+		hostname := facts.Hostname
+		version := rex.FindStringSubmatch(facts.PackageInfo[0].SoftwareVersion[0])
+		model := strings.ToUpper(facts.Platform)
+		res = append(res, routingEngine{Model: model, Version: version[1]})
+
+		return &Junos{
+			Session:  s,
+			Hostname: hostname,
+			MultiRE:  false,
+			Platform: res,
+		}, nil
 	}
 }
 
 // Rescue will create or delete the rescue configuration given "save" or "delete."
 func (j *Junos) Rescue(action string) error {
 	command := fmt.Sprintf("rescue-%s", action)
-	reply, err := j.Exec(rpcCommand[command])
+	reply, err := j.Session.Exec(rpcCommand[command])
 	if err != nil {
 		return err
 	}
@@ -375,7 +493,7 @@ func (j *Junos) RollbackConfig(option interface{}) error {
 		}
 	}
 
-	reply, err := j.Exec(command)
+	reply, err := j.Session.Exec(command)
 	if err != nil {
 		return err
 	}
@@ -396,7 +514,7 @@ func (j *Junos) RollbackConfig(option interface{}) error {
 
 // Unlock unlocks the candidate configuration.
 func (j *Junos) Unlock() error {
-	resp, err := j.Exec(rpcCommand["unlock"])
+	resp, err := j.Session.Exec(rpcCommand["unlock"])
 	if err != nil {
 		return err
 	}
