@@ -133,5 +133,24 @@ using the Commit() function.
 You don't have to use Lock() and Unlock() if you wish, but if by chance someone
 else tries to edit the device configuration at the same time, there can be conflics
 and most likely an error will be returned.
+
+Viewing Platform and Software Information
+
+When you call the Facts() function, it prints out the platform and software information:
+
+    jnpr.Facts()
+
+    // Returns output similar to the following
+    node0
+    --------------------------------------------------------------------------
+    Hostname: firewall-1
+    Model: SRX240H2
+    Version: 12.1X47-D10.4
+
+    node1
+    --------------------------------------------------------------------------
+    Hostname: firewall-1
+    Model: SRX240H2
+    Version: 12.1X47-D10.4
 */
 package junos
