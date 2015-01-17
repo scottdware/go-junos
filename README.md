@@ -27,7 +27,10 @@ import (
 
 func main() {
     // Establish a connection to a device.
-	jnpr := junos.NewSession("srx-1", "admin", "juniper123")
+	jnpr, err := junos.NewSession("srx-1", "admin", "juniper123")
+    if err != nil {
+        fmt.Println(err)
+    }
     defer jnpr.Close()
 
     // View only the security section of the configuration in text format.
