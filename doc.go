@@ -16,14 +16,14 @@ the configuration of that section only. So "security" would return everything
 under the "security" stanza.
 
     // Output format can be "text" or "xml"
-    config, err := jnpr.GetConfig("text", "full")
+    config, err := jnpr.GetConfig("full", "text")
     if err != nil {
         fmt.Println(err)
     }
     fmt.Println(config)
 
     // Viewing only a certain part of the configuration
-    routing, err := jnpr.GetConfig("text", "routing-instances")
+    routing, err := jnpr.GetConfig("routing-instances", "text")
     if err != nil {
         fmt.Println(err)
     }
