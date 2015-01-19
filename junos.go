@@ -267,6 +267,7 @@ func (j *Junos) Facts() {
 	fpcRegex := regexp.MustCompile(`^(EX).*`)
 	srxRegex := regexp.MustCompile(`^(SRX).*`)
 	mRegex := regexp.MustCompile(`^(M[X]?).*`)
+	str += fmt.Sprintf("Multiple RE: %t\n\n", j.MultiRE)
 	for i, p := range j.Platform {
 		model := p.Model
 		version := p.Version
@@ -288,7 +289,7 @@ func (j *Junos) Facts() {
 
 // GetConfig returns the full configuration, or starting a given <section>.
 // Format can either be "text" or "xml."
-func (j *Junos) GetConfig(format, section string) (string, error) {
+func (j *Junos) GetConfig(section, format string) (string, error) {
 	command := fmt.Sprintf("<rpc><get-configuration format=\"%s\"><configuration>", format)
 
 	if section == "full" {
