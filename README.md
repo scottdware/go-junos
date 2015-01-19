@@ -10,9 +10,10 @@ A Go package that interacts with Junos devices and allows you to do the followin
 * Rollback the configuration to a given state or a "rescue" config.
 * Configure devices by uploading a local file or from an FTP/HTTP server.
 
-Visit the [GoDoc][4] page for complete package documentation.
+Visit the [GoDoc][godoc-go-junos] page for complete package documentation.
 
-> **Note:** This package makes all of it's calls over [Netconf][1] using the [go-netconf][2] package from [Juniper Networks][3]
+> **Note:** This package makes all of it's calls over [Netconf][netconf-rfc] using the [go-netconf][go-netconf] package from
+ [Juniper Networks][juniper]
 
 Example
 -------
@@ -34,7 +35,7 @@ func main() {
     defer jnpr.Close()
 
     // View only the security section of the configuration in text format.
-    security, _ := jnpr.GetConfig("text", "security")
+    security, _ := jnpr.GetConfig("security", "text")
     fmt.Println(security)
     
     // Compare the current running config to "rollback 1."
@@ -74,7 +75,7 @@ func main() {
 }
 ```
 
-[1]: https://tools.ietf.org/html/rfc6241
-[2]: https://github.com/Juniper/go-netconf
-[3]: http://www.juniper.net
-[4]: https://godoc.org/github.com/scottdware/go-junos
+[netconf-rfc]: https://tools.ietf.org/html/rfc6241
+[go-netconf]: https://github.com/Juniper/go-netconf
+[juniper]: http://www.juniper.net
+[godoc-go-junos]: https://godoc.org/github.com/scottdware/go-junos
