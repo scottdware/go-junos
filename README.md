@@ -1,5 +1,4 @@
-go-junos
-========
+## go-junos
 
 [![GoDoc](https://godoc.org/github.com/scottdware/go-junos?status.svg)](https://godoc.org/github.com/scottdware/go-junos)
 
@@ -15,8 +14,7 @@ Visit the [GoDoc][godoc-go-junos] page for complete package documentation.
 > **Note:** This package makes all of it's calls over [Netconf][netconf-rfc] using the [go-netconf][go-netconf] package from
  [Juniper Networks][juniper]
 
-Example
--------
+### Example
 ```Go
 package main
 
@@ -75,7 +73,11 @@ func main() {
 }
 ```
 
+### License
+[MIT][license]
+
 [netconf-rfc]: https://tools.ietf.org/html/rfc6241
 [go-netconf]: https://github.com/Juniper/go-netconf
 [juniper]: http://www.juniper.net
 [godoc-go-junos]: https://godoc.org/github.com/scottdware/go-junos
+[license]: https://github.com/scottdware/go-junos/blob/master/LICENSE.txt
