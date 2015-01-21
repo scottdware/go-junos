@@ -141,7 +141,7 @@ Command() function. Output formats can be "text" or "xml."
 
     // Results returned in text format
     output, err := jnpr.Command("show chassis hardware", "text")
-    
+
     // Results returned in XML format
     output, err := jnpr.Command("show chassis hardware", "xml")
 
