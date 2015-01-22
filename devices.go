@@ -7,7 +7,7 @@ import (
 // DeviceList holds a []Device slice of each individual device.
 type DeviceList struct {
 	XMLName xml.Name `xml:"devices"`
-	Device  []Device `xml:"device"`
+	Devices  []Device `xml:"device"`
 }
 
 // Device holds all the information about each device.
