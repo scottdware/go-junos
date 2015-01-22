@@ -33,7 +33,7 @@ func NewServer(host, user, passwd string) *JunosSpace {
 }
 
 // APICall builds our GET request to the server, and returns the data.
-func (s *JunosSpace) APICall(method, uri string, body io.Reader) ([]byte, error) {
+func (s *JunosSpace) APICall(method, uri, body string) ([]byte, error) {
 	var req *http.Request
     client := &http.Client{Transport: s.Transport}
 	url := fmt.Sprintf("https://%s/api/space/%s", s.Host, uri)
@@ -41,7 +41,7 @@ func (s *JunosSpace) APICall(method, uri string, body io.Reader) ([]byte, error)
     if strings.ToLower(method) == "post" {
         req, _ = http.NewRequest("POST", url, body)
     } else {
-        req, _ = http.NewRequest("GET", url, nil)
+        req, _ = http.NewRequest("GET", url, "")
     }
     
 	req.SetBasicAuth(s.User, s.Password)
