@@ -7,7 +7,7 @@ import (
 // DeviceList holds a []Device slice of every device within Space.
 type DeviceList struct {
 	XMLName xml.Name `xml:"devices"`
-	Devices  []Device `xml:"device"`
+	Devices []Device `xml:"device"`
 }
 
 // Device holds all the information about each device within Space.
@@ -25,7 +25,7 @@ type Device struct {
 // about each device that is managed by Space.
 func (s *JunosSpace) Devices() (*DeviceList, error) {
 	var devices DeviceList
-	data, err := s.APICall("get", "device-management/devices", nil)
+	data, err := s.APIRequest("device-management/devices")
 	if err != nil {
 		return nil, err
 	}
