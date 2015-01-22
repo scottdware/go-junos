@@ -36,14 +36,14 @@ func (s *JunosSpace) APICall(uri string) ([]byte, error) {
 	url := fmt.Sprintf("https://%s/api/space/%s", s.Host, uri)
 	req, _ := http.NewRequest("GET", url, nil)
 	req.SetBasicAuth(s.User, s.Password)
-    req.Header.Set("Accept", "application/xml")
+	req.Header.Set("Accept", "application/xml")
 	res, err := client.Do(req)
 	defer res.Body.Close()
 
 	if err != nil {
 		return nil, err
 	}
-    
+
 	data, _ := ioutil.ReadAll(res.Body)
 
 	return data, nil
