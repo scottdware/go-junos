@@ -25,7 +25,7 @@ type Device struct {
 // about each device that is managed by Space.
 func (s *JunosSpace) Devices() (*DeviceList, error) {
 	var devices DeviceList
-	data, err := s.APICall("device-management/devices")
+	data, err := s.APICall("get", "device-management/devices", nil)
 	if err != nil {
 		return nil, err
 	}
