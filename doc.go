@@ -186,5 +186,36 @@ the devices it manages.
     for _, device := range d.Devices {
         fmt.Printf("Name: %s, IP Address: %s, Platform: %s\n", device.Name, device.IP, device.Platform)
     }
+
+How to add and remove devices:
+
+    // Add a device to Junos Space.
+    err = space.AddDevice("sdubs-fw", "admin", "juniper123")
+    if err != nil {
+        fmt.Println(err)
+    }
+
+    // Remove a device from Junos Space...given it's device ID.
+    err = space.RemoveDevice(11138405)
+    if err != nil {
+        fmt.Println(err)
+    }
+
+    // Here's a good way to loop through all devices, and find the one you want to delete:
+    d, err := space.Devices()
+    if err != nil {
+        fmt.Println(err)
+    }
+
+    for _, device := range d.Devices {
+        if device.Name == "sdubs-fw" {
+            err = space.RemoveDevice(device.ID)
+            if err != nil {
+                fmt.Println(err)
+            }
+
+            fmt.Printf("Deleted device: %s\n", device.Name)
+        }
+    }
 */
 package junos
