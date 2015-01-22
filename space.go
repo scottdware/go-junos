@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"strings"
 )
 
 // JunosSpace holds all of our information that we use for our server
@@ -22,7 +21,6 @@ type JunosSpace struct {
 var contentType = map[string]string{
 	"discover-devices": "application/vnd.net.juniper.space.device-management.discover-devices+xml;version=2;charset=UTF-8",
 	"exec-rpc":         "application/vnd.net.juniper.space.device-management.rpc+xml;version=3;charset=UTF-8",
-	"tags":             "application/vnd.net.juniper.space.tag-management.tag+xml;version=1;charset=UTF-8",
 }
 
 // NewServer sets up our connection to the Junos Space server.
@@ -50,7 +48,7 @@ func (s *JunosSpace) APIDelete(uri string) error {
 	defer res.Body.Close()
 
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	return nil
@@ -69,10 +67,8 @@ func (s *JunosSpace) APIPost(uri, body, ct string) error {
 	defer res.Body.Close()
 
 	if err != nil {
-		return nil, err
+		return err
 	}
-
-	data, _ := ioutil.ReadAll(res.Body)
 
 	return nil
 }
