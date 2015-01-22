@@ -22,7 +22,7 @@ type Device struct {
 }
 
 // Devices
-func (s *JunosSpace) Devices() (*DeviceList, error) {
+func (s *JunosSpace) Devices() (DeviceList, error) {
 	var devices DeviceList
 	data, err := s.APICall("device-management/devices")
 	if err != nil {
