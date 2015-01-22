@@ -4,7 +4,9 @@ import (
 	"crypto/tls"
 	"fmt"
 	"io/ioutil"
+    "io"
 	"net/http"
+    "strings"
 )
 
 // JunosSpace holds all of our information that we use for our server
@@ -31,10 +33,17 @@ func NewServer(host, user, passwd string) *JunosSpace {
 }
 
 // APICall builds our GET request to the server, and returns the data.
-func (s *JunosSpace) APICall(uri string) ([]byte, error) {
-	client := &http.Client{Transport: s.Transport}
+func (s *JunosSpace) APICall(method, uri string, body io.Reader) ([]byte, error) {
+	var req *http.Request
+    client := &http.Client{Transport: s.Transport}
 	url := fmt.Sprintf("https://%s/api/space/%s", s.Host, uri)
-	req, _ := http.NewRequest("GET", url, nil)
+    
+    if strings.ToLower(method) == "post" {
+        req, _ = http.NewRequest("POST", url, body)
+    } else {
+        req, _ = http.NewRequest("GET", url, nil)
+    }
+    
 	req.SetBasicAuth(s.User, s.Password)
 	res, err := client.Do(req)
 	defer res.Body.Close()
