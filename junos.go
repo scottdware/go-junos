@@ -443,26 +443,26 @@ func NewSession(host, user, password string) (*Junos, error) {
 			MultiRE:  true,
 			Platform: res,
 		}, nil
-	} else {
-		facts := &softwareSingleRE{}
-		err = xml.Unmarshal([]byte(reply.Data), facts)
-		if err != nil {
-			return nil, err
-		}
-
-		res := make([]routingEngine, 1)
-		hostname := facts.Hostname
-		version := rex.FindStringSubmatch(facts.PackageInfo[0].SoftwareVersion[0])
-		model := strings.ToUpper(facts.Platform)
-		res = append(res, routingEngine{Model: model, Version: version[1]})
-
-		return &Junos{
-			Session:  s,
-			Hostname: hostname,
-			MultiRE:  false,
-			Platform: res,
-		}, nil
 	}
+    
+    facts := &softwareSingleRE{}
+    err = xml.Unmarshal([]byte(reply.Data), facts)
+    if err != nil {
+        return nil, err
+    }
+
+    res := make([]routingEngine, 1)
+    hostname := facts.Hostname
+    version := rex.FindStringSubmatch(facts.PackageInfo[0].SoftwareVersion[0])
+    model := strings.ToUpper(facts.Platform)
+    res = append(res, routingEngine{Model: model, Version: version[1]})
+
+    return &Junos{
+        Session:  s,
+        Hostname: hostname,
+        MultiRE:  false,
+        Platform: res,
+    }, nil
 }
 
 // Rescue will create or delete the rescue configuration given "save" or "delete."
