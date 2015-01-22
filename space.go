@@ -1,12 +1,12 @@
 package junos
 
 import (
+	"bytes"
 	"crypto/tls"
 	"fmt"
 	"io/ioutil"
-    "io"
 	"net/http"
-    "strings"
+	"strings"
 )
 
 // JunosSpace holds all of our information that we use for our server
@@ -16,6 +16,13 @@ type JunosSpace struct {
 	User      string
 	Password  string
 	Transport *http.Transport
+}
+
+// contentType holds all of the HTTP Content-Types that our Junos Space requests will use.
+var contentType = map[string]string{
+	"discover-devices": "application/vnd.net.juniper.space.device-management.discover-devices+xml;version=2;charset=UTF-8",
+	"exec-rpc":         "application/vnd.net.juniper.space.device-management.rpc+xml;version=3;charset=UTF-8",
+	"tags":             "application/vnd.net.juniper.space.tag-management.tag+xml;version=1;charset=UTF-8",
 }
 
 // NewServer sets up our connection to the Junos Space server.
@@ -32,18 +39,50 @@ func NewServer(host, user, passwd string) *JunosSpace {
 	}
 }
 
-// APICall builds our GET request to the server, and returns the data.
-func (s *JunosSpace) APICall(method, uri, body string) ([]byte, error) {
+// APIDelete builds our DELETE request to the server.
+func (s *JunosSpace) APIDelete(uri string) error {
 	var req *http.Request
-    client := &http.Client{Transport: s.Transport}
+	client := &http.Client{Transport: s.Transport}
 	url := fmt.Sprintf("https://%s/api/space/%s", s.Host, uri)
-    
-    if strings.ToLower(method) == "post" {
-        req, _ = http.NewRequest("POST", url, body)
-    } else {
-        req, _ = http.NewRequest("GET", url, "")
-    }
-    
+	req, _ = http.NewRequest("DELETE", url, nil)
+	req.SetBasicAuth(s.User, s.Password)
+	res, err := client.Do(req)
+	defer res.Body.Close()
+
+	if err != nil {
+		return nil, err
+	}
+
+	return nil
+}
+
+// APIPost builds our POST request to the server.
+func (s *JunosSpace) APIPost(uri, body, ct string) error {
+	var req *http.Request
+	b := bytes.NewReader([]byte(body))
+	client := &http.Client{Transport: s.Transport}
+	url := fmt.Sprintf("https://%s/api/space/%s", s.Host, uri)
+	req, _ = http.NewRequest("POST", url, b)
+	req.Header.Set("Content-Type", contentType[ct])
+	req.SetBasicAuth(s.User, s.Password)
+	res, err := client.Do(req)
+	defer res.Body.Close()
+
+	if err != nil {
+		return nil, err
+	}
+
+	data, _ := ioutil.ReadAll(res.Body)
+
+	return nil
+}
+
+// APIRequest builds our GET request to the server.
+func (s *JunosSpace) APIRequest(uri string) ([]byte, error) {
+	var req *http.Request
+	client := &http.Client{Transport: s.Transport}
+	url := fmt.Sprintf("https://%s/api/space/%s", s.Host, uri)
+	req, _ = http.NewRequest("GET", url, nil)
 	req.SetBasicAuth(s.User, s.Password)
 	res, err := client.Do(req)
 	defer res.Body.Close()
