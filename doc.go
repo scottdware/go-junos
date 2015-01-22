@@ -165,9 +165,10 @@ When you call the Facts() function, it prints out the platform and software info
     Model: SRX240H2
     Version: 12.1X47-D10.4
 
-
 Connecting and Viewing Device Information from Junos Space
 
+Here's an example of how to connect to a Junos Space server, and get information about
+the devices it manages.
 
     // Establish a connection to a Junos Space server.
     space, err := junos.NewServer("space.company.com", "admin", "juniper123")
@@ -185,6 +186,5 @@ Connecting and Viewing Device Information from Junos Space
     for _, device := range d.Devices {
         fmt.Printf("Name: %s, IP Address: %s, Platform: %s\n", device.Name, device.IP, device.Platform)
     }
-
 */
 package junos
