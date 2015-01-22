@@ -18,7 +18,7 @@ type JunosSpace struct {
 
 // NewServer sets up our connection to the Junos Space server.
 func NewServer(host, user, passwd string) *JunosSpace {
-	return &Server{
+	return &JunosSpace{
 		Host:     host,
 		User:     user,
 		Password: passwd,
