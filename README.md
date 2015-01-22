@@ -102,7 +102,19 @@ func main() {
     
     // Iterate over our device list and display some information about them.
     for _, device := range d.Devices {
-        fmt.Printf("Name: %s, IP Address: %s, Platform: %s\n", device.Name, device.IP, device.Platform)
+        fmt.Printf("Name: %s, Device ID: %d, Platform: %s\n", device.Name, device.ID, device.Platform)
+    }
+    
+    // Add a device to Junos Space.
+    err = space.AddDevice("sdubs-fw", "admin", "juniper123")
+    if err != nil {
+        fmt.Println(err)
+    }
+    
+    // Remove a device from Junos Space...given it's device ID.
+    err = space.RemoveDevice(11138405)
+    if err != nil {
+        fmt.Println(err)
     }
 }
 ```
