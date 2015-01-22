@@ -8,7 +8,11 @@ A Go package that interacts with Junos devices, as well as Junos Space, and allo
 * Compare the active configuration to a given rollback config.
 * Rollback the configuration to a given state or a "rescue" config.
 * Configure devices by uploading a local file or from an FTP/HTTP server.
+
+Junos Space
+
 * Get information from Junos Space managed devices.
+* _More functionality coming soon!_
 
 Visit the [GoDoc][godoc-go-junos] page for complete package documentation.
 
