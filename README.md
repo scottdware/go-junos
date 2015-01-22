@@ -2,19 +2,20 @@
 
 [![GoDoc](https://godoc.org/github.com/scottdware/go-junos?status.svg)](https://godoc.org/github.com/scottdware/go-junos)
 
-A Go package that interacts with Junos devices and allows you to do the following:
+A Go package that interacts with Junos devices, as well as Junos Space, and allows you to do the following:
 
 * Run operational mode commands, such as `show`, `request`, etc..
 * Compare the active configuration to a given rollback config.
 * Rollback the configuration to a given state or a "rescue" config.
 * Configure devices by uploading a local file or from an FTP/HTTP server.
+* Get information from Junos Space managed devices.
 
 Visit the [GoDoc][godoc-go-junos] page for complete package documentation.
 
 > **Note:** This package makes all of it's calls over [Netconf][netconf-rfc] using the [go-netconf][go-netconf] package from
  [Juniper Networks][juniper]
 
-### Example
+### Junos Example
 ```Go
 package main
 
@@ -70,6 +71,35 @@ func main() {
     
     // Show platform and software information
     jnpr.Facts()
+}
+```
+
+### Junos Space Example
+```Go
+package main
+
+import (
+	"fmt"
+	"github.com/scottdware/go-junos"
+)
+
+func main() {
+    // Establish a connection to a Junos Space server.
+	space, err := junos.NewServer("space.company.com", "admin", "juniper123")
+    if err != nil {
+        fmt.Println(err)
+    }
+    
+    // Get the list of devices.
+    d, err := space.Devices()
+    if err != nil {
+        fmt.Println(err)
+    }
+    
+    // Iterate over our device list and display some information about them.
+    for _, device := range d.Devices {
+        fmt.Printf("Name: %s, IP Address: %s, Platform: %s\n", device.Name, device.IP, device.Platform)
+    }
 }
 ```
 

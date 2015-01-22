@@ -1,5 +1,6 @@
 /*
-Package junos provides automation for Junos (Juniper Networks) devices.
+Package junos provides automation for Junos (Juniper Networks) devices, as
+well as interaction with Junos Space.
 
 Establishing A Session
 
@@ -163,5 +164,24 @@ When you call the Facts() function, it prints out the platform and software info
     Hostname: firewall-1
     Model: SRX240H2
     Version: 12.1X47-D10.4
+    
+Connecting and Viewing Device Information from Junos Space
+
+    // Establish a connection to a Junos Space server.
+	space, err := junos.NewServer("space.company.com", "admin", "juniper123")
+    if err != nil {
+        fmt.Println(err)
+    }
+    
+    // Get the list of devices.
+    d, err := space.Devices()
+    if err != nil {
+        fmt.Println(err)
+    }
+    
+    // Iterate over our device list and display some information about them.
+    for _, device := range d.Devices {
+        fmt.Printf("Name: %s, IP Address: %s, Platform: %s\n", device.Name, device.IP, device.Platform)
+    }
 */
 package junos
