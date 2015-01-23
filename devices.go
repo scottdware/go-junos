@@ -23,6 +23,39 @@ type Device struct {
 	Name      string `xml:"name"`
 }
 
+// getDeviceID returns the given devices ID, which will be used for REST
+// calls against it.
+func (s *JunosSpace) getDeviceID(device interface{}) (int, error) {
+	var err error
+	var deviceID int
+	ipRegex := regexp.MustCompile(`(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})`)
+	devices, err := s.Devices()
+	if err != nil {
+		return -1, err
+	}
+
+	switch device.(type) {
+	case int:
+		deviceID = device.(int)
+	case string:
+		if ipRegex.MatchString(device.(string)) {
+			for _, d := range devices.Devices {
+				if d.IPAddress == device {
+					deviceID = d.ID
+				}
+			}
+		} else {
+			for _, d := range devices.Devices {
+				if d.Name == device {
+					deviceID = d.ID
+				}
+			}
+		}
+	}
+
+	return deviceID, nil
+}
+
 // AddDevice adds a new managed device to Junos Space, and returns the Job ID.
 func (s *JunosSpace) AddDevice(host, user, password string) error {
 	ipRegex := regexp.MustCompile(`(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})`)
@@ -37,7 +70,7 @@ func (s *JunosSpace) AddDevice(host, user, password string) error {
 	inputXML += fmt.Sprintf("<sshCredential><userName>%s</userName><password>%s</password></sshCredential>", user, password)
 	inputXML += "<manageDiscoveredSystemsFlag>true</manageDiscoveredSystemsFlag><usePing>true</usePing></discover-devices>"
 
-	err := s.APIPost("device-management/discover-devices", inputXML, "discover-devices")
+	_, err := s.APIPost("device-management/discover-devices", inputXML, "discover-devices")
 	if err != nil {
 		return err
 	}
@@ -66,33 +99,16 @@ func (s *JunosSpace) Devices() (*DeviceList, error) {
 // or IP address.
 func (s *JunosSpace) RemoveDevice(device interface{}) error {
 	var err error
-	ipRegex := regexp.MustCompile(`(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})`)
-	devices, err := s.Devices()
+	deviceID, err := s.getDeviceID(device)
 	if err != nil {
 		return err
 	}
 
-	switch device.(type) {
-	case int:
-		err = s.APIDelete(fmt.Sprintf("device-management/devices/%d", device))
-	case string:
-		if ipRegex.MatchString(device.(string)) {
-			for _, d := range devices.Devices {
-				if d.IPAddress == device {
-					err = s.APIDelete(fmt.Sprintf("device-management/devices/%d", d.ID))
-				}
-			}
-		} else {
-			for _, d := range devices.Devices {
-				if d.Name == device {
-					err = s.APIDelete(fmt.Sprintf("device-management/devices/%d", d.ID))
-				}
-			}
+	if deviceID != -1 {
+		err = s.APIDelete(fmt.Sprintf("device-management/devices/%d", deviceID))
+		if err != nil {
+			return err
 		}
-	}
-
-	if err != nil {
-		return err
 	}
 
 	return nil
