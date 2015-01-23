@@ -3,7 +3,6 @@ package junos
 import (
 	"encoding/xml"
 	"fmt"
-	"time"
 )
 
 // SoftwarePackages holds a []Device slice of every device within Space.
