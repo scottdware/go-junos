@@ -105,7 +105,6 @@ func (s *JunosSpace) Devices() (*DeviceList, error) {
 // or IP address.
 func (s *JunosSpace) RemoveDevice(device interface{}) error {
 	var err error
-    var job jobID
 	deviceID, err := s.getDeviceID(device)
 	if err != nil {
 		return err
