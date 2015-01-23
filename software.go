@@ -6,12 +6,12 @@ import (
 	"time"
 )
 
-// DeviceList holds a []Device slice of every device within Space.
+// SoftwarePackages holds a []Device slice of every device within Space.
 type SoftwarePackages struct {
 	Packages []SoftwarePackage `xml:"package"`
 }
 
-// Device holds all the information about each device within Space.
+// SoftwarePackage holds all the information about each device within Space.
 type SoftwarePackage struct {
 	ID       int    `xml:"key,attr"`
 	Name     string `xml:"fileName"`
