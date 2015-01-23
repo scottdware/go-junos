@@ -116,6 +116,34 @@ func main() {
     if err != nil {
         fmt.Println(err)
     }
+    
+    // Stage (copy/download) an image on a device from Space. The third parameter is whether or not to
+    // remove any existing images from the device - true or false.
+    jobID, err := space.StageSoftware("sdubs-fw", "junos-srxsme-12.1X46-D30.2-domestic.tgz", false)
+    if err != nil {
+        fmt.Println(err)
+    }
+    
+    // Deploy (upgrade) the software image to a device.
+    options := &junos.SoftwareDeployOptions{
+        UseDownloaded: true,
+        Validate: false,
+        Reboot: false,
+        RebootAfter: 0,
+        Cleanup: false,
+        RemoveAfter: false,
+    }
+    
+    jobID, err := space.DeploySoftware("sdubs-fw", "junos-srxsme-12.1X46-D30.2-domestic.tgz", options)
+    if err != nil {
+        fmt.Println(err)
+    }
+    
+    // Remove a staged image from the device.
+    jobID, err := space.RemoveStagedSoftware("sdubs-fw", "junos-srxsme-12.1X46-D30.2-domestic.tgz")
+    if err != nil {
+        fmt.Println(err)
+    }
 }
 ```
 
