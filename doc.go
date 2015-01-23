@@ -190,13 +190,13 @@ the devices it manages.
 How to add and remove devices:
 
     // Add a device to Junos Space.
-    err = space.AddDevice("sdubs-fw", "admin", "juniper123")
+    jobID, err = space.AddDevice("sdubs-fw", "admin", "juniper123")
     if err != nil {
         fmt.Println(err)
     }
 
-    // Remove a device from Junos Space...given it's device ID.
-    err = space.RemoveDevice(11138405)
+    // Remove a device from Junos Space.
+    err = space.RemoveDevice("sdubs-fw")
     if err != nil {
         fmt.Println(err)
     }
@@ -209,13 +209,47 @@ How to add and remove devices:
 
     for _, device := range d.Devices {
         if device.Name == "sdubs-fw" {
-            err = space.RemoveDevice(device.ID)
+            err = space.RemoveDevice(device.Name)
             if err != nil {
                 fmt.Println(err)
             }
 
             fmt.Printf("Deleted device: %s\n", device.Name)
         }
+    }
+
+Stage a software image on a device. This basically just downloads it to the device, and does
+not upgrade it.
+
+    // The third parameter is whether or not to remove any existing images from the device - true or false.
+    jobID, err := space.StageSoftware("sdubs-fw", "junos-srxsme-12.1X46-D30.2-domestic.tgz", false)
+    if err != nil {
+        fmt.Println(err)
+    }
+
+If you want to issue a software upgrade to the device, here's how:
+
+    // Deploy (upgrade) the software image to a device.
+    options := &junos.SoftwareDeployOptions{
+        UseDownloaded: true,
+        Validate: false,
+        Reboot: false,
+        RebootAfter: 0,
+        Cleanup: false,
+        RemoveAfter: false,
+    }
+
+    jobID, err := space.DeploySoftware("sdubs-fw", "junos-srxsme-12.1X46-D30.2-domestic.tgz", options)
+    if err != nil {
+        fmt.Println(err)
+    }
+
+Remove a staged image from a device.
+
+    // Remove a staged image from the device.
+    jobID, err := space.RemoveStagedSoftware("sdubs-fw", "junos-srxsme-12.1X46-D30.2-domestic.tgz")
+    if err != nil {
+        fmt.Println(err)
     }
 */
 package junos
