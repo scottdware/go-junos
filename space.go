@@ -20,7 +20,6 @@ type JunosSpace struct {
 // contentType holds all of the HTTP Content-Types that our Junos Space requests will use.
 var contentType = map[string]string{
 	"discover-devices": "application/vnd.net.juniper.space.device-management.discover-devices+xml;version=2;charset=UTF-8",
-	"exec-rpc":         "application/vnd.net.juniper.space.device-management.rpc+xml;version=3;charset=UTF-8",
 }
 
 // NewServer sets up our connection to the Junos Space server.
