@@ -171,10 +171,7 @@ Here's an example of how to connect to a Junos Space server, and get information
 the devices it manages.
 
     // Establish a connection to a Junos Space server.
-    space, err := junos.NewServer("space.company.com", "admin", "juniper123")
-    if err != nil {
-        fmt.Println(err)
-    }
+    space := junos.NewServer("space.company.com", "admin", "juniper123")
 
     // Get the list of devices.
     d, err := space.Devices()
