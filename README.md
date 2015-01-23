@@ -106,13 +106,13 @@ func main() {
     }
     
     // Add a device to Junos Space.
-    err = space.AddDevice("sdubs-fw", "admin", "juniper123")
+    jobID, err = space.AddDevice("sdubs-fw", "admin", "juniper123")
     if err != nil {
         fmt.Println(err)
     }
     
     // Remove a device from Junos Space...given it's device ID.
-    err = space.RemoveDevice(11138405)
+    err = space.RemoveDevice("sdubs-fw")
     if err != nil {
         fmt.Println(err)
     }
