@@ -127,7 +127,7 @@ func main() {
     }
     
     // Deploy (upgrade) the software image to a device.
-    options := &junos.SoftwareDeployOptions{
+    options := &junos.SoftwareOptions{
         UseDownloaded: true,
         Validate: false,
         Reboot: false,
