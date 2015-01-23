@@ -22,7 +22,7 @@ type jobID struct {
 	ID int `xml:"id"`
 }
 
-// jobInfo holds the information about a given job.
+// jobDetail holds the information about a given job.
 type jobDetail struct {
 	ID      jobID
 	Name    string  `xml:"name"`
