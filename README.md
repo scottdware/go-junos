@@ -51,10 +51,16 @@ func main() {
     jnpr.Rescue("save")
     
     // Load a configuration file with "set" commands, and commit it.
-	err := jnpr.LoadConfig("C:/Configs/juniper.txt", "set", true)
+	err := jnpr.LoadConfig("C:/Configs/juniper.txt", "set", false)
 	if err != nil {
 		fmt.Println(err)
 	}
+    
+    // Rollback the configuration after 15 minutes.
+    jnpr.CommitConfirm(15)
+    
+    // ...or commit the configuration at a later time (11 pm).
+    jnpr.CommitAt("23:00:00")
     
     // Rollback to a previous config.
     err = jnpr.RollbackConfig(5)
