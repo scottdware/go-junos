@@ -229,7 +229,7 @@ not upgrade it.
 
 If you want to issue a software upgrade to the device, here's how:
 
-    // Deploy (upgrade) the software image to a device.
+    // Configure our options, such as whether or not to reboot the device, etc.
     options := &junos.SoftwareDeployOptions{
         UseDownloaded: true,
         Validate: false,
