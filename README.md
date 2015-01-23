@@ -12,7 +12,9 @@ A Go package that interacts with Junos devices, as well as Junos Space, and allo
 Junos Space
 
 * Get information from Junos Space managed devices.
-* _More functionality coming soon!_
+* Add/remove devices from Junos Space.
+* List all software image packages that are in Junos Space.
+* Stage and deploy software images to devices from Junos Space.
 
 Visit the [GoDoc][godoc-go-junos] page for complete package documentation.
 
