@@ -20,6 +20,10 @@ type JunosSpace struct {
 // contentType holds all of the HTTP Content-Types that our Junos Space requests will use.
 var contentType = map[string]string{
 	"discover-devices": "application/vnd.net.juniper.space.device-management.discover-devices+xml;version=2;charset=UTF-8",
+	"exec-deploy":      "application/vnd.net.juniper.space.software-management.exec-deploy+xml;version=1;charset=UTF-8",
+	"exec-remove":      "application/vnd.net.juniper.space.software-management.exec-remove+xml;version=1;charset=UTF-8",
+	"exec-stage":       "application/vnd.net.juniper.space.software-management.exec-stage+xml;version=1;charset=UTF-8",
+	"exec-verify":      "application/vnd.net.juniper.space.software-management.exec-verify+xml;version=1;charset=UTF-8",
 }
 
 // NewServer sets up our connection to the Junos Space server.
@@ -54,7 +58,7 @@ func (s *JunosSpace) APIDelete(uri string) error {
 }
 
 // APIPost builds our POST request to the server.
-func (s *JunosSpace) APIPost(uri, body, ct string) error {
+func (s *JunosSpace) APIPost(uri, body, ct string) ([]byte, error) {
 	var req *http.Request
 	b := bytes.NewReader([]byte(body))
 	client := &http.Client{Transport: s.Transport}
@@ -66,10 +70,12 @@ func (s *JunosSpace) APIPost(uri, body, ct string) error {
 	defer res.Body.Close()
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	data, _ := ioutil.ReadAll(res.Body)
+
+	return data, nil
 }
 
 // APIRequest builds our GET request to the server.
