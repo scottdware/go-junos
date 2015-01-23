@@ -62,9 +62,35 @@ func (s *JunosSpace) Devices() (*DeviceList, error) {
 	return &devices, nil
 }
 
-// RemoveDevice removes a device from Junos Space.
-func (s *JunosSpace) RemoveDevice(id int) error {
-	err := s.APIDelete(fmt.Sprintf("device-management/devices/%d", id))
+// RemoveDevice removes a device from Junos Space. You can specify the device ID, name
+// or IP address.
+func (s *JunosSpace) RemoveDevice(device interface{}) error {
+	var err error
+	ipRegex := regexp.MustCompile(`(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})`)
+	devices, err := s.Devices()
+	if err != nil {
+		return err
+	}
+
+	switch device.(type) {
+	case int:
+		err = s.APIDelete(fmt.Sprintf("device-management/devices/%d", device))
+	case string:
+		if ipRegex.MatchString(device.(string)) {
+			for _, d := range devices.Devices {
+				if d.IPAddress == device {
+					err = s.APIDelete(fmt.Sprintf("device-management/devices/%d", d.ID))
+				}
+			}
+		} else {
+			for _, d := range devices.Devices {
+				if d.Name == device {
+					err = s.APIDelete(fmt.Sprintf("device-management/devices/%d", d.ID))
+				}
+			}
+		}
+	}
+
 	if err != nil {
 		return err
 	}
