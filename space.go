@@ -17,13 +17,26 @@ type JunosSpace struct {
 	Transport *http.Transport
 }
 
+// jobID parses the job ID from the returned XML.
+type jobID struct {
+	ID int `xml:"id"`
+}
+
+// jobInfo holds the information about a given job.
+type jobDetail struct {
+	ID      jobID
+	Name    string  `xml:"name"`
+	State   string  `xml:"job-state"`
+	Status  string  `xml:"job-status"`
+	Percent float64 `xml:"percent-complete"`
+}
+
 // contentType holds all of the HTTP Content-Types that our Junos Space requests will use.
 var contentType = map[string]string{
 	"discover-devices": "application/vnd.net.juniper.space.device-management.discover-devices+xml;version=2;charset=UTF-8",
 	"exec-deploy":      "application/vnd.net.juniper.space.software-management.exec-deploy+xml;version=1;charset=UTF-8",
 	"exec-remove":      "application/vnd.net.juniper.space.software-management.exec-remove+xml;version=1;charset=UTF-8",
 	"exec-stage":       "application/vnd.net.juniper.space.software-management.exec-stage+xml;version=1;charset=UTF-8",
-	"exec-verify":      "application/vnd.net.juniper.space.software-management.exec-verify+xml;version=1;charset=UTF-8",
 }
 
 // NewServer sets up our connection to the Junos Space server.
