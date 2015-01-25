@@ -57,7 +57,7 @@ func NewServer(host, user, passwd string) *JunosSpace {
 func (s *JunosSpace) APIDelete(uri string) error {
 	var req *http.Request
 	client := &http.Client{Transport: s.Transport}
-	url := fmt.Sprintf("https://%s/api/space/%s", s.Host, uri)
+	url := fmt.Sprintf("https://%s/api/%s", s.Host, uri)
 	req, _ = http.NewRequest("DELETE", url, nil)
 	req.SetBasicAuth(s.User, s.Password)
 	res, err := client.Do(req)
@@ -75,7 +75,7 @@ func (s *JunosSpace) APIPost(uri, body, ct string) ([]byte, error) {
 	var req *http.Request
 	b := bytes.NewReader([]byte(body))
 	client := &http.Client{Transport: s.Transport}
-	url := fmt.Sprintf("https://%s/api/space/%s", s.Host, uri)
+	url := fmt.Sprintf("https://%s/api/%s", s.Host, uri)
 	req, _ = http.NewRequest("POST", url, b)
 	req.Header.Set("Content-Type", contentType[ct])
 	req.SetBasicAuth(s.User, s.Password)
@@ -95,7 +95,7 @@ func (s *JunosSpace) APIPost(uri, body, ct string) ([]byte, error) {
 func (s *JunosSpace) APIRequest(uri string) ([]byte, error) {
 	var req *http.Request
 	client := &http.Client{Transport: s.Transport}
-	url := fmt.Sprintf("https://%s/api/space/%s", s.Host, uri)
+	url := fmt.Sprintf("https://%s/api/%s", s.Host, uri)
 	req, _ = http.NewRequest("GET", url, nil)
 	req.SetBasicAuth(s.User, s.Password)
 	res, err := client.Do(req)
