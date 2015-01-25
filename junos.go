@@ -14,10 +14,10 @@ import (
 // Junos holds the connection information to our Junos device, as well
 // as the platform and software version it is running.
 type Junos struct {
-	Session  *netconf.Session
-	Hostname string
-	MultiRE  bool
-	Platform []routingEngine
+	Session      *netconf.Session
+	Hostname     string
+	RouteEngines int
+	Platform     []routingEngine
 }
 
 // CommandXML parses our operational command responses.
@@ -50,33 +50,38 @@ type routingEngine struct {
 	Version string
 }
 
-// multiRE parses our XML if we have multiple routing engines.
-type softwareMultiRE struct {
+// hardwareMultiRE parses our XML if we have multiple routing engines.
+type hardwareRouteEngines struct {
 	XMLName xml.Name              `xml:"multi-routing-engine-results"`
-	RE      []softwareRouteEngine `xml:"multi-routing-engine-item>software-information"`
+	RE      []hardwareRouteEngine `xml:"multi-routing-engine-item>chassis-inventory"`
 }
 
-// routeEngine holds all of our routing engine information.
-type softwareRouteEngine struct {
-	XMLName     xml.Name              `xml:"software-information"`
-	Hostname    string                `xml:"host-name"`
-	Platform    string                `xml:"product-model"`
-	PackageInfo []softwarePackageInfo `xml:"package-information"`
+// hardwareRouteEngine holds all of our routing engine information.
+type hardwareRouteEngine struct {
+	XMLName     xml.Name `xml:"chassis-inventory"`
+	Serial      string   `xml:"chassis>serial-number"`
+	Description string   `xml:"chassis>description"`
 }
 
-// packageInfo holds our software information per routing engine.
-type softwarePackageInfo struct {
+// versionRouteEngines parses our XML if we have multiple routing engines.
+type versionRouteEngines struct {
+	XMLName xml.Name             `xml:"multi-routing-engine-results"`
+	RE      []versionRouteEngine `xml:"multi-routing-engine-item>software-information"`
+}
+
+// versionRouteEngine holds all of our routing engine information.
+type versionRouteEngine struct {
+	XMLName     xml.Name             `xml:"software-information"`
+	Hostname    string               `xml:"host-name"`
+	Platform    string               `xml:"product-model"`
+	PackageInfo []versionPackageInfo `xml:"package-information"`
+}
+
+// versionPackageInfo holds our software information per routing engine.
+type versionPackageInfo struct {
 	XMLName         xml.Name `xml:"package-information"`
 	PackageName     []string `xml:"name"`
 	SoftwareVersion []string `xml:"comment"`
-}
-
-// singleRE parses our XML if we only have one routing engine.
-type softwareSingleRE struct {
-	XMLName     xml.Name              `xml:"software-information"`
-	Hostname    string                `xml:"host-name"`
-	Platform    string                `xml:"product-model"`
-	PackageInfo []softwarePackageInfo `xml:"package-information"`
 }
 
 // Close disconnects our session to the device.
@@ -261,13 +266,13 @@ func (j *Junos) ConfigDiff(compare int) (string, error) {
 	return rb.Config, nil
 }
 
-// Facts returns information about the device, such as model and software.
-func (j *Junos) Facts() {
+// PrintFacts prints information about the device, such as model and software.
+func (j *Junos) PrintFacts() {
 	var str string
 	fpcRegex := regexp.MustCompile(`^(EX).*`)
 	srxRegex := regexp.MustCompile(`^(SRX).*`)
 	mRegex := regexp.MustCompile(`^(M[X]?).*`)
-	str += fmt.Sprintf("Multiple RE: %t\n\n", j.MultiRE)
+	str += fmt.Sprintf("Routing Engines/FPC's: %d\n\n", j.RouteEngines)
 	for i, p := range j.Platform {
 		model := p.Model
 		version := p.Version
@@ -421,7 +426,7 @@ func NewSession(host, user, password string) (*Junos, error) {
 	}
 
 	if strings.Contains(reply.Data, "multi-routing-engine-results") {
-		facts := &softwareMultiRE{}
+		facts := &versionRouteEngines{}
 		err = xml.Unmarshal([]byte(reply.Data), facts)
 		if err != nil {
 			return nil, err
@@ -438,30 +443,30 @@ func NewSession(host, user, password string) (*Junos, error) {
 		}
 
 		return &Junos{
-			Session:  s,
-			Hostname: hostname,
-			MultiRE:  true,
-			Platform: res,
+			Session:      s,
+			Hostname:     hostname,
+			RouteEngines: numRE,
+			Platform:     res,
 		}, nil
 	}
 
-	facts := &softwareSingleRE{}
+	facts := &versionRouteEngine{}
 	err = xml.Unmarshal([]byte(reply.Data), facts)
 	if err != nil {
 		return nil, err
 	}
 
-	res := make([]routingEngine, 1)
+	res := make([]routingEngine, 0)
 	hostname := facts.Hostname
 	version := rex.FindStringSubmatch(facts.PackageInfo[0].SoftwareVersion[0])
 	model := strings.ToUpper(facts.Platform)
 	res = append(res, routingEngine{Model: model, Version: version[1]})
 
 	return &Junos{
-		Session:  s,
-		Hostname: hostname,
-		MultiRE:  false,
-		Platform: res,
+		Session:      s,
+		Hostname:     hostname,
+		RouteEngines: 1,
+		Platform:     res,
 	}, nil
 }
 
