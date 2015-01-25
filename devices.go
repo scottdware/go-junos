@@ -71,7 +71,7 @@ func (s *JunosSpace) AddDevice(host, user, password string) (int, error) {
 	inputXML += fmt.Sprintf("<sshCredential><userName>%s</userName><password>%s</password></sshCredential>", user, password)
 	inputXML += "<manageDiscoveredSystemsFlag>true</manageDiscoveredSystemsFlag><usePing>true</usePing></discover-devices>"
 
-    data, err := s.APIPost("device-management/discover-devices", inputXML, "discover-devices")
+    data, err := s.APIPost("space/device-management/discover-devices", inputXML, "discover-devices")
 	if err != nil {
 		return -1, err
 	}
@@ -88,7 +88,7 @@ func (s *JunosSpace) AddDevice(host, user, password string) (int, error) {
 // about each device that is managed by Space.
 func (s *JunosSpace) Devices() (*DeviceList, error) {
 	var devices DeviceList
-	data, err := s.APIRequest("device-management/devices")
+	data, err := s.APIRequest("space/device-management/devices")
 	if err != nil {
 		return nil, err
 	}
@@ -111,7 +111,7 @@ func (s *JunosSpace) RemoveDevice(device interface{}) error {
 	}
 
 	if deviceID != -1 {
-		err = s.APIDelete(fmt.Sprintf("device-management/devices/%d", deviceID))
+		err = s.APIDelete(fmt.Sprintf("space/device-management/devices/%d", deviceID))
 		if err != nil {
 			return err
 		}
