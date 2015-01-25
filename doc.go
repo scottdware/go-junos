@@ -148,9 +148,9 @@ Command() function. Output formats can be "text" or "xml."
 
 Viewing Platform and Software Information
 
-When you call the Facts() function, it prints out the platform and software information:
+When you call the PrintFacts() function, it prints out the platform and software information:
 
-    jnpr.Facts()
+    jnpr.PrintFacts()
 
     // Returns output similar to the following
     node0
@@ -164,6 +164,13 @@ When you call the Facts() function, it prints out the platform and software info
     Hostname: firewall-1
     Model: SRX240H2
     Version: 12.1X47-D10.4
+
+You can also loop over the struct field that contains this information yourself:
+
+    fmt.Printf("Hostname: %s", jnpr.Hostname)
+    for _, data := range jnpr.Platform {
+        fmt.Printf("Model: %s, Version: %s", data.Model, data.Version)
+    }
 
 Connecting and Viewing Device Information from Junos Space
 

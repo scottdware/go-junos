@@ -82,7 +82,10 @@ func main() {
     fmt.Println(output)
     
     // Show platform and software information
-    jnpr.Facts()
+    jnpr.PrintFacts()
+    
+    // You can also view the raw data and manipulate it yourself
+    fmt.Printf("%+v\n", jnpr.Platform)
 }
 ```
 
