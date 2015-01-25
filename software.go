@@ -18,9 +18,9 @@ type SoftwarePackage struct {
 	Platform string `xml:"platformType"`
 }
 
-// SoftwareOptions holds all of the options available for deploying/upgrading
-// the software on a device.
-type SoftwareOptions struct {
+// SpaceSoftwareOptions holds all of the options available for deploying/upgrading
+// the software on a device through Junos Space.
+type SpaceSoftwareOptions struct {
 	UseDownloaded bool
 	Validate      bool
 	Reboot        bool
@@ -89,7 +89,7 @@ func (s *JunosSpace) getSoftwareID(image string) (int, error) {
 }
 
 // DeploySoftware starts the upgrade process on the device, using the given image.
-func (s *JunosSpace) DeploySoftware(device, image string, options *SoftwareOptions) (int, error) {
+func (s *JunosSpace) DeploySoftware(device, image string, options *SpaceSoftwareOptions) (int, error) {
 	var job jobID
 	deviceID, _ := s.getDeviceID(device)
 	softwareID, _ := s.getSoftwareID(image)
