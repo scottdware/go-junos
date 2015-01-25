@@ -94,7 +94,7 @@ func (s *JunosSpace) DeploySoftware(device, image string, options *SoftwareOptio
 	deviceID, _ := s.getDeviceID(device)
 	softwareID, _ := s.getSoftwareID(image)
 	deploy := fmt.Sprintf(deployXML, deviceID, options.UseDownloaded, options.Validate, options.Reboot, options.RebootAfter, options.Cleanup, options.RemoveAfter)
-	data, err := s.APIPost(fmt.Sprintf("software-management/packages/%d/exec-deploy", softwareID), deploy, "exec-deploy")
+	data, err := s.APIPost(fmt.Sprintf("space/software-management/packages/%d/exec-deploy", softwareID), deploy, "exec-deploy")
 	if err != nil {
 		return -1, err
 	}
@@ -113,7 +113,7 @@ func (s *JunosSpace) RemoveStagedSoftware(device, image string) (int, error) {
 	deviceID, _ := s.getDeviceID(device)
 	softwareID, _ := s.getSoftwareID(image)
 	remove := fmt.Sprintf(removeStagedXML, deviceID)
-	data, err := s.APIPost(fmt.Sprintf("software-management/packages/%d/exec-remove", softwareID), remove, "exec-remove")
+	data, err := s.APIPost(fmt.Sprintf("space/software-management/packages/%d/exec-remove", softwareID), remove, "exec-remove")
 	if err != nil {
 		return -1, err
 	}
@@ -130,7 +130,7 @@ func (s *JunosSpace) RemoveStagedSoftware(device, image string) (int, error) {
 // about each software image that Space manages.
 func (s *JunosSpace) Software() (*SoftwarePackages, error) {
 	var software SoftwarePackages
-	data, err := s.APIRequest("software-management/packages")
+	data, err := s.APIRequest("space/software-management/packages")
 	if err != nil {
 		return nil, err
 	}
@@ -150,7 +150,7 @@ func (s *JunosSpace) StageSoftware(device, image string, cleanup bool) (int, err
 	deviceID, _ := s.getDeviceID(device)
 	softwareID, _ := s.getSoftwareID(image)
 	stage := fmt.Sprintf(stageXML, deviceID, cleanup)
-	data, err := s.APIPost(fmt.Sprintf("software-management/packages/%d/exec-stage", softwareID), stage, "exec-stage")
+	data, err := s.APIPost(fmt.Sprintf("space/software-management/packages/%d/exec-stage", softwareID), stage, "exec-stage")
 	if err != nil {
 		return -1, err
 	}
