@@ -520,13 +520,13 @@ func (j *Junos) RollbackConfig(option interface{}) error {
 
 // Unlock unlocks the candidate configuration.
 func (j *Junos) Unlock() error {
-	resp, err := j.Session.Exec(rpcCommand["unlock"])
+	reply, err := j.Session.Exec(rpcCommand["unlock"])
 	if err != nil {
 		return err
 	}
 
-	if resp.Ok == false {
-		for _, m := range resp.Errors {
+	if reply.Errors != nil {
+		for _, m := range reply.Errors {
 			return errors.New(m.Message)
 		}
 	}
