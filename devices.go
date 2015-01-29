@@ -31,7 +31,7 @@ func (s *JunosSpace) getDeviceID(device interface{}) (int, error) {
 	ipRegex := regexp.MustCompile(`(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})`)
 	devices, err := s.Devices()
 	if err != nil {
-		return -1, err
+		return 0, err
 	}
 
 	switch device.(type) {
@@ -59,26 +59,25 @@ func (s *JunosSpace) getDeviceID(device interface{}) (int, error) {
 // AddDevice adds a new managed device to Junos Space, and returns the Job ID.
 func (s *JunosSpace) AddDevice(host, user, password string) (int, error) {
 	var job jobID
-    ipRegex := regexp.MustCompile(`(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})`)
+	ipRegex := regexp.MustCompile(`(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})`)
 	inputXML := "<discover-devices>"
 
 	if ipRegex.MatchString(host) {
 		inputXML += fmt.Sprintf("<ipAddressDiscoveryTarget><ipAddress>%s</ipAddress></ipAddressDiscoveryTarget>", host)
-	} else {
-		inputXML += fmt.Sprintf("<hostNameDiscoveryTarget><hostName>%s</hostName></hostNameDiscoveryTarget>", host)
 	}
 
+	inputXML += fmt.Sprintf("<hostNameDiscoveryTarget><hostName>%s</hostName></hostNameDiscoveryTarget>", host)
 	inputXML += fmt.Sprintf("<sshCredential><userName>%s</userName><password>%s</password></sshCredential>", user, password)
 	inputXML += "<manageDiscoveredSystemsFlag>true</manageDiscoveredSystemsFlag><usePing>true</usePing></discover-devices>"
 
-    data, err := s.APIPost("space/device-management/discover-devices", inputXML, "discover-devices")
+	data, err := s.APIPost("space/device-management/discover-devices", inputXML, "discover-devices")
 	if err != nil {
-		return -1, err
+		return 0, err
 	}
-    
+
 	err = xml.Unmarshal(data, &job)
 	if err != nil {
-		return -1, err
+		return 0, err
 	}
 
 	return job.ID, nil
@@ -110,8 +109,8 @@ func (s *JunosSpace) RemoveDevice(device interface{}) error {
 		return err
 	}
 
-	if deviceID != -1 {
-		err = s.APIDelete(fmt.Sprintf("space/device-management/devices/%d", deviceID))
+	if deviceID != 0 {
+		err = s.APIDelete(fmt.Sprintf("space/device-management/devices/%d", deviceID), "")
 		if err != nil {
 			return err
 		}
