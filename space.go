@@ -37,6 +37,10 @@ var contentType = map[string]string{
 	"exec-deploy":      "application/vnd.net.juniper.space.software-management.exec-deploy+xml;version=1;charset=UTF-8",
 	"exec-remove":      "application/vnd.net.juniper.space.software-management.exec-remove+xml;version=1;charset=UTF-8",
 	"exec-stage":       "application/vnd.net.juniper.space.software-management.exec-stage+xml;version=1;charset=UTF-8",
+	"add-object":       "application/vnd.juniper.sd.address-management.address+xml;version=1;charset=UTF-8",
+	"delete-object":    "application/vnd.juniper.sd.address-management.delete-address-response+xml;version=1;q=0.01",
+	"update-device":    "application/vnd.juniper.sd.device-management.update-devices+xml;version=1;charset=UTF-8",
+	"publish-policy":   "application/vnd.juniper.sd.fwpolicy-management.publish+xml;version=1;charset=UTF-8",
 }
 
 // NewServer sets up our connection to the Junos Space server.
@@ -54,12 +58,15 @@ func NewServer(host, user, passwd string) *JunosSpace {
 }
 
 // APIDelete builds our DELETE request to the server.
-func (s *JunosSpace) APIDelete(uri string) error {
+func (s *JunosSpace) APIDelete(uri, ct string) error {
 	var req *http.Request
 	client := &http.Client{Transport: s.Transport}
 	url := fmt.Sprintf("https://%s/api/%s", s.Host, uri)
 	req, _ = http.NewRequest("DELETE", url, nil)
 	req.SetBasicAuth(s.User, s.Password)
+	if ct != "" {
+		req.Header.Set("Content-Type", contentType[ct])
+	}
 	res, err := client.Do(req)
 	defer res.Body.Close()
 
