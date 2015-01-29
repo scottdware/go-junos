@@ -76,7 +76,7 @@ func (s *JunosSpace) getSoftwareID(image string) (int, error) {
 	var softwareID int
 	images, err := s.Software()
 	if err != nil {
-		return -1, err
+		return 0, err
 	}
 
 	for _, sw := range images.Packages {
@@ -96,12 +96,12 @@ func (s *JunosSpace) DeploySoftware(device, image string, options *SpaceSoftware
 	deploy := fmt.Sprintf(deployXML, deviceID, options.UseDownloaded, options.Validate, options.Reboot, options.RebootAfter, options.Cleanup, options.RemoveAfter)
 	data, err := s.APIPost(fmt.Sprintf("space/software-management/packages/%d/exec-deploy", softwareID), deploy, "exec-deploy")
 	if err != nil {
-		return -1, err
+		return 0, err
 	}
 
 	err = xml.Unmarshal(data, &job)
 	if err != nil {
-		return -1, err
+		return 0, err
 	}
 
 	return job.ID, nil
@@ -115,12 +115,12 @@ func (s *JunosSpace) RemoveStagedSoftware(device, image string) (int, error) {
 	remove := fmt.Sprintf(removeStagedXML, deviceID)
 	data, err := s.APIPost(fmt.Sprintf("space/software-management/packages/%d/exec-remove", softwareID), remove, "exec-remove")
 	if err != nil {
-		return -1, err
+		return 0, err
 	}
 
 	err = xml.Unmarshal(data, &job)
 	if err != nil {
-		return -1, err
+		return 0, err
 	}
 
 	return job.ID, nil
@@ -152,12 +152,12 @@ func (s *JunosSpace) StageSoftware(device, image string, cleanup bool) (int, err
 	stage := fmt.Sprintf(stageXML, deviceID, cleanup)
 	data, err := s.APIPost(fmt.Sprintf("space/software-management/packages/%d/exec-stage", softwareID), stage, "exec-stage")
 	if err != nil {
-		return -1, err
+		return 0, err
 	}
 
 	err = xml.Unmarshal(data, &job)
 	if err != nil {
-		return -1, err
+		return 0, err
 	}
 
 	return job.ID, nil
