@@ -72,7 +72,7 @@ func NewServer(host, user, passwd string) *JunosSpace {
 func (s *JunosSpace) APICall(options *APIRequest) ([]byte, error) {
 	var req *http.Request
 	client := &http.Client{Transport: s.Transport}
-	url := fmt.Sprintf("https://%s/api/%s", s.Host, options.URL)
+	url := fmt.Sprintf("https://%s%s", s.Host, options.URL)
 	body := bytes.NewReader([]byte(options.Body))
 	req, _ = http.NewRequest(strings.ToUpper(options.Method), url, body)
 	req.SetBasicAuth(s.User, s.Password)

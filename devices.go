@@ -117,7 +117,7 @@ func (s *JunosSpace) AddDevice(host, user, password string) (int, error) {
 
 	req := &APIRequest{
 		Method:      "post",
-		URL:         "space/device-management/discover-devices",
+		URL:         "/api/space/device-management/discover-devices",
 		Body:        fmt.Sprintf(addDevice, host, user, password),
 		ContentType: ContentDiscoverDevices,
 	}
@@ -140,7 +140,7 @@ func (s *JunosSpace) Devices() (*Devices, error) {
 	var devices Devices
 	req := &APIRequest{
 		Method: "get",
-		URL:    "space/device-management/devices",
+		URL:    "/api/space/device-management/devices",
 	}
 	data, err := s.APICall(req)
 	if err != nil {
@@ -167,7 +167,7 @@ func (s *JunosSpace) RemoveDevice(device interface{}) error {
 	if deviceID != 0 {
 		req := &APIRequest{
 			Method: "delete",
-			URL:    fmt.Sprintf("space/device-management/devices/%d", deviceID),
+			URL:    fmt.Sprintf("/api/space/device-management/devices/%d", deviceID),
 		}
 		_, err = s.APICall(req)
 		if err != nil {

@@ -96,7 +96,7 @@ func (s *JunosSpace) DeploySoftware(device, image string, options *SoftwareUpgra
 	deploy := fmt.Sprintf(deployXML, deviceID, options.UseDownloaded, options.Validate, options.Reboot, options.RebootAfter, options.Cleanup, options.RemoveAfter)
 	req := &APIRequest{
 		Method:      "post",
-		URL:         fmt.Sprintf("space/software-management/packages/%d/exec-deploy", softwareID),
+		URL:         fmt.Sprintf("/api/space/software-management/packages/%d/exec-deploy", softwareID),
 		Body:        deploy,
 		ContentType: ContentExecDeploy,
 	}
@@ -121,7 +121,7 @@ func (s *JunosSpace) RemoveStagedSoftware(device, image string) (int, error) {
 	remove := fmt.Sprintf(removeStagedXML, deviceID)
 	req := &APIRequest{
 		Method:      "post",
-		URL:         fmt.Sprintf("space/software-management/packages/%d/exec-remove", softwareID),
+		URL:         fmt.Sprintf("/api/space/software-management/packages/%d/exec-remove", softwareID),
 		Body:        remove,
 		ContentType: ContentExecRemove,
 	}
@@ -144,7 +144,7 @@ func (s *JunosSpace) Software() (*SoftwarePackages, error) {
 	var software SoftwarePackages
 	req := &APIRequest{
 		Method: "get",
-		URL:    "space/software-management/packages",
+		URL:    "/api/space/software-management/packages",
 	}
 	data, err := s.APICall(req)
 	if err != nil {
@@ -168,7 +168,7 @@ func (s *JunosSpace) StageSoftware(device, image string, cleanup bool) (int, err
 	stage := fmt.Sprintf(stageXML, deviceID, cleanup)
 	req := &APIRequest{
 		Method:      "post",
-		URL:         fmt.Sprintf("space/software-management/packages/%d/exec-stage", softwareID),
+		URL:         fmt.Sprintf("/api/space/software-management/packages/%d/exec-stage", softwareID),
 		Body:        stage,
 		ContentType: ContentExecStage,
 	}
