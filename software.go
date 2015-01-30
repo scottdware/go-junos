@@ -5,12 +5,12 @@ import (
 	"fmt"
 )
 
-// SoftwarePackages holds a []Device slice of every device within Space.
+// SoftwarePackages holds a list of every software image managed within Space.
 type SoftwarePackages struct {
 	Packages []SoftwarePackage `xml:"package"`
 }
 
-// SoftwarePackage holds all the information about each device within Space.
+// SoftwarePackage holds all the information about each software image within Space.
 type SoftwarePackage struct {
 	ID       int    `xml:"key,attr"`
 	Name     string `xml:"fileName"`
