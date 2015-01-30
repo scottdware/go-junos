@@ -6,8 +6,8 @@ import (
 	"regexp"
 )
 
-// DeviceList holds a []Device slice of every device within Space.
-type DeviceList struct {
+// Devices holds a []Device slice of every device within Space.
+type Devices struct {
 	XMLName xml.Name `xml:"devices"`
 	Devices []Device `xml:"device"`
 }
@@ -23,12 +23,46 @@ type Device struct {
 	Name      string `xml:"name"`
 }
 
+// addDeviceIPXML is the XML used to add a device by IP address.
+var addDeviceIPXML = `
+<discover-devices>
+    <ipAddressDiscoveryTarget>
+        <ipAddress>%s</ipAddress>
+    </ipAddressDiscoveryTarget>
+    <sshCredential>
+        <userName>%s</userName>
+        <password>%s</password>
+    </sshCredential>
+    <manageDiscoveredSystemsFlag>true</manageDiscoveredSystemsFlag>
+    <usePing>true</usePing>
+</discover-devices>
+`
+
+// addDeviceHostXML is the XML used to add a device by hostname.
+var addDeviceHostXML = `
+<discover-devices>
+    <hostNameDiscoveryTarget>
+        <hostName>%s</hostName>
+    </hostNameDiscoveryTarget>
+    <sshCredential>
+        <userName>%s</userName>
+        <password>%s</password>
+    </sshCredential>
+    <manageDiscoveredSystemsFlag>true</manageDiscoveredSystemsFlag>
+    <usePing>true</usePing>
+</discover-devices>
+`
+
 // getDeviceID returns the given devices ID, which will be used for REST
 // calls against it.
-func (s *JunosSpace) getDeviceID(device interface{}) (int, error) {
+func (s *JunosSpace) getDeviceID(device interface{}, sd bool) (int, error) {
 	var err error
 	var deviceID int
+	var sds *SecurityDevices
 	ipRegex := regexp.MustCompile(`(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})`)
+	if sd {
+		sds, err = s.SecurityDevices()
+	}
 	devices, err := s.Devices()
 	if err != nil {
 		return 0, err
@@ -38,17 +72,30 @@ func (s *JunosSpace) getDeviceID(device interface{}) (int, error) {
 	case int:
 		deviceID = device.(int)
 	case string:
+		if sd {
+			if ipRegex.MatchString(device.(string)) {
+				for _, d := range sds.Devices {
+					if d.IPAddress == device {
+						deviceID = d.ID
+					}
+				}
+			}
+			for _, d := range sds.Devices {
+				if d.Name == device {
+					deviceID = d.ID
+				}
+			}
+		}
 		if ipRegex.MatchString(device.(string)) {
 			for _, d := range devices.Devices {
 				if d.IPAddress == device {
 					deviceID = d.ID
 				}
 			}
-		} else {
-			for _, d := range devices.Devices {
-				if d.Name == device {
-					deviceID = d.ID
-				}
+		}
+		for _, d := range devices.Devices {
+			if d.Name == device {
+				deviceID = d.ID
 			}
 		}
 	}
@@ -59,18 +106,22 @@ func (s *JunosSpace) getDeviceID(device interface{}) (int, error) {
 // AddDevice adds a new managed device to Junos Space, and returns the Job ID.
 func (s *JunosSpace) AddDevice(host, user, password string) (int, error) {
 	var job jobID
+	var addDevice string
 	ipRegex := regexp.MustCompile(`(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})`)
-	inputXML := "<discover-devices>"
 
 	if ipRegex.MatchString(host) {
-		inputXML += fmt.Sprintf("<ipAddressDiscoveryTarget><ipAddress>%s</ipAddress></ipAddressDiscoveryTarget>", host)
+		addDevice = addDeviceIPXML
 	}
 
-	inputXML += fmt.Sprintf("<hostNameDiscoveryTarget><hostName>%s</hostName></hostNameDiscoveryTarget>", host)
-	inputXML += fmt.Sprintf("<sshCredential><userName>%s</userName><password>%s</password></sshCredential>", user, password)
-	inputXML += "<manageDiscoveredSystemsFlag>true</manageDiscoveredSystemsFlag><usePing>true</usePing></discover-devices>"
+	addDevice = addDeviceHostXML
 
-	data, err := s.APIPost("space/device-management/discover-devices", inputXML, "discover-devices")
+	req := &APIRequest{
+		Method:      "post",
+		URL:         "space/device-management/discover-devices",
+		Body:        fmt.Sprintf(addDevice, host, user, password),
+		ContentType: ContentDiscoverDevices,
+	}
+	data, err := s.APICall(req)
 	if err != nil {
 		return 0, err
 	}
@@ -85,9 +136,13 @@ func (s *JunosSpace) AddDevice(host, user, password string) (int, error) {
 
 // Devices queries the Junos Space server and returns all of the information
 // about each device that is managed by Space.
-func (s *JunosSpace) Devices() (*DeviceList, error) {
-	var devices DeviceList
-	data, err := s.APIRequest("space/device-management/devices")
+func (s *JunosSpace) Devices() (*Devices, error) {
+	var devices Devices
+	req := &APIRequest{
+		Method: "get",
+		URL:    "space/device-management/devices",
+	}
+	data, err := s.APICall(req)
 	if err != nil {
 		return nil, err
 	}
@@ -104,13 +159,17 @@ func (s *JunosSpace) Devices() (*DeviceList, error) {
 // or IP address.
 func (s *JunosSpace) RemoveDevice(device interface{}) error {
 	var err error
-	deviceID, err := s.getDeviceID(device)
+	deviceID, err := s.getDeviceID(device, false)
 	if err != nil {
 		return err
 	}
 
 	if deviceID != 0 {
-		err = s.APIDelete(fmt.Sprintf("space/device-management/devices/%d", deviceID), "")
+		req := &APIRequest{
+			Method: "delete",
+			URL:    fmt.Sprintf("space/device-management/devices/%d", deviceID),
+		}
+		_, err = s.APICall(req)
 		if err != nil {
 			return err
 		}
