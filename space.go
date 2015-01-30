@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strings"
 )
 
 // JunosSpace holds all of our information that we use for our server
@@ -15,6 +16,14 @@ type JunosSpace struct {
 	User      string
 	Password  string
 	Transport *http.Transport
+}
+
+// APIRequest holds all of our options when building our API call.
+type APIRequest struct {
+	Method      string
+	URL         string
+	Body        string
+	ContentType string
 }
 
 // jobID parses the job ID from the returned XML.
@@ -31,17 +40,19 @@ type jobDetail struct {
 	Percent float64 `xml:"percent-complete"`
 }
 
-// contentType holds all of the HTTP Content-Types that our Junos Space requests will use.
-var contentType = map[string]string{
-	"discover-devices": "application/vnd.net.juniper.space.device-management.discover-devices+xml;version=2;charset=UTF-8",
-	"exec-deploy":      "application/vnd.net.juniper.space.software-management.exec-deploy+xml;version=1;charset=UTF-8",
-	"exec-remove":      "application/vnd.net.juniper.space.software-management.exec-remove+xml;version=1;charset=UTF-8",
-	"exec-stage":       "application/vnd.net.juniper.space.software-management.exec-stage+xml;version=1;charset=UTF-8",
-	"add-object":       "application/vnd.juniper.sd.address-management.address+xml;version=1;charset=UTF-8",
-	"delete-object":    "application/vnd.juniper.sd.address-management.delete-address-response+xml;version=1;q=0.01",
-	"update-device":    "application/vnd.juniper.sd.device-management.update-devices+xml;version=1;charset=UTF-8",
-	"publish-policy":   "application/vnd.juniper.sd.fwpolicy-management.publish+xml;version=1;charset=UTF-8",
-}
+// These are all of the HTTP Content-Type's that we use for POST and DELETE requests.
+// You can also call an API yourself using a URL and Content-Type if one is not
+// listed here.
+var (
+	ContentDiscoverDevices       = "application/vnd.net.juniper.space.device-management.discover-devices+xml;version=2;charset=UTF-8"
+	ContentExecDeploy            = "application/vnd.net.juniper.space.software-management.exec-deploy+xml;version=1;charset=UTF-8"
+	ContentExecRemove            = "application/vnd.net.juniper.space.software-management.exec-remove+xml;version=1;charset=UTF-8"
+	ContentExecStage             = "application/vnd.net.juniper.space.software-management.exec-stage+xml;version=1;charset=UTF-8"
+	ContentAddress               = "application/vnd.juniper.sd.address-management.address+xml;version=1;charset=UTF-8"
+	ContentDeleteAddressResponse = "application/vnd.juniper.sd.address-management.delete-address-response+xml;version=1;q=0.01"
+	ContentUpdateDevices         = "application/vnd.juniper.sd.device-management.update-devices+xml;version=1;charset=UTF-8"
+	ContentPublish               = "application/vnd.juniper.sd.fwpolicy-management.publish+xml;version=1;charset=UTF-8"
+)
 
 // NewServer sets up our connection to the Junos Space server.
 func NewServer(host, user, passwd string) *JunosSpace {
@@ -57,54 +68,19 @@ func NewServer(host, user, passwd string) *JunosSpace {
 	}
 }
 
-// APIDelete builds our DELETE request to the server.
-func (s *JunosSpace) APIDelete(uri, ct string) error {
+// APICall is used to query the Junos Space server API's.
+func (s *JunosSpace) APICall(options *APIRequest) ([]byte, error) {
 	var req *http.Request
 	client := &http.Client{Transport: s.Transport}
-	url := fmt.Sprintf("https://%s/api/%s", s.Host, uri)
-	req, _ = http.NewRequest("DELETE", url, nil)
+	url := fmt.Sprintf("https://%s/api/%s", s.Host, options.URL)
+	body := bytes.NewReader([]byte(options.Body))
+	req, _ = http.NewRequest(strings.ToUpper(options.Method), url, body)
 	req.SetBasicAuth(s.User, s.Password)
-	if ct != "" {
-		req.Header.Set("Content-Type", contentType[ct])
-	}
-	res, err := client.Do(req)
-	defer res.Body.Close()
 
-	if err != nil {
-		return err
+	if len(options.ContentType) > 0 {
+		req.Header.Set("Content-Type", options.ContentType)
 	}
 
-	return nil
-}
-
-// APIPost builds our POST request to the server.
-func (s *JunosSpace) APIPost(uri, body, ct string) ([]byte, error) {
-	var req *http.Request
-	b := bytes.NewReader([]byte(body))
-	client := &http.Client{Transport: s.Transport}
-	url := fmt.Sprintf("https://%s/api/%s", s.Host, uri)
-	req, _ = http.NewRequest("POST", url, b)
-	req.Header.Set("Content-Type", contentType[ct])
-	req.SetBasicAuth(s.User, s.Password)
-	res, err := client.Do(req)
-	defer res.Body.Close()
-
-	if err != nil {
-		return nil, err
-	}
-
-	data, _ := ioutil.ReadAll(res.Body)
-
-	return data, nil
-}
-
-// APIRequest builds our GET request to the server.
-func (s *JunosSpace) APIRequest(uri string) ([]byte, error) {
-	var req *http.Request
-	client := &http.Client{Transport: s.Transport}
-	url := fmt.Sprintf("https://%s/api/%s", s.Host, uri)
-	req, _ = http.NewRequest("GET", url, nil)
-	req.SetBasicAuth(s.User, s.Password)
 	res, err := client.Do(req)
 	defer res.Body.Close()
 
