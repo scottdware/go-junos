@@ -234,7 +234,7 @@ not upgrade it.
 If you want to issue a software upgrade to the device, here's how:
 
     // Configure our options, such as whether or not to reboot the device, etc.
-    options := &junos.SpaceSoftwareOptions{
+    options := &junos.SoftwareUpgrade{
         UseDownloaded: true,
         Validate: false,
         Reboot: false,
