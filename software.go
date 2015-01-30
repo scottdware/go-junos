@@ -18,9 +18,9 @@ type SoftwarePackage struct {
 	Platform string `xml:"platformType"`
 }
 
-// SpaceSoftwareOptions holds all of the options available for deploying/upgrading
+// SoftwareUpgrade holds all of the options available for deploying/upgrading
 // the software on a device through Junos Space.
-type SpaceSoftwareOptions struct {
+type SoftwareUpgrade struct {
 	UseDownloaded bool
 	Validate      bool
 	Reboot        bool
@@ -89,12 +89,18 @@ func (s *JunosSpace) getSoftwareID(image string) (int, error) {
 }
 
 // DeploySoftware starts the upgrade process on the device, using the given image.
-func (s *JunosSpace) DeploySoftware(device, image string, options *SpaceSoftwareOptions) (int, error) {
+func (s *JunosSpace) DeploySoftware(device, image string, options *SoftwareUpgrade) (int, error) {
 	var job jobID
-	deviceID, _ := s.getDeviceID(device)
+	deviceID, _ := s.getDeviceID(device, false)
 	softwareID, _ := s.getSoftwareID(image)
 	deploy := fmt.Sprintf(deployXML, deviceID, options.UseDownloaded, options.Validate, options.Reboot, options.RebootAfter, options.Cleanup, options.RemoveAfter)
-	data, err := s.APIPost(fmt.Sprintf("space/software-management/packages/%d/exec-deploy", softwareID), deploy, "exec-deploy")
+	req := &APIRequest{
+		Method:      "post",
+		URL:         fmt.Sprintf("space/software-management/packages/%d/exec-deploy", softwareID),
+		Body:        deploy,
+		ContentType: ContentExecDeploy,
+	}
+	data, err := s.APICall(req)
 	if err != nil {
 		return 0, err
 	}
@@ -110,10 +116,16 @@ func (s *JunosSpace) DeploySoftware(device, image string, options *SpaceSoftware
 // RemoveStagedSoftware will delete the staged software image on the device.
 func (s *JunosSpace) RemoveStagedSoftware(device, image string) (int, error) {
 	var job jobID
-	deviceID, _ := s.getDeviceID(device)
+	deviceID, _ := s.getDeviceID(device, false)
 	softwareID, _ := s.getSoftwareID(image)
 	remove := fmt.Sprintf(removeStagedXML, deviceID)
-	data, err := s.APIPost(fmt.Sprintf("space/software-management/packages/%d/exec-remove", softwareID), remove, "exec-remove")
+	req := &APIRequest{
+		Method:      "post",
+		URL:         fmt.Sprintf("space/software-management/packages/%d/exec-remove", softwareID),
+		Body:        remove,
+		ContentType: ContentExecRemove,
+	}
+	data, err := s.APICall(req)
 	if err != nil {
 		return 0, err
 	}
@@ -130,7 +142,11 @@ func (s *JunosSpace) RemoveStagedSoftware(device, image string) (int, error) {
 // about each software image that Space manages.
 func (s *JunosSpace) Software() (*SoftwarePackages, error) {
 	var software SoftwarePackages
-	data, err := s.APIRequest("space/software-management/packages")
+	req := &APIRequest{
+		Method: "get",
+		URL:    "space/software-management/packages",
+	}
+	data, err := s.APICall(req)
 	if err != nil {
 		return nil, err
 	}
@@ -147,10 +163,16 @@ func (s *JunosSpace) Software() (*SoftwarePackages, error) {
 // upgrade it. The package is placed in the /var/tmp directory.
 func (s *JunosSpace) StageSoftware(device, image string, cleanup bool) (int, error) {
 	var job jobID
-	deviceID, _ := s.getDeviceID(device)
+	deviceID, _ := s.getDeviceID(device, false)
 	softwareID, _ := s.getSoftwareID(image)
 	stage := fmt.Sprintf(stageXML, deviceID, cleanup)
-	data, err := s.APIPost(fmt.Sprintf("space/software-management/packages/%d/exec-stage", softwareID), stage, "exec-stage")
+	req := &APIRequest{
+		Method:      "post",
+		URL:         fmt.Sprintf("space/software-management/packages/%d/exec-stage", softwareID),
+		Body:        stage,
+		ContentType: ContentExecStage,
+	}
+	data, err := s.APICall(req)
 	if err != nil {
 		return 0, err
 	}
