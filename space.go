@@ -52,6 +52,7 @@ var (
 	ContentDeleteAddressResponse = "application/vnd.juniper.sd.address-management.delete-address-response+xml;version=1;q=0.01"
 	ContentUpdateDevices         = "application/vnd.juniper.sd.device-management.update-devices+xml;version=1;charset=UTF-8"
 	ContentPublish               = "application/vnd.juniper.sd.fwpolicy-management.publish+xml;version=1;charset=UTF-8"
+	ContentAddressPatch          = "application/vnd.juniper.sd.address-management.address_patch+xml;version=1;charset=UTF-8"
 )
 
 // NewServer sets up our connection to the Junos Space server.
