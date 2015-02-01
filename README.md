@@ -15,8 +15,12 @@ Junos Space
 * Add/remove devices from Junos Space.
 * List all software image packages that are in Junos Space.
 * Stage and deploy software images to devices from Junos Space.
+* Add/remove address and service objects/groups.
+* Modify objects (e.g. add/remove objects from groups, and delete objects).
+* View all policies managed by Junos Space.
+* Publish policies and update devices.
 
-Visit the [GoDoc][godoc-go-junos] page for complete package documentation.
+> Visit the [GoDoc][godoc-go-junos] page for complete package documentation and examples.
 
 > **Note:** This package makes all of it's calls over [Netconf][netconf-rfc] using the [go-netconf][go-netconf] package from
  [Juniper Networks][juniper]
