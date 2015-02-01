@@ -287,7 +287,9 @@ func (s *JunosSpace) AddAddress(name, ip, desc string) (int, error) {
 	return job.ID, nil
 }
 
-// AddService adds a new service object to Junos Space, and returns the Job ID.
+// AddService adds a new service object to Junos Space, and returns the Job ID. If adding just
+// a single port, then enter in the same number in both the "low" and "high" parameters. For a
+// range of ports, enter the starting port in "low" and the uppper limit in "high."
 func (s *JunosSpace) AddService(proto, name string, low, high int, desc string, timeout int) (int, error) {
 	var job jobID
 	var port string

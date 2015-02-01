@@ -21,11 +21,17 @@ type SoftwarePackage struct {
 // SoftwareUpgrade holds all of the options available for deploying/upgrading
 // the software on a device through Junos Space.
 type SoftwareUpgrade struct {
+    // Use an image already staged on the device.
 	UseDownloaded bool
+    // Check/don't check compatibility with current configuration.
 	Validate      bool
+    // Reboot system after adding package.
 	Reboot        bool
+    // Reboot the system after "x" minutes.
 	RebootAfter   int
+    // Remove any pre-existing packages on the device.
 	Cleanup       bool
+    // Remove the package after successful installation.
 	RemoveAfter   bool
 }
 
@@ -69,7 +75,7 @@ var stageXML = `
 </exec-stage>
 `
 
-// getSoftwareID returns the given software images ID, which will be used for REST
+// getSoftwareID returns the given software image ID, which will be used for REST
 // calls against it.
 func (s *JunosSpace) getSoftwareID(image string) (int, error) {
 	var err error
@@ -88,7 +94,8 @@ func (s *JunosSpace) getSoftwareID(image string) (int, error) {
 	return softwareID, nil
 }
 
-// DeploySoftware starts the upgrade process on the device, using the given image.
+// DeploySoftware starts the upgrade process on the device, using the given image along
+// with the options specified.
 func (s *JunosSpace) DeploySoftware(device, image string, options *SoftwareUpgrade) (int, error) {
 	var job jobID
 	deviceID, _ := s.getDeviceID(device, false)
