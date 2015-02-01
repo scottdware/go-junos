@@ -1,5 +1,4 @@
 ## go-junos
-
 [![GoDoc](https://godoc.org/github.com/scottdware/go-junos?status.svg)](https://godoc.org/github.com/scottdware/go-junos)
 
 A Go package that interacts with Junos devices, as well as Junos Space, and allows you to do the following:
@@ -20,7 +19,8 @@ Junos Space
 * View all policies managed by Junos Space.
 * Publish policies and update devices.
 
-> Visit the [GoDoc][godoc-go-junos] page for complete package documentation and examples.
+### Examples & Documentation
+Visit the [GoDoc][godoc-go-junos] page for complete package documentation and examples.
 
 > **Note:** This package makes all of it's calls over [Netconf][netconf-rfc] using the [go-netconf][go-netconf] package from
  [Juniper Networks][juniper]
