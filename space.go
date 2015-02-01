@@ -44,15 +44,16 @@ type jobDetail struct {
 // You can also call an API yourself using a URL and Content-Type if one is not
 // listed here.
 var (
-	ContentDiscoverDevices       = "application/vnd.net.juniper.space.device-management.discover-devices+xml;version=2;charset=UTF-8"
-	ContentExecDeploy            = "application/vnd.net.juniper.space.software-management.exec-deploy+xml;version=1;charset=UTF-8"
-	ContentExecRemove            = "application/vnd.net.juniper.space.software-management.exec-remove+xml;version=1;charset=UTF-8"
-	ContentExecStage             = "application/vnd.net.juniper.space.software-management.exec-stage+xml;version=1;charset=UTF-8"
-	ContentAddress               = "application/vnd.juniper.sd.address-management.address+xml;version=1;charset=UTF-8"
-	ContentDeleteAddressResponse = "application/vnd.juniper.sd.address-management.delete-address-response+xml;version=1;q=0.01"
-	ContentUpdateDevices         = "application/vnd.juniper.sd.device-management.update-devices+xml;version=1;charset=UTF-8"
-	ContentPublish               = "application/vnd.juniper.sd.fwpolicy-management.publish+xml;version=1;charset=UTF-8"
-	ContentAddressPatch          = "application/vnd.juniper.sd.address-management.address_patch+xml;version=1;charset=UTF-8"
+	ContentDiscoverDevices = "application/vnd.net.juniper.space.device-management.discover-devices+xml;version=2;charset=UTF-8"
+	ContentExecDeploy      = "application/vnd.net.juniper.space.software-management.exec-deploy+xml;version=1;charset=UTF-8"
+	ContentExecRemove      = "application/vnd.net.juniper.space.software-management.exec-remove+xml;version=1;charset=UTF-8"
+	ContentExecStage       = "application/vnd.net.juniper.space.software-management.exec-stage+xml;version=1;charset=UTF-8"
+	ContentAddress         = "application/vnd.juniper.sd.address-management.address+xml;version=1;charset=UTF-8"
+	ContentUpdateDevices   = "application/vnd.juniper.sd.device-management.update-devices+xml;version=1;charset=UTF-8"
+	ContentPublish         = "application/vnd.juniper.sd.fwpolicy-management.publish+xml;version=1;charset=UTF-8"
+	ContentAddressPatch    = "application/vnd.juniper.sd.address-management.address_patch+xml;version=1;charset=UTF-8"
+	ContentService         = "application/vnd.juniper.sd.service-management.service+xml;version=1;charset=UTF-8"
+	ContentServicePatch    = "application/vnd.juniper.sd.service-management.service_patch+xml;version=1;charset=UTF-8"
 )
 
 // NewServer sets up our connection to the Junos Space server.
