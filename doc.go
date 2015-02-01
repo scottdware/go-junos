@@ -4,22 +4,11 @@ well as interaction with Junos Space.
 
 Establishing A Session
 
-To connect to a Junos device, the process is fairly straightforward.
+To connect to a Junos device, the process is fairly straightforward:
 
     jnpr := junos.NewSession(host, user, password)
     defer jnpr.Close()
 
-List all devices managed by Space:
-
-    devices, err := space.SecurityDevices()
-    if err != nil {
-        fmt.Println(err)
-    }
-    
-    for _, device := range devices.Devices {
-        fmt.Printf("%+v\n", device)
-    }
-    
 Viewing The Configuration
 
 To View the entire configuration, use the keyword "full" for the second
@@ -44,7 +33,7 @@ under the "security" stanza.
 Compare Rollback Configurations
 
 If you want to view the difference between the current configuration and a rollback
-one, then you can use the ConfigDiff() function.
+one, then you can use the ConfigDiff() function:
 
     diff, err := jnpr.ConfigDiff(3)
     if err != nil {
@@ -56,7 +45,7 @@ This will output exactly how it does on the CLI when you "| compare."
 
 Rolling Back to a Previous State
 
-You can also rollback to a previous state, or the "rescue" configuration by using
+You can also rollback to a previous state, or the rescue configuration by using
 the RollbackConfig() function:
 
     err := jnpr.RollbackConfig(3)
@@ -149,7 +138,7 @@ and most likely an error will be returned.
 Running Commands
 
 You can run operational mode commands such as "show" and "request" by using the
-Command() function. Output formats can be "text" or "xml."
+Command() function. Output formats can be "text" or "xml":
 
     // Results returned in text format
     output, err := jnpr.Command("show chassis hardware", "text")
@@ -186,19 +175,19 @@ You can also loop over the struct field that contains this information yourself:
 Junos Space - Network Management Platform Functions
 
 Here's an example of how to connect to a Junos Space server, and get information about
-the devices it manages.
+all of the managed devices:
 
     // Establish a connection to a Junos Space server.
     space := junos.NewServer("space.company.com", "admin", "juniper123")
 
     // Get the list of devices.
-    d, err := space.Devices()
+    devices, err := space.Devices()
     if err != nil {
         fmt.Println(err)
     }
 
     // Iterate over our device list and display some information about them.
-    for _, device := range d.Devices {
+    for _, device := range devices.Devices {
         fmt.Printf("Name: %s, IP Address: %s, Platform: %s\n", device.Name, device.IP, device.Platform)
     }
 
@@ -234,7 +223,7 @@ How to add and remove devices:
     }
 
 Stage a software image on a device. This basically just downloads it to the device, and does
-not upgrade it.
+not upgrade it:
 
     // The third parameter is whether or not to remove any existing images from the device - true or false.
     jobID, err := space.StageSoftware("sdubs-fw", "junos-srxsme-12.1X46-D30.2-domestic.tgz", false)
@@ -259,25 +248,117 @@ If you want to issue a software upgrade to the device, here's how:
         fmt.Println(err)
     }
 
-Remove a staged image from a device.
+Remove a staged image from a device:
 
     // Remove a staged image from the device.
     jobID, err := space.RemoveStagedSoftware("sdubs-fw", "junos-srxsme-12.1X46-D30.2-domestic.tgz")
     if err != nil {
         fmt.Println(err)
     }
-    
+
 Junos Space - Security Director Functions
 
-List all security devices:
+List all security devices, and display the SecurityDevices struct information about them:
 
     devices, err := space.SecurityDevices()
     if err != nil {
         fmt.Println(err)
     }
-    
+
     for _, device := range devices.Devices {
         fmt.Printf("%+v\n", device)
     }
+
+To view the address and service objects, you use the Addresses() and Services() functions. Both of them
+take a "filter" parameter, which lets you search for objects matching your filter.
+
+If you leave the parameter blank (e.g. ""), all objects are returned.
+
+    // Address objects
+    addresses, err := space.Addresses()
+    if err != nil {
+        fmt.Println(err)
+    }
+
+    for _, address := range addresses.Addresses {
+        fmt.Printf("%+v\n", address)
+    }
+
+    // Service objects
+    services, err := space.Services()
+    if err != nil {
+        fmt.Println(err)
+    }
+
+    for _, service := range services.Services {
+        fmt.Printf("%+v\n", service)
+    }
+
+To add objects to Junos Space, you can do the following:
+
+    // Add an address group. "false" as the first parameter means that we assume the
+    // group is going to be an address group.
+    space.AddGroup(false, "Blacklist-IPs", "Blacklisted IP addresses")
+
+    // Add a service group. We do this by specifying "true" as the first parameter.
+    space.AddGroup(true, "Web-Protocols", "All web-based protocols and ports")
+
+    // Add an address object
+    space.AddAddress("my-laptop", "2.2.2.2/32", "My personal laptop")
+
+    // Add a network
+    space.AddAddress("corporate-users", "192.168.1.0/24", "People on campus")
+
+    // Add a service object with an 1800 second inactivity timeout (using "0" disables this feature)
+    space.AddService("udp", "udp-5000", 5000, 5000, "UDP port 5000", 1800)
+
+    // Add a service object with a port range
+    space.AddService("tcp", "high-port-range", 40000, 65000, "TCP high ports", 0)
+
+If you want to modify an existing object, you can do that with the ModifyObject() function. The
+first parameter is whether the object is a service (true) or an address object (false).
+
+    // Add a service to a group
+    space.ModifyObject(true, "add", "service-group", "service-name")
+
+    // Remove an address object from a group
+    space.ModifyObject(false, "remove", "Whitelisted-Addresses", "bad-ip")
+
+    // Rename an object
+    space.ModifyObject(true, "rename", "Web-Services", "Web-Ports")
+
+    // Delete an object
+    space.ModifyObject(false, "delete", "my-laptop")
+
+Let's take a look at what security policies Space manages:
+
+    policies, err := space.Policies()
+    if err != nil {
+        fmt.Println(err)
+    }
+
+    for _, policy := range policies.Policies {
+        fmt.Printf("%s\n", policy.Name)
+    }
+
+For example, say we have been adding and removing objects to/from a group. That group
+is referenced in a firewall policy, so let's update it:
+
+    // Update the policy. If "false" is specified, then the policy is only published, and the
+    // device is not updated.
+    job, err := space.PublishPolicy("Internet-Firewall-Policy", true)
+    if err != nil {
+        fmt.Println(err)
+    }
+
+    fmt.Printf("Job ID: %d\n", job)
+
+    // Let's update a device knowing that we have some previously published services.
+    job, err := space.UpdateDevice("firewall-1.company.com")
+    if err != nil {
+        fmt.Println(err)
+    }
+
+    fmt.Printf("Job ID: %d\n", job)
 */
 package junos
