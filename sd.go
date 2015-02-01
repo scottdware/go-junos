@@ -240,7 +240,12 @@ func (s *JunosSpace) getPolicyID(object string) (int, error) {
 func (s *JunosSpace) Addresses(filter string) (*Addresses, error) {
 	var addresses Addresses
 	p := url.Values{}
-	p.Set("filter", fmt.Sprintf("(global eq '%s')", filter))
+	p.Set("filter", "(global eq '')")
+
+	if filter != "all" {
+		p.Set("filter", fmt.Sprintf("(global eq '%s')", filter))
+	}
+
 	req := &APIRequest{
 		Method: "get",
 		URL:    fmt.Sprintf("/api/juniper/sd/address-management/addresses?%s", p.Encode()),
@@ -437,7 +442,12 @@ func (s *JunosSpace) ModifyObject(isservice bool, actions ...interface{}) error 
 func (s *JunosSpace) Services(filter string) (*Services, error) {
 	var services Services
 	p := url.Values{}
-	p.Set("filter", fmt.Sprintf("(global eq '%s')", filter))
+	p.Set("filter", "(global eq '')")
+
+	if filter != "all" {
+		p.Set("filter", fmt.Sprintf("(global eq '%s')", filter))
+	}
+
 	req := &APIRequest{
 		Method: "get",
 		URL:    fmt.Sprintf("/api/juniper/sd/service-management/services?%s", p.Encode()),
