@@ -21,18 +21,18 @@ type SoftwarePackage struct {
 // SoftwareUpgrade holds all of the options available for deploying/upgrading
 // the software on a device through Junos Space.
 type SoftwareUpgrade struct {
-    // Use an image already staged on the device.
+	// Use an image already staged on the device.
 	UseDownloaded bool
-    // Check/don't check compatibility with current configuration.
-	Validate      bool
-    // Reboot system after adding package.
-	Reboot        bool
-    // Reboot the system after "x" minutes.
-	RebootAfter   int
-    // Remove any pre-existing packages on the device.
-	Cleanup       bool
-    // Remove the package after successful installation.
-	RemoveAfter   bool
+	// Check/don't check compatibility with current configuration.
+	Validate bool
+	// Reboot system after adding package.
+	Reboot bool
+	// Reboot the system after "x" minutes.
+	RebootAfter int
+	// Remove any pre-existing packages on the device.
+	Cleanup bool
+	// Remove the package after successful installation.
+	RemoveAfter bool
 }
 
 // deployXML is what we send to the server for image deployment.
