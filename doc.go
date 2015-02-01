@@ -270,12 +270,13 @@ List all security devices, and display the SecurityDevices struct information ab
     }
 
 To view the address and service objects, you use the Addresses() and Services() functions. Both of them
-take a "filter" parameter, which lets you search for objects matching your filter.
+take a "filter" parameter, which lets you search for objects matching your filter. If you specify "all",
+then the full list is returned.
 
 If you leave the parameter blank (e.g. ""), all objects are returned.
 
     // Address objects
-    addresses, err := space.Addresses()
+    addresses, err := space.Addresses("all")
     if err != nil {
         fmt.Println(err)
     }
@@ -285,7 +286,7 @@ If you leave the parameter blank (e.g. ""), all objects are returned.
     }
 
     // Service objects
-    services, err := space.Services()
+    services, err := space.Services("all")
     if err != nil {
         fmt.Println(err)
     }
