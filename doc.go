@@ -9,6 +9,17 @@ To connect to a Junos device, the process is fairly straightforward.
     jnpr := junos.NewSession(host, user, password)
     defer jnpr.Close()
 
+List all devices managed by Space:
+
+    devices, err := space.SecurityDevices()
+    if err != nil {
+        fmt.Println(err)
+    }
+    
+    for _, device := range devices.Devices {
+        fmt.Printf("%+v\n", device)
+    }
+    
 Viewing The Configuration
 
 To View the entire configuration, use the keyword "full" for the second
@@ -172,7 +183,7 @@ You can also loop over the struct field that contains this information yourself:
         fmt.Printf("Model: %s, Version: %s", data.Model, data.Version)
     }
 
-Connecting and Viewing Device Information from Junos Space
+Junos Space - Network Management Platform Functions
 
 Here's an example of how to connect to a Junos Space server, and get information about
 the devices it manages.
@@ -254,6 +265,19 @@ Remove a staged image from a device.
     jobID, err := space.RemoveStagedSoftware("sdubs-fw", "junos-srxsme-12.1X46-D30.2-domestic.tgz")
     if err != nil {
         fmt.Println(err)
+    }
+    
+Junos Space - Security Director Functions
+
+List all security devices:
+
+    devices, err := space.SecurityDevices()
+    if err != nil {
+        fmt.Println(err)
+    }
+    
+    for _, device := range devices.Devices {
+        fmt.Printf("%+v\n", device)
     }
 */
 package junos
