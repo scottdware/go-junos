@@ -44,7 +44,7 @@ type Policy struct {
 	Description string `xml:"description"`
 }
 
-// Policiese holds all of our firewall policy information.
+// Policies holds all of our firewall policy information.
 type Policies struct {
 	Policies []Policy `xml:"firewall-policy"`
 }
@@ -511,7 +511,7 @@ func (s *JunosSpace) PublishPolicy(object interface{}, update bool) (int, error)
 			return 0, err
 		}
 		if id == 0 {
-			return 0, errors.New("No policy found")
+			return 0, errors.New("no policy found")
 		}
 	}
 	publish := fmt.Sprintf(publishPolicyXML, id)
@@ -533,7 +533,7 @@ func (s *JunosSpace) PublishPolicy(object interface{}, update bool) (int, error)
 
 	err = xml.Unmarshal(data, &job)
 	if err != nil {
-		return 0, errors.New("No policy changes to publish")
+		return 0, errors.New("no policy changes to publish")
 	}
 
 	return job.ID, nil
