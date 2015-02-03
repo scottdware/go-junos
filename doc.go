@@ -305,7 +305,7 @@ To add objects to Junos Space, you can do the following:
     space.AddGroup(true, "Web-Protocols", "All web-based protocols and ports")
 
     // Add an address object
-    space.AddAddress("my-laptop", "2.2.2.2/32", "My personal laptop")
+    space.AddAddress("my-laptop", "2.2.2.2", "My personal laptop")
 
     // Add a network
     space.AddAddress("corporate-users", "192.168.1.0/24", "People on campus")
