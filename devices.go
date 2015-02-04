@@ -116,7 +116,7 @@ func (s *JunosSpace) AddDevice(host, user, password string) (int, error) {
 		Method:      "post",
 		URL:         "/api/space/device-management/discover-devices",
 		Body:        fmt.Sprintf(addDevice, host, user, password),
-		ContentType: ContentDiscoverDevices,
+		ContentType: contentDiscoverDevices,
 	}
 	data, err := s.APICall(req)
 	if err != nil {

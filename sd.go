@@ -267,7 +267,7 @@ func (s *JunosSpace) AddAddress(name, ip, desc string) (int, error) {
 		Method:      "post",
 		URL:         "/api/juniper/sd/address-management/addresses",
 		Body:        address,
-		ContentType: ContentAddress,
+		ContentType: contentAddress,
 	}
 	data, err := s.APICall(req)
 	if err != nil {
@@ -316,7 +316,7 @@ func (s *JunosSpace) AddService(proto, name string, low, high int, desc string, 
 		Method:      "post",
 		URL:         "/api/juniper/sd/service-management/services",
 		Body:        service,
-		ContentType: ContentService,
+		ContentType: contentService,
 	}
 	data, err := s.APICall(req)
 	if err != nil {
@@ -335,12 +335,12 @@ func (s *JunosSpace) AddService(proto, name string, low, high int, desc string, 
 func (s *JunosSpace) AddGroup(isservice bool, name, desc string) error {
 	uri := "/api/juniper/sd/address-management/addresses"
 	addGroupXML := addressGroupXML
-	content := ContentAddress
+	content := contentAddress
 
 	if isservice {
 		uri = "/api/juniper/sd/service-management/services"
 		addGroupXML = serviceGroupXML
-		content = ContentService
+		content = contentService
 	}
 
 	groupXML := fmt.Sprintf(addGroupXML, name, desc)
@@ -380,12 +380,12 @@ func (s *JunosSpace) ModifyObject(isservice bool, actions ...interface{}) error 
 	if objectID != 0 {
 		var req *APIRequest
 		uri = fmt.Sprintf("/api/juniper/sd/address-management/addresses/%d", objectID)
-		content = ContentAddressPatch
+		content = contentAddressPatch
 		rel = "address"
 
 		if isservice {
 			uri = fmt.Sprintf("/api/juniper/sd/service-management/services/%d", objectID)
-			content = ContentServicePatch
+			content = contentServicePatch
 			rel = "service"
 		}
 
@@ -526,7 +526,7 @@ func (s *JunosSpace) PublishPolicy(object interface{}, update bool) (int, error)
 		Method:      "post",
 		URL:         uri,
 		Body:        publish,
-		ContentType: ContentPublish,
+		ContentType: contentPublish,
 	}
 	data, err := s.APICall(req)
 	if err != nil {
@@ -555,7 +555,7 @@ func (s *JunosSpace) UpdateDevice(device interface{}) (int, error) {
 		Method:      "post",
 		URL:         "/api/juniper/sd/device-management/update-devices",
 		Body:        update,
-		ContentType: ContentUpdateDevices,
+		ContentType: contentUpdateDevices,
 	}
 	data, err := s.APICall(req)
 	if err != nil {

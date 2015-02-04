@@ -94,7 +94,7 @@ func (s *JunosSpace) DeploySoftware(device, image string, options *SoftwareUpgra
 		Method:      "post",
 		URL:         fmt.Sprintf("/api/space/software-management/packages/%d/exec-deploy", softwareID),
 		Body:        deploy,
-		ContentType: ContentExecDeploy,
+		ContentType: contentExecDeploy,
 	}
 	data, err := s.APICall(req)
 	if err != nil {
@@ -119,7 +119,7 @@ func (s *JunosSpace) RemoveStagedSoftware(device, image string) (int, error) {
 		Method:      "post",
 		URL:         fmt.Sprintf("/api/space/software-management/packages/%d/exec-remove", softwareID),
 		Body:        remove,
-		ContentType: ContentExecRemove,
+		ContentType: contentExecRemove,
 	}
 	data, err := s.APICall(req)
 	if err != nil {
@@ -166,7 +166,7 @@ func (s *JunosSpace) StageSoftware(device, image string, cleanup bool) (int, err
 		Method:      "post",
 		URL:         fmt.Sprintf("/api/space/software-management/packages/%d/exec-stage", softwareID),
 		Body:        stage,
-		ContentType: ContentExecStage,
+		ContentType: contentExecStage,
 	}
 	data, err := s.APICall(req)
 	if err != nil {
