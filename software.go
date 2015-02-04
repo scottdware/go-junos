@@ -5,12 +5,10 @@ import (
 	"fmt"
 )
 
-// SoftwarePackages holds a list of every software image managed within Space.
 type SoftwarePackages struct {
 	Packages []SoftwarePackage `xml:"package"`
 }
 
-// SoftwarePackage holds all the information about each software image within Space.
 type SoftwarePackage struct {
 	ID       int    `xml:"key,attr"`
 	Name     string `xml:"fileName"`
@@ -18,24 +16,16 @@ type SoftwarePackage struct {
 	Platform string `xml:"platformType"`
 }
 
-// SoftwareUpgrade holds all of the options available for deploying/upgrading
-// the software on a device through Junos Space.
 type SoftwareUpgrade struct {
-	// Use an image already staged on the device.
-	UseDownloaded bool
-	// Check/don't check compatibility with current configuration.
-	Validate bool
-	// Reboot system after adding package.
-	Reboot bool
-	// Reboot the system after "x" minutes.
-	RebootAfter int
-	// Remove any pre-existing packages on the device.
-	Cleanup bool
-	// Remove the package after successful installation.
-	RemoveAfter bool
+	UseDownloaded bool // Use an image already staged on the device.
+	Validate      bool // Check/don't check compatibility with current configuration.
+	Reboot        bool // Reboot system after adding package.
+	RebootAfter   int  // Reboot the system after "x" minutes.
+	Cleanup       bool // Remove any pre-existing packages on the device.
+	RemoveAfter   bool // Remove the package after successful installation.
 }
 
-// deployXML is what we send to the server for image deployment.
+// deployXML is XML we send (POST) for image deployment.
 var deployXML = `
 <exec-deploy>
     <devices>
@@ -54,7 +44,7 @@ var deployXML = `
 </exec-deploy>
 `
 
-// removeStagedXML is what we send to the server for removing a staged image.
+// removeStagedXML is XML we send (POST) for removing a staged image.
 var removeStagedXML = `
 <exec-remove>
     <devices>
@@ -63,7 +53,7 @@ var removeStagedXML = `
 </exec-remove>
 `
 
-// stageXML is what we send to the server for staging an image on a device.
+// stageXML is XML we send (POST) for staging an image on a device.
 var stageXML = `
 <exec-stage>
     <devices>
@@ -75,8 +65,7 @@ var stageXML = `
 </exec-stage>
 `
 
-// getSoftwareID returns the given software image ID, which will be used for REST
-// calls against it.
+// getSoftwareID returns the ID of the software package.
 func (s *JunosSpace) getSoftwareID(image string) (int, error) {
 	var err error
 	var softwareID int

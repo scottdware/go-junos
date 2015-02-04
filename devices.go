@@ -6,13 +6,11 @@ import (
 	"regexp"
 )
 
-// Devices holds a []Device slice of every device within Space.
 type Devices struct {
 	XMLName xml.Name `xml:"devices"`
 	Devices []Device `xml:"device"`
 }
 
-// Device holds all the information about each device within Space.
 type Device struct {
 	ID        int    `xml:"key,attr"`
 	Family    string `xml:"deviceFamily"`
@@ -23,7 +21,7 @@ type Device struct {
 	Name      string `xml:"name"`
 }
 
-// addDeviceIPXML is the XML used to add a device by IP address.
+// addDeviceIPXML is the XML we send (POST) for adding a device by IP address.
 var addDeviceIPXML = `
 <discover-devices>
     <ipAddressDiscoveryTarget>
@@ -38,7 +36,7 @@ var addDeviceIPXML = `
 </discover-devices>
 `
 
-// addDeviceHostXML is the XML used to add a device by hostname.
+// addDeviceHostXML is the XML we send (POST) for adding a device by hostname.
 var addDeviceHostXML = `
 <discover-devices>
     <hostNameDiscoveryTarget>
@@ -53,8 +51,7 @@ var addDeviceHostXML = `
 </discover-devices>
 `
 
-// getDeviceID returns the given devices ID, which will be used for REST
-// calls against it.
+// getDeviceID returns the ID of a managed device.
 func (s *JunosSpace) getDeviceID(device interface{}, sd bool) (int, error) {
 	var err error
 	var deviceID int

@@ -11,8 +11,6 @@ import (
 	"strings"
 )
 
-// Junos holds the connection information to our Junos device, as well
-// as the platform and software version it is running.
 type Junos struct {
 	Session      *netconf.Session
 	Hostname     string
@@ -20,56 +18,47 @@ type Junos struct {
 	Platform     []routingEngine
 }
 
-// CommandXML parses our operational command responses.
 type commandXML struct {
 	Config string `xml:",innerxml"`
 }
 
-// commitError parses any errors during the commit process.
 type commitError struct {
 	Path    string `xml:"error-path"`
 	Element string `xml:"error-info>bad-element"`
 	Message string `xml:"error-message"`
 }
 
-// commitResults stores our errors if we have any.
 type commitResults struct {
 	XMLName xml.Name      `xml:"commit-results"`
 	Errors  []commitError `xml:"rpc-error"`
 }
 
-// rollbackXML parses our rollback diff configuration.
 type diffXML struct {
 	XMLName xml.Name `xml:"rollback-information"`
 	Config  string   `xml:"configuration-information>configuration-output"`
 }
 
-// routingEngine holds the device hardware and software information.
 type routingEngine struct {
 	Model   string
 	Version string
 }
 
-// hardwareMultiRE parses our XML if we have multiple routing engines.
 type hardwareRouteEngines struct {
 	XMLName xml.Name              `xml:"multi-routing-engine-results"`
 	RE      []hardwareRouteEngine `xml:"multi-routing-engine-item>chassis-inventory"`
 }
 
-// hardwareRouteEngine holds all of our routing engine information.
 type hardwareRouteEngine struct {
 	XMLName     xml.Name `xml:"chassis-inventory"`
 	Serial      string   `xml:"chassis>serial-number"`
 	Description string   `xml:"chassis>description"`
 }
 
-// versionRouteEngines parses our XML if we have multiple routing engines.
 type versionRouteEngines struct {
 	XMLName xml.Name             `xml:"multi-routing-engine-results"`
 	RE      []versionRouteEngine `xml:"multi-routing-engine-item>software-information"`
 }
 
-// versionRouteEngine holds all of our routing engine information.
 type versionRouteEngine struct {
 	XMLName     xml.Name             `xml:"software-information"`
 	Hostname    string               `xml:"host-name"`
@@ -77,7 +66,6 @@ type versionRouteEngine struct {
 	PackageInfo []versionPackageInfo `xml:"package-information"`
 }
 
-// versionPackageInfo holds our software information per routing engine.
 type versionPackageInfo struct {
 	XMLName         xml.Name `xml:"package-information"`
 	PackageName     []string `xml:"name"`
@@ -90,7 +78,7 @@ func (j *Junos) Close() {
 }
 
 // Command runs any operational mode command, such as "show" or "request."
-// Format is either "text" or "xml".
+// Format can be one of "text" or "xml."
 func (j *Junos) Command(cmd, format string) (string, error) {
 	var c commandXML
 	var command = fmt.Sprintf(rpcCommand["command"], cmd)
@@ -290,8 +278,8 @@ func (j *Junos) PrintFacts() {
 	fmt.Println(str)
 }
 
-// GetConfig returns the full configuration, or starting a given <section>.
-// Format can either be "text" or "xml."
+// GetConfig returns the full configuration, or configuration starting at <section>.
+// Format can be one of "text" or "xml."
 func (j *Junos) GetConfig(section, format string) (string, error) {
 	command := fmt.Sprintf("<rpc><get-configuration format=\"%s\"><configuration>", format)
 	if section == "full" {
@@ -323,8 +311,8 @@ func (j *Junos) GetConfig(section, format string) (string, error) {
 	return reply.Data, nil
 }
 
-// LoadConfig loads a given configuration file locally or from
-// an FTP or HTTP server. Format is either "set" "text" or "xml."
+// LoadConfig loads a given configuration file from your local machine or
+// a remote (FTP or HTTP server) location. Format can be one of "set" "text" or "xml."
 func (j *Junos) LoadConfig(path, format string, commit bool) error {
 	var command string
 	switch format {
@@ -399,7 +387,7 @@ func (j *Junos) Lock() error {
 
 // NewSession establishes a new connection to a Junos device that we will use
 // to run our commands against. NewSession also gathers software information
-// pertaining to the device.
+// about the device.
 func NewSession(host, user, password string) (*Junos, error) {
 	rex := regexp.MustCompile(`^.*\[(.*)\]`)
 	s, err := netconf.DialSSH(host, netconf.SSHConfigPassword(user, password))

@@ -9,8 +9,6 @@ import (
 	"strings"
 )
 
-// JunosSpace holds all of our information that we use for our server
-// connection.
 type JunosSpace struct {
 	Host      string
 	User      string
@@ -18,7 +16,6 @@ type JunosSpace struct {
 	Transport *http.Transport
 }
 
-// APIRequest holds all of our options when building our API call.
 type APIRequest struct {
 	Method      string
 	URL         string
@@ -26,12 +23,10 @@ type APIRequest struct {
 	ContentType string
 }
 
-// jobID parses the job ID from the returned XML.
 type jobID struct {
 	ID int `xml:"id"`
 }
 
-// jobDetail holds the information about a given job.
 type jobDetail struct {
 	ID      jobID
 	Name    string  `xml:"name"`
@@ -40,9 +35,8 @@ type jobDetail struct {
 	Percent float64 `xml:"percent-complete"`
 }
 
-// These are all of the HTTP Content-Type's that we use for POST and DELETE requests.
-// You can also call an API yourself using a URL and Content-Type if one is not
-// listed here.
+// Content-Type's that we use for POST and DELETE requests. You can also call an API
+// yourself using a URL and Content-Type if one is not listed here.
 var (
 	ContentDiscoverDevices = "application/vnd.net.juniper.space.device-management.discover-devices+xml;version=2;charset=UTF-8"
 	ContentExecDeploy      = "application/vnd.net.juniper.space.software-management.exec-deploy+xml;version=1;charset=UTF-8"
@@ -70,7 +64,7 @@ func NewServer(host, user, passwd string) *JunosSpace {
 	}
 }
 
-// APICall is used to query the Junos Space server API's.
+// APICall is used to query the Junos Space server API.
 func (s *JunosSpace) APICall(options *APIRequest) ([]byte, error) {
 	var req *http.Request
 	client := &http.Client{Transport: s.Transport}

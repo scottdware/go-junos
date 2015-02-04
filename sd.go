@@ -10,12 +10,10 @@ import (
 	"strings"
 )
 
-// Addresses holds all of our address objects when queried.
 type Addresses struct {
 	Addresses []Address `xml:"address"`
 }
 
-// Address holds information about each individual address object.
 type Address struct {
 	ID          int    `xml:"id"`
 	Name        string `xml:"name"`
@@ -24,12 +22,10 @@ type Address struct {
 	IPAddress   string `xml:"ip-address"`
 }
 
-// Services holds all of our service objects when queried.
 type Services struct {
 	Services []Service `xml:"service"`
 }
 
-// Service holds information about each individual service object.
 type Service struct {
 	ID          int    `xml:"id"`
 	Name        string `xml:"name"`
@@ -37,25 +33,21 @@ type Service struct {
 	Description string `xml:"description"`
 }
 
-// Policy holds information about each individual firewall policy.
 type Policy struct {
 	ID          int    `xml:"id"`
 	Name        string `xml:"name"`
 	Description string `xml:"description"`
 }
 
-// Policies holds all of our firewall policy information.
 type Policies struct {
 	Policies []Policy `xml:"firewall-policy"`
 }
 
-// SecurityDevices holds a []Device slice of every security device within Space.
 type SecurityDevices struct {
 	XMLName xml.Name         `xml:"devices"`
 	Devices []SecurityDevice `xml:"device"`
 }
 
-// SecurityDevice holds all the information about each security device within Space.
 type SecurityDevice struct {
 	ID        int    `xml:"id"`
 	Family    string `xml:"device-family"`
@@ -64,7 +56,7 @@ type SecurityDevice struct {
 	Name      string `xml:"name"`
 }
 
-// addressesXML is what we send to the server when creating an address object.
+// addressesXML is XML we send (POST) for creating an address object.
 var addressesXML = `
 <address>
     <name>%s</name>
@@ -79,7 +71,7 @@ var addressesXML = `
 </address>
 `
 
-// serviceXML is what we send to the server when creating a service object.
+// serviceXML is XML we send (POST) for creating a service object.
 var serviceXML = `
 <service>
     <name>%s</name>
@@ -100,7 +92,7 @@ var serviceXML = `
 </service>
 `
 
-// addressGroupXML is what we send to the server when adding an address group.
+// addressGroupXML is XML we send (POST) for adding an address group.
 var addressGroupXML = `
 <address>
     <name>%s</name>
@@ -113,7 +105,7 @@ var addressGroupXML = `
 </address>
 `
 
-// serviceGroupXML is what we send to the server when adding a service group.
+// serviceGroupXML is XML we send (POST) for adding a service group.
 var serviceGroupXML = `
 <service>
     <name>%s</name>
@@ -122,14 +114,14 @@ var serviceGroupXML = `
 </service>
 `
 
-// removeXML is what we send to the server when removing an address or service from a group.
+// removeXML is XML we send (POST) for removing an address or service from a group.
 var removeXML = `
 <diff>
     <remove sel="%s/members/member[name='%s']"/>
 </diff>
 `
 
-// addGroupMemberXML is what we send to the server when adding addresses or services to a group.
+// addGroupMemberXML is XML we send (POST) for adding addresses or services to a group.
 var addGroupMemberXML = `
 <diff>
     <add sel="%s/members">
@@ -140,7 +132,7 @@ var addGroupMemberXML = `
 </diff>
 `
 
-// renameXML is what we send to the server when renaming an address or service object.
+// renameXML is XML we send (POST) for renaming an address or service object.
 var renameXML = `
 <diff>
     <replace sel="%s/name">
@@ -149,7 +141,7 @@ var renameXML = `
 </diff>
 `
 
-// updateDeviceXML is what we send to the server when updating a security device.
+// updateDeviceXML is XML we send (POST) for updating a security device.
 var updateDeviceXML = `
 <update-devices>
     <sd-ids>
@@ -164,7 +156,7 @@ var updateDeviceXML = `
 </update-devices>
 `
 
-// publishPolicyXML is what we send to the server to publish a changed policy.
+// publishPolicyXML is XML we send (POST) for publishing a changed policy.
 var publishPolicyXML = `
 <publish>
     <policy-ids>
@@ -173,8 +165,7 @@ var publishPolicyXML = `
 </publish>
 `
 
-// getObjectID returns the given address object ID, which will be used for REST
-// calls against it.
+// getObjectID returns the ID of the address or service object.
 func (s *JunosSpace) getObjectID(object interface{}, service bool) (int, error) {
 	var err error
 	var objectID int
@@ -216,8 +207,7 @@ func (s *JunosSpace) getObjectID(object interface{}, service bool) (int, error) 
 	return objectID, nil
 }
 
-// getPolicyID returns the given firewall policy object ID, which will be used for REST
-// calls against it.
+// getPolicyID returns the ID of a firewall policy.
 func (s *JunosSpace) getPolicyID(object string) (int, error) {
 	var err error
 	var objectID int
