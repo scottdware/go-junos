@@ -11,6 +11,7 @@ import (
 	"strings"
 )
 
+// Junos contains our session state.
 type Junos struct {
 	Session      *netconf.Session
 	Hostname     string

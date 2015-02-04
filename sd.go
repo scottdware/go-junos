@@ -10,10 +10,12 @@ import (
 	"strings"
 )
 
+// Addresses contains a list of address objects.
 type Addresses struct {
 	Addresses []Address `xml:"address"`
 }
 
+// An Address contains information about each individual address object.
 type Address struct {
 	ID          int    `xml:"id"`
 	Name        string `xml:"name"`
@@ -22,10 +24,12 @@ type Address struct {
 	IPAddress   string `xml:"ip-address"`
 }
 
+// Services contains a list of service objects.
 type Services struct {
 	Services []Service `xml:"service"`
 }
 
+// A Service contains information about each individual service object.
 type Service struct {
 	ID          int    `xml:"id"`
 	Name        string `xml:"name"`
@@ -33,21 +37,25 @@ type Service struct {
 	Description string `xml:"description"`
 }
 
+// A Policy contains information about each individual firewall policy.
 type Policy struct {
 	ID          int    `xml:"id"`
 	Name        string `xml:"name"`
 	Description string `xml:"description"`
 }
 
+// Policies contains a list of firewall policies.
 type Policies struct {
 	Policies []Policy `xml:"firewall-policy"`
 }
 
+// SecurityDevices contains a list of security devices.
 type SecurityDevices struct {
 	XMLName xml.Name         `xml:"devices"`
 	Devices []SecurityDevice `xml:"device"`
 }
 
+// A SecurityDevice contains information about each individual security device.
 type SecurityDevice struct {
 	ID        int    `xml:"id"`
 	Family    string `xml:"device-family"`

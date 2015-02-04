@@ -5,10 +5,12 @@ import (
 	"fmt"
 )
 
+// SoftwarePackages contains a list of software packages managed by Junos Space.
 type SoftwarePackages struct {
 	Packages []SoftwarePackage `xml:"package"`
 }
 
+// A SoftwarePackage contains information about each individual software package.
 type SoftwarePackage struct {
 	ID       int    `xml:"key,attr"`
 	Name     string `xml:"fileName"`
@@ -16,6 +18,7 @@ type SoftwarePackage struct {
 	Platform string `xml:"platformType"`
 }
 
+// SoftwareUpgrade consists of options available to use before issuing a software upgrade.
 type SoftwareUpgrade struct {
 	UseDownloaded bool // Use an image already staged on the device.
 	Validate      bool // Check/don't check compatibility with current configuration.

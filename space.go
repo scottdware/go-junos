@@ -9,6 +9,7 @@ import (
 	"strings"
 )
 
+// JunosSpace contains our session state.
 type JunosSpace struct {
 	Host      string
 	User      string
@@ -16,6 +17,7 @@ type JunosSpace struct {
 	Transport *http.Transport
 }
 
+// APIRequest builds our request before sending it to the server.
 type APIRequest struct {
 	Method      string
 	URL         string

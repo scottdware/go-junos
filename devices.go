@@ -6,11 +6,13 @@ import (
 	"regexp"
 )
 
+// Devices contains a list of managed devices.
 type Devices struct {
 	XMLName xml.Name `xml:"devices"`
 	Devices []Device `xml:"device"`
 }
 
+// A Device contains information about each individual device.
 type Device struct {
 	ID        int    `xml:"key,attr"`
 	Family    string `xml:"deviceFamily"`
