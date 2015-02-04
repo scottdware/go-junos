@@ -9,6 +9,20 @@ import (
 	"strings"
 )
 
+// All of our HTTP Content-Types we use.
+var (
+	contentDiscoverDevices = "application/vnd.net.juniper.space.device-management.discover-devices+xml;version=2;charset=UTF-8"
+	contentExecDeploy      = "application/vnd.net.juniper.space.software-management.exec-deploy+xml;version=1;charset=UTF-8"
+	contentExecRemove      = "application/vnd.net.juniper.space.software-management.exec-remove+xml;version=1;charset=UTF-8"
+	contentExecStage       = "application/vnd.net.juniper.space.software-management.exec-stage+xml;version=1;charset=UTF-8"
+	contentAddress         = "application/vnd.juniper.sd.address-management.address+xml;version=1;charset=UTF-8"
+	contentUpdateDevices   = "application/vnd.juniper.sd.device-management.update-devices+xml;version=1;charset=UTF-8"
+	contentPublish         = "application/vnd.juniper.sd.fwpolicy-management.publish+xml;version=1;charset=UTF-8"
+	contentAddressPatch    = "application/vnd.juniper.sd.address-management.address_patch+xml;version=1;charset=UTF-8"
+	contentService         = "application/vnd.juniper.sd.service-management.service+xml;version=1;charset=UTF-8"
+	contentServicePatch    = "application/vnd.juniper.sd.service-management.service_patch+xml;version=1;charset=UTF-8"
+)
+
 // JunosSpace contains our session state.
 type JunosSpace struct {
 	Host      string
