@@ -174,12 +174,12 @@ var publishPolicyXML = `
 `
 
 // getObjectID returns the ID of the address or service object.
-func (s *JunosSpace) getObjectID(object interface{}, service bool) (int, error) {
+func (s *JunosSpace) getObjectID(object interface{}, otype bool) (int, error) {
 	var err error
 	var objectID int
 	var services *Services
 	ipRegex := regexp.MustCompile(`(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\/\d+)`)
-	if service {
+	if !otype {
 		services, err = s.Services(object.(string))
 	}
 	objects, err := s.Addresses(object.(string))
@@ -191,7 +191,7 @@ func (s *JunosSpace) getObjectID(object interface{}, service bool) (int, error) 
 	case int:
 		objectID = object.(int)
 	case string:
-		if service {
+		if !otype {
 			for _, o := range services.Services {
 				if o.Name == object {
 					objectID = o.ID
@@ -340,12 +340,12 @@ func (s *JunosSpace) AddService(proto, name string, low, high int, desc string, 
 }
 
 // AddGroup adds a new address or service group to Junos Space, and returns the Job ID.
-func (s *JunosSpace) AddGroup(isservice bool, name, desc string) error {
+func (s *JunosSpace) AddGroup(otype bool, name, desc string) error {
 	uri := "/api/juniper/sd/address-management/addresses"
 	addGroupXML := addressGroupXML
 	content := contentAddress
 
-	if isservice {
+	if !otype {
 		uri = "/api/juniper/sd/service-management/services"
 		addGroupXML = serviceGroupXML
 		content = contentService
@@ -369,18 +369,18 @@ func (s *JunosSpace) AddGroup(isservice bool, name, desc string) error {
 
 // ModifyObject modifies an existing address, service or group. The actions are as follows:
 //
-// "isservice" is either "true" (for service) or "false" (for address)
+// "otype" is either "true" (for address) or "false" (for service)
 //
-// ModifyObject("isservice", "add", "existing-group", "member-to-add")
-// ModifyObject("isservice", "remove", "existing-group", "member-to-remove")
-// ModifyObject("isservice", "rename", "old-name", "new-name")
-// ModifyObject("isservice", "delete", "object-to-delete")
-func (s *JunosSpace) ModifyObject(isservice bool, actions ...interface{}) error {
+// ModifyObject(otype, "add", "existing-group", "member-to-add")
+// ModifyObject(otype, "remove", "existing-group", "member-to-remove")
+// ModifyObject(otype, "rename", "old-name", "new-name")
+// ModifyObject(otype, "delete", "object-to-delete")
+func (s *JunosSpace) ModifyObject(otype bool, actions ...interface{}) error {
 	var err error
 	var uri string
 	var content string
 	var rel string
-	objectID, err := s.getObjectID(actions[1], isservice)
+	objectID, err := s.getObjectID(actions[1], otype)
 	if err != nil {
 		return err
 	}
@@ -391,7 +391,7 @@ func (s *JunosSpace) ModifyObject(isservice bool, actions ...interface{}) error 
 		content = contentAddressPatch
 		rel = "address"
 
-		if isservice {
+		if !otype {
 			uri = fmt.Sprintf("/api/juniper/sd/service-management/services/%d", objectID)
 			content = contentServicePatch
 			rel = "service"
