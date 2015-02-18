@@ -297,12 +297,12 @@ If you leave the parameter blank (e.g. ""), all objects are returned.
 
 To add objects to Junos Space, you can do the following:
 
-    // Add an address group. "false" as the first parameter means that we assume the
+    // Add an address group. "true" as the first parameter means that we assume the
     // group is going to be an address group.
-    space.AddGroup(false, "Blacklist-IPs", "Blacklisted IP addresses")
+    space.AddGroup(true, "Blacklist-IPs", "Blacklisted IP addresses")
 
-    // Add a service group. We do this by specifying "true" as the first parameter.
-    space.AddGroup(true, "Web-Protocols", "All web-based protocols and ports")
+    // Add a service group. We do this by specifying "false" as the first parameter.
+    space.AddGroup(false, "Web-Protocols", "All web-based protocols and ports")
 
     // Add an address object
     space.AddAddress("my-laptop", "2.2.2.2", "My personal laptop")
@@ -317,19 +317,19 @@ To add objects to Junos Space, you can do the following:
     space.AddService("tcp", "high-port-range", 40000, 65000, "TCP high ports", 0)
 
 If you want to modify an existing object, you can do that with the ModifyObject() function. The
-first parameter is whether the object is a service (true) or an address object (false).
+first parameter is whether the object is an address (true) or a service object (false).
 
     // Add a service to a group
-    space.ModifyObject(true, "add", "service-group", "service-name")
+    space.ModifyObject(false, "add", "service-group", "service-name")
 
     // Remove an address object from a group
-    space.ModifyObject(false, "remove", "Whitelisted-Addresses", "bad-ip")
+    space.ModifyObject(true, "remove", "Whitelisted-Addresses", "bad-ip")
 
     // Rename an object
-    space.ModifyObject(true, "rename", "Web-Services", "Web-Ports")
+    space.ModifyObject(false, "rename", "Web-Services", "Web-Ports")
 
     // Delete an object
-    space.ModifyObject(false, "delete", "my-laptop")
+    space.ModifyObject(true, "delete", "my-laptop")
 
 Let's take a look at what security policies Space manages:
 
