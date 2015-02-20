@@ -118,7 +118,7 @@ var serviceGroupXML = `
 <service>
     <name>%s</name>
     <is-group>true</is-group>
-    <description>%s</description>    
+    <description>%s</description>
 </service>
 `
 
