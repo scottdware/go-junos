@@ -743,7 +743,8 @@ func (s *JunosSpace) ModifyVariable(actions ...interface{}) error {
 		return err
 	}
 	
-	modifyVariable := modifyVariableContent(&varData, moid, actions[2].(string), vid)
+	varContent := modifyVariableContent(&varData, moid, actions[2].(string), vid)
+	modifyVariable := fmt.Sprintf(modifyVariableXML, data.Name, data.Type, data.Description, data.Version, data.DefaultName, data.DefaultValue, varContent)
 	
 	if varID != 0 {
 		switch actions[0].(string) {
