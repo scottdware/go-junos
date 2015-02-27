@@ -64,6 +64,16 @@ type SecurityDevice struct {
 	Name      string `xml:"name"`
 }
 
+type Variables struct {
+	Variables []Variable `xml:"variable-definition"`
+}
+
+type Variable struct {
+	ID          int    `xml:"id"`
+	Name        string `xml:"name"`
+	Description string `xml:"description"`
+}
+
 // addressesXML is XML we send (POST) for creating an address object.
 var addressesXML = `
 <address>
@@ -592,6 +602,26 @@ func (s *JunosSpace) UpdateDevice(device interface{}) (int, error) {
 	return job.ID, nil
 }
 
+// Variables returns a listing of all polymorphic (variable) objects.
+func (s *JunosSpace) Variables() (*Variables, error) {
+	var vars Variables
+	req := &APIRequest{
+		Method: "get",
+		URL:    "/api/juniper/sd/variable-management/variable-definitions",
+	}
+	data, err := s.APICall(req)
+	if err != nil {
+		return err
+	}
+
+	err = xml.Unmarshal(data, &vars)
+	if err != nil {
+		return err
+	}
+
+	return &vars, nil
+}
+
 // AddVariable creates a new polymorphic object (variable) on the Junos Space server.
 func (s *JunosSpace) AddVariable(name, vtype, desc, obj string) error {
 	objID, err := s.getObjectID(obj, true)
@@ -613,3 +643,7 @@ func (s *JunosSpace) AddVariable(name, vtype, desc, obj string) error {
 
 	return nil
 }
+
+// ModifyVariable adds or deletes entries to the polymorphic (variable) object.
+// func (s *JunosSpace) ModifyVariable(actions ...interface{}) error {
+// }
