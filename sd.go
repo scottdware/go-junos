@@ -182,7 +182,7 @@ var createVariableXML = `
     <context>DEVICE</context>
     <default-name>%s</default-name>
     <default-value-detail>
-        <default-value>%i</default-value>
+        <default-value>%d</default-value>
     </default-value-detail>
 </variable-definition>
 `
@@ -598,18 +598,18 @@ func (s *JunosSpace) AddVariable(name, vtype, desc, obj string) error {
 	if err != nil {
 		return err
 	}
-	
+
 	varBody := fmt.Sprintf(createVariableXML, name, strings.ToUpper(vtype), desc, obj, objID)
 	req := &APIRequest{
-		Method: "post",
-		URL: "/api/juniper/sd/variable-management/variable-definitions",
-		Body: varBody,
+		Method:      "post",
+		URL:         "/api/juniper/sd/variable-management/variable-definitions",
+		Body:        varBody,
 		ContentType: contentVariable,
 	}
 	_, err := s.APICall(req)
 	if err != nil {
 		return err
 	}
-	
+
 	return nil
 }
