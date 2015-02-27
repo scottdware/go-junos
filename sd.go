@@ -173,6 +173,20 @@ var publishPolicyXML = `
 </publish>
 `
 
+// createVariableXML is the XML we send (POST) for adding a new variable object.
+var createVariableXML = `
+<variable-definition>
+    <name>%s</name>
+    <type>%s</type>
+	<description>%s</description>
+    <context>DEVICE</context>
+    <default-name>%s</default-name>
+    <default-value-detail>
+        <default-value>%i</default-value>
+    </default-value-detail>
+</variable-definition>
+`
+
 // getObjectID returns the ID of the address or service object.
 func (s *JunosSpace) getObjectID(object interface{}, otype bool) (int, error) {
 	var err error
@@ -576,4 +590,26 @@ func (s *JunosSpace) UpdateDevice(device interface{}) (int, error) {
 	}
 
 	return job.ID, nil
+}
+
+// AddVariable creates a new polymorphic object (variable) on the Junos Space server.
+func (s *JunosSpace) AddVariable(name, vtype, desc, obj string) error {
+	objID, err := s.getObjectID(obj, true)
+	if err != nil {
+		return err
+	}
+	
+	varBody := fmt.Sprintf(createVariableXML, name, strings.ToUpper(vtype), desc, obj, objID)
+	req := &APIRequest{
+		Method: "post",
+		URL: "/api/juniper/sd/variable-management/variable-definitions",
+		Body: varBody,
+		ContentType: contentVariable,
+	}
+	_, err := s.APICall(req)
+	if err != nil {
+		return err
+	}
+	
+	return nil
 }
