@@ -64,10 +64,12 @@ type SecurityDevice struct {
 	Name      string `xml:"name"`
 }
 
+// Variables contains a list of all polymorphic (variable) objects.
 type Variables struct {
 	Variables []Variable `xml:"variable-definition"`
 }
 
+// A Variable contains information about each individual polymorphic (variable) object.
 type Variable struct {
 	ID          int    `xml:"id"`
 	Name        string `xml:"name"`
