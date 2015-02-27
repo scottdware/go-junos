@@ -76,6 +76,23 @@ type Variable struct {
 	Description string `xml:"description"`
 }
 
+type existingVariable struct {
+	Name               string           `xml:"name"`
+	Description        string           `xml:"description"`
+	Type               string           `xml:"type"`
+	Version            int              `xml:"edit-version"`
+	DefaultName        string           `xml:"default-name"`
+	DefaultValue       int              `xml:"default-value-detail>default-value"`
+	VariableValuesList []variableValues `xml:"variable-values"`
+}
+
+type variableValues struct {
+	DeviceMOID    string `xml:"device>moid"`
+	DeviceName    string `xml:"device>name"`
+	VariableValue int    `xml:"variable-value-detail>variable-value"`
+	VariableName  string `xml:"variable-value-detail>name"`
+}
+
 // addressesXML is XML we send (POST) for creating an address object.
 var addressesXML = `
 <address>
@@ -199,6 +216,21 @@ var createVariableXML = `
 </variable-definition>
 `
 
+var modifyVariableXML = `
+<variable-definition>
+    <name>%s</name>
+    <type>%s</type>
+	<description>%s</description>
+	<edit-version>%d</edit-version>
+    <context>DEVICE</context>
+    <default-name>%s</default-name>
+    <default-value-detail>
+        <default-value>%d</default-value>
+    </default-value-detail>
+	%s
+</variable-definition>
+`
+
 // getObjectID returns the ID of the address or service object.
 func (s *JunosSpace) getObjectID(object interface{}, otype bool) (int, error) {
 	var err error
@@ -275,6 +307,19 @@ func (s *JunosSpace) getVariableID(variable string) (int, error) {
 	}
 
 	return variableID, nil
+}
+
+func (s *JunosSpace) modifyVariableContent(data *existingVariable, moid, firewall string, vid int) string {
+	var varValuesList = "<variable-values-list>"
+	for _, d := data.VariableValuesList {
+		varValuesList += fmt.Sprintf("<variable-values><device><moid>%s</moid><name>%s</name></device>", d.DeviceMOID, d.DeviceName)
+		varValuesList += fmt.Sprintf("<variable-value-detail><variable-value>%d</variable-value></variable-value-detail></variable-values>", d.VariableValue)
+	}
+	varValuesList += fmt.Sprintf("<variable-values><device><moid>%s</moid><name>%s</name></device>", moid, firewall)
+	varValuesList += fmt.Sprintf("<variable-value-detail><variable-value>%d</variable-value></variable-value-detail></variable-values>", vid)
+	varValuesList += "</variable-values-list>"
+	
+	return varValuesList
 }
 
 // Addresses queries the Junos Space server and returns all of the information
@@ -666,15 +711,58 @@ func (s *JunosSpace) AddVariable(name, vtype, desc, obj string) error {
 
 // ModifyVariable adds or deletes entries to the polymorphic (variable) object.
 func (s *JunosSpace) ModifyVariable(actions ...interface{}) error {
+	var req *APIRequest
+	var varData existingVariable
+	deviceID, err := s.getDeviceID(actions[2].(string), true)
+	if err != nil {
+		return err
+	}
+	
+	var moid fmt.Sprintf("net.juniper.jnap.sm.om.jpa.SecurityDeviceEntity:%d", deviceID)
 	varID, err := s.getVariableID(actions[1].(string))
 	if err != nil {
 		return err
 	}
-	req := &APIRequest{
-		Method:      "delete",
-		URL:         fmt.Sprintf("/api/juniper/sd/variable-management/variable-definitions/%d", varID),
-		ContentType: contentVariable,
+	
+	vid, err := s.getObjectID(actions[3].(string), true)
+	if err != nil {
+		return err
 	}
+
+	existing := &APIRequest{
+		Method: "get",
+		URL:    fmt.Sprintf("/api/juniper/sd/variable-management/variable-definitions/%d", varID),
+	}
+	data, err := s.APICall(existing)
+	if err != nil {
+		return err
+	}
+
+	err = xml.Unmarshal(data, &varData)
+	if err != nil {
+		return err
+	}
+	
+	modifyVariable := modifyVariableContent(&varData *existingVariable, moid, firewall string, vid int)
+	
+	if varID != 0 {
+		switch actions[0].(string) {
+		case "delete":
+			req = &APIRequest{
+				Method:      "delete",
+				URL:         fmt.Sprintf("/api/juniper/sd/variable-management/variable-definitions/%d", varID),
+				ContentType: contentVariable,
+			}
+		case "add":
+			req = &APIRequest{
+				Method:      "put",
+				URL:         fmt.Sprintf("/api/juniper/sd/variable-management/variable-definitions/%d", varID),
+				Body:        modifyVariable,
+				ContentType: contentVariable,
+			}
+		}
+	}
+
 	_, err = s.APICall(req)
 	if err != nil {
 		return err
