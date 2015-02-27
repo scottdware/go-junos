@@ -259,6 +259,24 @@ func (s *JunosSpace) getPolicyID(object string) (int, error) {
 	return objectID, nil
 }
 
+// getVariableID returns the ID of a polymorphic (variable) object.
+func (s *JunosSpace) getVariableID(variable string) (int, error) {
+	var err error
+	var variableID int
+	vars, err := s.Variables()
+	if err != nil {
+		return 0, err
+	}
+
+	for _, v := range vars.Variables {
+		if v.Name == variable {
+			variableID = v.ID
+		}
+	}
+
+	return variableID, nil
+}
+
 // Addresses queries the Junos Space server and returns all of the information
 // about each address that is managed by Space.
 func (s *JunosSpace) Addresses(filter string) (*Addresses, error) {
@@ -647,5 +665,20 @@ func (s *JunosSpace) AddVariable(name, vtype, desc, obj string) error {
 }
 
 // ModifyVariable adds or deletes entries to the polymorphic (variable) object.
-// func (s *JunosSpace) ModifyVariable(actions ...interface{}) error {
-// }
+func (s *JunosSpace) ModifyVariable(actions ...interface{}) error {
+	varID, err := s.getVariableID(actions[1])
+	if err != nil {
+		return err
+	}
+	req := &APIRequest{
+		Method:      "delete",
+		URL:         fmt.Sprintf("/api/juniper/sd/variable-management/variable-definitions/%d", varID),
+		ContentType: contentVariable,
+	}
+	_, err = s.APICall(req)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
