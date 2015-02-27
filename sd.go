@@ -666,7 +666,7 @@ func (s *JunosSpace) AddVariable(name, vtype, desc, obj string) error {
 
 // ModifyVariable adds or deletes entries to the polymorphic (variable) object.
 func (s *JunosSpace) ModifyVariable(actions ...interface{}) error {
-	varID, err := s.getVariableID(actions[1])
+	varID, err := s.getVariableID(actions[1].(string))
 	if err != nil {
 		return err
 	}
