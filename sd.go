@@ -718,7 +718,7 @@ func (s *JunosSpace) ModifyVariable(actions ...interface{}) error {
 		return err
 	}
 	
-	var moid fmt.Sprintf("net.juniper.jnap.sm.om.jpa.SecurityDeviceEntity:%d", deviceID)
+	var moid = fmt.Sprintf("net.juniper.jnap.sm.om.jpa.SecurityDeviceEntity:%d", deviceID)
 	varID, err := s.getVariableID(actions[1].(string))
 	if err != nil {
 		return err
@@ -743,7 +743,7 @@ func (s *JunosSpace) ModifyVariable(actions ...interface{}) error {
 		return err
 	}
 	
-	modifyVariable := modifyVariableContent(&varData *existingVariable, moid, firewall string, vid int)
+	modifyVariable := modifyVariableContent(&varData *existingVariable, moid, firewall, vid)
 	
 	if varID != 0 {
 		switch actions[0].(string) {
