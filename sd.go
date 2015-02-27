@@ -311,7 +311,7 @@ func (s *JunosSpace) getVariableID(variable string) (int, error) {
 
 func (s *JunosSpace) modifyVariableContent(data *existingVariable, moid, firewall string, vid int) string {
 	var varValuesList = "<variable-values-list>"
-	for _, d := data.VariableValuesList {
+	for _, d := range data.VariableValuesList {
 		varValuesList += fmt.Sprintf("<variable-values><device><moid>%s</moid><name>%s</name></device>", d.DeviceMOID, d.DeviceName)
 		varValuesList += fmt.Sprintf("<variable-value-detail><variable-value>%d</variable-value></variable-value-detail></variable-values>", d.VariableValue)
 	}
