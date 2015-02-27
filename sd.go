@@ -743,7 +743,7 @@ func (s *JunosSpace) ModifyVariable(actions ...interface{}) error {
 		return err
 	}
 	
-	modifyVariable := modifyVariableContent(&varData *existingVariable, moid, firewall, vid)
+	modifyVariable := modifyVariableContent(&varData, moid, actions[2].(string), vid)
 	
 	if varID != 0 {
 		switch actions[0].(string) {
