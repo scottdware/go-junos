@@ -599,8 +599,8 @@ func (s *JunosSpace) AddVariable(name, vtype, desc, obj string) error {
 		return err
 	}
 
-	fmt.Println(name, vtype, obj, objID)
 	varBody := fmt.Sprintf(createVariableXML, name, strings.ToUpper(vtype), desc, obj, objID)
+	fmt.Println(varBody)
 	req := &APIRequest{
 		Method:      "post",
 		URL:         "/api/juniper/sd/variable-management/variable-definitions",
