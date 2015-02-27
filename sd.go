@@ -599,6 +599,7 @@ func (s *JunosSpace) AddVariable(name, vtype, desc, obj string) error {
 		return err
 	}
 
+	fmt.Println(name, vtype, obj, objID)
 	varBody := fmt.Sprintf(createVariableXML, name, strings.ToUpper(vtype), desc, obj, objID)
 	req := &APIRequest{
 		Method:      "post",
