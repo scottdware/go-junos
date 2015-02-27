@@ -598,18 +598,18 @@ func (s *JunosSpace) AddVariable(name, vtype, desc, obj string) error {
 	if err != nil {
 		return err
 	}
-	
+
 	varBody := fmt.Sprintf(createVariableXML, name, strings.ToUpper(vtype), desc, obj, objID)
 	req := &APIRequest{
-		Method: "post",
-		URL: "/api/juniper/sd/variable-management/variable-definitions",
-		Body: varBody,
+		Method:      "post",
+		URL:         "/api/juniper/sd/variable-management/variable-definitions",
+		Body:        varBody,
 		ContentType: contentVariable,
 	}
-	_, err := s.APICall(req)
+	_, err = s.APICall(req)
 	if err != nil {
 		return err
 	}
-	
+
 	return nil
 }
