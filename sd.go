@@ -613,12 +613,12 @@ func (s *JunosSpace) Variables() (*Variables, error) {
 	}
 	data, err := s.APICall(req)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	err = xml.Unmarshal(data, &vars)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	return &vars, nil
