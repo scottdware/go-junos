@@ -89,7 +89,7 @@ type existingVariable struct {
 type variableValues struct {
 	DeviceMOID    string `xml:"device>moid"`
 	DeviceName    string `xml:"device>name"`
-	VariableValue int    `xml:"variable-value-detail>variable-value"`
+	VariableValue string    `xml:"variable-value-detail>variable-value"`
 	VariableName  string `xml:"variable-value-detail>name"`
 }
 
