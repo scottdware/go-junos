@@ -229,7 +229,9 @@ var modifyVariableXML = `
     <default-value-detail>
         <default-value>%s</default-value>
     </default-value-detail>
-%s
+	<variable-values-list>
+	%s
+	</variable-values-list>
 </variable-definition>
 `
 
@@ -312,14 +314,15 @@ func (s *JunosSpace) getVariableID(variable string) (int, error) {
 }
 
 func (s *JunosSpace) modifyVariableContent(data *existingVariable, moid, firewall, obj string, vid int) string {
-	var varValuesList = "<variable-values-list>"
+	// var varValuesList = "<variable-values-list>"
+	var varValuesList string
 	for _, d := range data.VariableValuesList {
 		varValuesList += fmt.Sprintf("<variable-values><device><moid>%s</moid><name>%s</name></device>", d.DeviceMOID, d.DeviceName)
 		varValuesList += fmt.Sprintf("<variable-value-detail><variable-value>%s</variable-value><name>%s</name></variable-value-detail></variable-values>", d.VariableValue, d.VariableName)
 	}
 	varValuesList += fmt.Sprintf("<variable-values><device><moid>%s</moid><name>%s</name></device>", moid, firewall)
 	varValuesList += fmt.Sprintf("<variable-value-detail><variable-value>net.juniper.jnap.sm.om.jpa.AddressEntity:%d</variable-value><name>%s</name></variable-value-detail></variable-values>", vid, obj)
-	varValuesList += "</variable-values-list>"
+	// varValuesList += "</variable-values-list>"
 	
 	return varValuesList
 }
