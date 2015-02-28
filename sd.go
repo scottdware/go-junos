@@ -87,7 +87,6 @@ type existingVariable struct {
 }
 
 type variableValues struct {
-	XMLName xml.Name `xml:"variable-values"`
 	DeviceMOID    string `xml:"device>moid"`
 	DeviceName    string `xml:"device>name"`
 	VariableValue int    `xml:"variable-value-detail>variable-value"`
