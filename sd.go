@@ -87,10 +87,10 @@ type existingVariable struct {
 }
 
 type variableValues struct {
-	DeviceMOID    string `xml:"variable-values>device>moid"`
-	DeviceName    string `xml:"variable-values>device>name"`
-	VariableValue int    `xml:"variable-values>variable-value-detail>variable-value"`
-	VariableName  string `xml:"variable-values>variable-value-detail>name"`
+	DeviceMOID    string `xml:"device>moid"`
+	DeviceName    string `xml:"device>name"`
+	VariableValue int    `xml:"variable-value-detail>variable-value"`
+	VariableName  string `xml:"variable-value-detail>name"`
 }
 
 // addressesXML is XML we send (POST) for creating an address object.
