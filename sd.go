@@ -311,14 +311,14 @@ func (s *JunosSpace) getVariableID(variable string) (int, error) {
 	return variableID, nil
 }
 
-func (s *JunosSpace) modifyVariableContent(data *existingVariable, moid, firewall string, vid int) string {
+func (s *JunosSpace) modifyVariableContent(data *existingVariable, moid, firewall, obj string, vid int) string {
 	var varValuesList = "<variable-values-list>"
 	for _, d := range data.VariableValuesList {
 		varValuesList += fmt.Sprintf("<variable-values><device><moid>%s</moid><name>%s</name></device>", d.DeviceMOID, d.DeviceName)
-		varValuesList += fmt.Sprintf("<variable-value-detail><variable-value>%s</variable-value></variable-value-detail></variable-values>", d.VariableValue)
+		varValuesList += fmt.Sprintf("<variable-value-detail><variable-value>%s</variable-value><name>%s</name></variable-value-detail></variable-values>", d.VariableValue, d.VariableName)
 	}
 	varValuesList += fmt.Sprintf("<variable-values><device><moid>%s</moid><name>%s</name></device>", moid, firewall)
-	varValuesList += fmt.Sprintf("<variable-value-detail><variable-value>%d</variable-value></variable-value-detail></variable-values>", vid)
+	varValuesList += fmt.Sprintf("<variable-value-detail><variable-value>%d</variable-value><name>%s</name></variable-value-detail></variable-values>", vid, obj)
 	varValuesList += "</variable-values-list>"
 	
 	return varValuesList
@@ -745,7 +745,7 @@ func (s *JunosSpace) ModifyVariable(actions ...interface{}) error {
 		return err
 	}
 		
-	varContent := s.modifyVariableContent(&varData, moid, actions[2].(string), vid)
+	varContent := s.modifyVariableContent(&varData, moid, actions[2].(string), actions[3].(string), vid)
 	modifyVariable := fmt.Sprintf(modifyVariableXML, varData.Name, varData.Type, varData.Description, varData.Version, varData.DefaultName, varData.DefaultValue, varContent)
 	
 	fmt.Printf("%s\n%d\n", modifyVariable, varID)
