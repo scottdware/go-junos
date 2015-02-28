@@ -713,7 +713,7 @@ func (s *JunosSpace) AddVariable(name, vtype, desc, obj string) error {
 
 // ModifyVariable adds or deletes entries to the polymorphic (variable) object.
 func (s *JunosSpace) ModifyVariable(actions ...interface{}) error {
-	// var req *APIRequest
+	var req *APIRequest
 	var varData existingVariable
 	deviceID, err := s.getDeviceID(actions[2].(string), true)
 	if err != nil {
