@@ -738,11 +738,11 @@ func (s *JunosSpace) ModifyVariable(actions ...interface{}) error {
 		return err
 	}
 
-	fmt.Printf("%+v\n", string(data))
 	err = xml.Unmarshal(data, &varData)
 	if err != nil {
 		return err
 	}
+	fmt.Printf("%+v\n", &varData)
 	
 	varContent := s.modifyVariableContent(&varData, moid, actions[2].(string), vid)
 	modifyVariable := fmt.Sprintf(modifyVariableXML, varData.Name, varData.Type, varData.Description, varData.Version, varData.DefaultName, varData.DefaultValue, varContent)
