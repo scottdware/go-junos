@@ -83,7 +83,7 @@ type existingVariable struct {
 	Version            int              `xml:"edit-version"`
 	DefaultName        string           `xml:"default-name"`
 	DefaultValue       string              `xml:"default-value-detail>default-value"`
-	VariableValuesList []variableValues `xml:"variable-values"`
+	VariableValuesList []variableValues `xml:"variable-values-list>variable-values"`
 }
 
 type variableValues struct {
