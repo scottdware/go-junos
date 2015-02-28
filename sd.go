@@ -82,7 +82,7 @@ type existingVariable struct {
 	Type               string           `xml:"type"`
 	Version            int              `xml:"edit-version"`
 	DefaultName        string           `xml:"default-name"`
-	DefaultValue       int              `xml:"default-value-detail>default-value"`
+	DefaultValue       string              `xml:"default-value-detail>default-value"`
 	VariableValuesList []variableValues `xml:"variable-values"`
 }
 
@@ -225,7 +225,7 @@ var modifyVariableXML = `
     <context>DEVICE</context>
     <default-name>%s</default-name>
     <default-value-detail>
-        <default-value>%d</default-value>
+        <default-value>%s</default-value>
     </default-value-detail>
 	%s
 </variable-definition>
