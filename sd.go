@@ -87,11 +87,10 @@ type existingVariable struct {
 }
 
 type variableValues struct {
-	XMLName	xml.Name	`xml:"variable-values"`
-	DeviceMOID    string `xml:"device>moid"`
-	DeviceName    string `xml:"device>name"`
-	VariableValue int    `xml:"variable-value-detail>variable-value"`
-	VariableName  string `xml:"variable-value-detail>name"`
+	DeviceMOID    string `xml:"variable-values>device>moid"`
+	DeviceName    string `xml:"variable-values>device>name"`
+	VariableValue int    `xml:"variable-values>variable-value-detail>variable-value"`
+	VariableName  string `xml:"variable-values>variable-value-detail>name"`
 }
 
 // addressesXML is XML we send (POST) for creating an address object.
@@ -314,7 +313,7 @@ func (s *JunosSpace) modifyVariableContent(data *existingVariable, moid, firewal
 	var varValuesList = "<variable-values-list>"
 	for _, d := range data.VariableValuesList {
 		varValuesList += fmt.Sprintf("<variable-values><device><moid>%s</moid><name>%s</name></device>", d.DeviceMOID, d.DeviceName)
-		varValuesList += fmt.Sprintf("<variable-value-detail><variable-value>%d</variable-value></variable-value-detail></variable-values>", d.VariableValue)
+		varValuesList += fmt.Sprintf("<variable-value-detail><variable-value>%s</variable-value></variable-value-detail></variable-values>", d.VariableValue)
 	}
 	varValuesList += fmt.Sprintf("<variable-values><device><moid>%s</moid><name>%s</name></device>", moid, firewall)
 	varValuesList += fmt.Sprintf("<variable-value-detail><variable-value>%d</variable-value></variable-value-detail></variable-values>", vid)
