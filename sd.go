@@ -229,7 +229,7 @@ var modifyVariableXML = `
     <default-value-detail>
         <default-value>%s</default-value>
     </default-value-detail>
-	%s
+%s
 </variable-definition>
 `
 
