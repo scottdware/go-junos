@@ -744,12 +744,10 @@ func (s *JunosSpace) ModifyVariable(actions ...interface{}) error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("%+v\n", &varData)
-	
+		
 	varContent := s.modifyVariableContent(&varData, moid, actions[2].(string), vid)
 	modifyVariable := fmt.Sprintf(modifyVariableXML, varData.Name, varData.Type, varData.Description, varData.Version, varData.DefaultName, varData.DefaultValue, varContent)
 	
-	// fmt.Printf("%s\n", modifyVariable)
 	if varID != 0 {
 		switch actions[0].(string) {
 		case "delete":
