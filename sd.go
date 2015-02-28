@@ -767,10 +767,11 @@ func (s *JunosSpace) ModifyVariable(actions ...interface{}) error {
 		}
 	}
 
-	_, err = s.APICall(req)
+	ret, err = s.APICall(req)
 	if err != nil {
 		return err
 	}
+	fmt.Println(string(ret))
 
 	return nil
 }
