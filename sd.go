@@ -738,7 +738,7 @@ func (s *JunosSpace) ModifyVariable(actions ...interface{}) error {
 		return err
 	}
 
-	fmt.Printf("%+v\n", data)
+	fmt.Printf("%+v\n", string(data))
 	err = xml.Unmarshal(data, &varData)
 	if err != nil {
 		return err
