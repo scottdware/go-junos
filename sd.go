@@ -767,7 +767,7 @@ func (s *JunosSpace) ModifyVariable(actions ...interface{}) error {
 		}
 	}
 
-	ret, err = s.APICall(req)
+	ret, err := s.APICall(req)
 	if err != nil {
 		return err
 	}
