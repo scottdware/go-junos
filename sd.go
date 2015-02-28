@@ -318,7 +318,7 @@ func (s *JunosSpace) modifyVariableContent(data *existingVariable, moid, firewal
 		varValuesList += fmt.Sprintf("<variable-value-detail><variable-value>%s</variable-value><name>%s</name></variable-value-detail></variable-values>", d.VariableValue, d.VariableName)
 	}
 	varValuesList += fmt.Sprintf("<variable-values><device><moid>%s</moid><name>%s</name></device>", moid, firewall)
-	varValuesList += fmt.Sprintf("<variable-value-detail><variable-value>%d</variable-value><name>%s</name></variable-value-detail></variable-values>", vid, obj)
+	varValuesList += fmt.Sprintf("<variable-value-detail><variable-value>net.juniper.jnap.sm.om.jpa.AddressEntity:%d</variable-value><name>%s</name></variable-value-detail></variable-values>", vid, obj)
 	varValuesList += "</variable-values-list>"
 	
 	return varValuesList
@@ -747,8 +747,7 @@ func (s *JunosSpace) ModifyVariable(actions ...interface{}) error {
 		
 	varContent := s.modifyVariableContent(&varData, moid, actions[2].(string), actions[3].(string), vid)
 	modifyVariable := fmt.Sprintf(modifyVariableXML, varData.Name, varData.Type, varData.Description, varData.Version, varData.DefaultName, varData.DefaultValue, varContent)
-	
-	fmt.Printf("%s\n%d\n", modifyVariable, varID)
+
 	if varID != 0 {
 		switch actions[0].(string) {
 		case "delete":
@@ -767,11 +766,10 @@ func (s *JunosSpace) ModifyVariable(actions ...interface{}) error {
 		}
 	}
 
-	ret, err := s.APICall(req)
+	_, err = s.APICall(req)
 	if err != nil {
 		return err
 	}
-	fmt.Println(string(ret))
-
+	
 	return nil
 }
