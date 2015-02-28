@@ -77,6 +77,7 @@ type Variable struct {
 }
 
 type existingVariable struct {
+	XMLName	xml.Name `xml:"variable-definition"`
 	Name               string           `xml:"name"`
 	Description        string           `xml:"description"`
 	Type               string           `xml:"type"`
@@ -87,6 +88,7 @@ type existingVariable struct {
 }
 
 type variableValues struct {
+	XMLName xml.Name `xml:"variable-values"`
 	DeviceMOID    string `xml:"device>moid"`
 	DeviceName    string `xml:"device>name"`
 	VariableValue string    `xml:"variable-value-detail>variable-value"`
