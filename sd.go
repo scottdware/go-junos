@@ -725,6 +725,7 @@ func (s *JunosSpace) ModifyVariable(actions ...interface{}) error {
 	var vid int
 	var data []byte
 	
+	log.Println(actions[2])
 	deviceID, err = s.getDeviceID(actions[2], true)
 	if err != nil {
 		return err
