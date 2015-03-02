@@ -8,6 +8,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 )
 
 // Addresses contains a list of address objects.
@@ -766,10 +767,13 @@ func (s *JunosSpace) ModifyVariable(actions ...interface{}) error {
 				ContentType: contentVariable,
 			}
 		case "add":
+			dIDTime := time.Now()
+			fmt.Println("Device ID start ", dIDTime)
 			deviceID, err := s.getSDDeviceID(actions[2])
 			if err != nil {
 				return err
 			}
+			fmt.Println(time.Since(dIDTime))
 			
 			moid := fmt.Sprintf("net.juniper.jnap.sm.om.jpa.SecurityDeviceEntity:%d", deviceID)
 			
