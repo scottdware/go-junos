@@ -235,6 +235,36 @@ var modifyVariableXML = `
 	</variable-values-list>
 </variable-definition>
 `
+// getDeviceID returns the ID of a managed device.
+func (s *JunosSpace) getSDDeviceID(device interface{}) (int, error) {
+	var err error
+	var deviceID int
+	ipRegex := regexp.MustCompile(`(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})`)
+	devices, err := s.SecurityDevices()
+	if err != nil {
+		return 0, err
+	}
+
+	switch device.(type) {
+	case int:
+		deviceID = device.(int)
+	case string:
+		if ipRegex.MatchString(device.(string)) {
+			for _, d := range devices.Devices {
+				if d.IPAddress == device.(string) {
+					deviceID = d.ID
+				}
+			}
+		}
+		for _, d := range devices.Devices {
+			if d.Name == device.(string) {
+				deviceID = d.ID
+			}
+		}
+	}
+
+	return deviceID, nil
+}
 
 // getObjectID returns the ID of the address or service object.
 func (s *JunosSpace) getObjectID(object interface{}, otype bool) (int, error) {
@@ -725,16 +755,16 @@ func (s *JunosSpace) ModifyVariable(actions ...interface{}) error {
 	var vid int
 	var data []byte
 	
-	devices, err := s.SecurityDevices()
+	deviceID, err = s.getSDDeviceID(actions[2])
 	if err != nil {
 		return err
 	}
 	
-	for _, d := range devices.Devices {
-		if d.Name == actions[2].(string) {
-			deviceID = d.ID
-		}
-	}
+	// for _, d := range devices.Devices {
+		// if d.Name == actions[2].(string) {
+			// deviceID = d.ID
+		// }
+	// }
 	
 	moid = fmt.Sprintf("net.juniper.jnap.sm.om.jpa.SecurityDeviceEntity:%d", deviceID)
 	varID, err = s.getVariableID(actions[1].(string))
