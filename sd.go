@@ -724,12 +724,18 @@ func (s *JunosSpace) ModifyVariable(actions ...interface{}) error {
 	var moid string
 	var vid int
 	var data []byte
+	var deviceID int
 	
-	deviceID, err = s.getDeviceID(actions[2], true)
+	devices, err := s.SecurityDevices()
 	if err != nil {
 		return err
 	}
-	log.Println(deviceID)
+	
+	for _, d := range devices.Devices {
+		if d.Name == actions[2].(string) {
+			deviceID = d.ID
+		}
+	}
 	
 	moid = fmt.Sprintf("net.juniper.jnap.sm.om.jpa.SecurityDeviceEntity:%d", deviceID)
 	varID, err = s.getVariableID(actions[1].(string))
