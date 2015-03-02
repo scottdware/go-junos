@@ -729,13 +729,13 @@ func (s *JunosSpace) Variables() (*Variables, error) {
 // AddVariable creates a new polymorphic object (variable) on the Junos Space server.
 // The address option is a default address that will be used. This address object must
 // already exist on the server.
-func (s *JunosSpace) AddVariable(name, vtype, desc, address string) error {
+func (s *JunosSpace) AddVariable(name, desc, address string) error {
 	objectID, err := s.getObjectID(address, true)
 	if err != nil {
 		return err
 	}
 
-	varBody := fmt.Sprintf(createVariableXML, name, strings.ToUpper(vtype), desc, address, objectID)
+	varBody := fmt.Sprintf(createVariableXML, name, "ADDRESS", desc, address, objectID)
 	req := &APIRequest{
 		Method:      "post",
 		URL:         "/api/juniper/sd/variable-management/variable-definitions",
@@ -752,6 +752,15 @@ func (s *JunosSpace) AddVariable(name, vtype, desc, address string) error {
 
 // ModifyVariable adds device and values to the polymorphic (variable) object, or
 // deletes the variable all together.
+//
+// The parameters for assigning SD devices to a variable:
+// <action> (add), <variable-name>, <SD device>, <address object>
+//
+// The parameters for deleting a variable:
+// <action> (delete), <variable-name>
+//
+// ModifyVariable("add", "test-variable", "srx-firewall1", "server-network")
+// ModifyVariable("delete", "test-variable")
 func (s *JunosSpace) ModifyVariable(actions ...interface{}) error {
 	var err error
 	var req *APIRequest
