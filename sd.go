@@ -78,22 +78,22 @@ type Variable struct {
 }
 
 type existingVariable struct {
-	XMLName	xml.Name `xml:"variable-definition"`
+	XMLName            xml.Name         `xml:"variable-definition"`
 	Name               string           `xml:"name"`
 	Description        string           `xml:"description"`
 	Type               string           `xml:"type"`
 	Version            int              `xml:"edit-version"`
 	DefaultName        string           `xml:"default-name"`
-	DefaultValue       string              `xml:"default-value-detail>default-value"`
+	DefaultValue       string           `xml:"default-value-detail>default-value"`
 	VariableValuesList []variableValues `xml:"variable-values-list>variable-values"`
 }
 
 type variableValues struct {
-	XMLName xml.Name `xml:"variable-values"`
-	DeviceMOID    string `xml:"device>moid"`
-	DeviceName    string `xml:"device>name"`
-	VariableValue string    `xml:"variable-value-detail>variable-value"`
-	VariableName  string `xml:"variable-value-detail>name"`
+	XMLName       xml.Name `xml:"variable-values"`
+	DeviceMOID    string   `xml:"device>moid"`
+	DeviceName    string   `xml:"device>name"`
+	VariableValue string   `xml:"variable-value-detail>variable-value"`
+	VariableName  string   `xml:"variable-value-detail>name"`
 }
 
 // addressesXML is XML we send (POST) for creating an address object.
@@ -235,6 +235,7 @@ var modifyVariableXML = `
 	</variable-values-list>
 </variable-definition>
 `
+
 // getDeviceID returns the ID of a managed device.
 func (s *JunosSpace) getSDDeviceID(device interface{}) (int, error) {
 	var err error
@@ -353,7 +354,7 @@ func (s *JunosSpace) modifyVariableContent(data *existingVariable, moid, firewal
 	}
 	varValuesList += fmt.Sprintf("<variable-values><device><moid>%s</moid><name>%s</name></device>", moid, firewall)
 	varValuesList += fmt.Sprintf("<variable-value-detail><variable-value>net.juniper.jnap.sm.om.jpa.AddressEntity:%d</variable-value><name>%s</name></variable-value-detail></variable-values>", vid, address)
-	
+
 	return varValuesList
 }
 
@@ -599,7 +600,7 @@ func (s *JunosSpace) SecurityDevices() (*SecurityDevices, error) {
 	if err != nil {
 		return nil, err
 	}
-	
+
 	err = xml.Unmarshal(data, &devices)
 	if err != nil {
 		return nil, err
@@ -752,12 +753,12 @@ func (s *JunosSpace) ModifyVariable(actions ...interface{}) error {
 	var err error
 	var req *APIRequest
 	var varData existingVariable
-		
+
 	varID, err := s.getVariableID(actions[1].(string))
 	if err != nil {
 		return err
 	}
-		
+
 	if varID != 0 {
 		switch actions[0].(string) {
 		case "delete":
@@ -767,15 +768,13 @@ func (s *JunosSpace) ModifyVariable(actions ...interface{}) error {
 				ContentType: contentVariable,
 			}
 		case "add":
-			deviceIDTimeStart := time.Now()
 			deviceID, err := s.getSDDeviceID(actions[2])
 			if err != nil {
 				return err
 			}
-			fmt.Println(time.Since(deviceIDTimeStart))
-			
+
 			moid := fmt.Sprintf("net.juniper.jnap.sm.om.jpa.SecurityDeviceEntity:%d", deviceID)
-			
+
 			vid, err := s.getObjectID(actions[3], true)
 			if err != nil {
 				return err
@@ -789,15 +788,15 @@ func (s *JunosSpace) ModifyVariable(actions ...interface{}) error {
 			if err != nil {
 				return err
 			}
-			
+
 			err = xml.Unmarshal(data, &varData)
 			if err != nil {
 				return err
 			}
-			
+
 			varContent := s.modifyVariableContent(&varData, moid, actions[2].(string), actions[3].(string), vid)
 			modifyVariable := fmt.Sprintf(modifyVariableXML, varData.Name, varData.Type, varData.Description, varData.Version, varData.DefaultName, varData.DefaultValue, varContent)
-	
+
 			req = &APIRequest{
 				Method:      "put",
 				URL:         fmt.Sprintf("/api/juniper/sd/variable-management/variable-definitions/%d", varID),
@@ -811,6 +810,6 @@ func (s *JunosSpace) ModifyVariable(actions ...interface{}) error {
 	if err != nil {
 		return err
 	}
-	
+
 	return nil
 }
