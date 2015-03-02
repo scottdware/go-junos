@@ -726,7 +726,7 @@ func (s *JunosSpace) ModifyVariable(actions ...interface{}) error {
 	var data []byte
 	
 	switch actions[2].(type) {
-	case "string":
+	case string:
 		log.Println(actions[2])
 	default:
 		log.Println("Something else")
