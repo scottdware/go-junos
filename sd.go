@@ -595,12 +595,10 @@ func (s *JunosSpace) SecurityDevices() (*SecurityDevices, error) {
 		Method: "get",
 		URL:    "/api/juniper/sd/device-management/devices",
 	}
-	deviceIDTimeStart := time.Now()
 	data, err := s.APICall(req)
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println("SecurityDevices() ", time.Since(deviceIDTimeStart))
 	
 	err = xml.Unmarshal(data, &devices)
 	if err != nil {
