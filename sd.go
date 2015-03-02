@@ -239,7 +239,7 @@ var modifyVariableXML = `
 func (s *JunosSpace) getSDDeviceID(device interface{}) (int, error) {
 	var err error
 	var deviceID int
-	ipRegex := regexp.MustCompile(`(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})`)
+	// ipRegex := regexp.MustCompile(`(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})`)
 	devices, err := s.SecurityDevices()
 	if err != nil {
 		return 0, err
@@ -249,13 +249,13 @@ func (s *JunosSpace) getSDDeviceID(device interface{}) (int, error) {
 	case int:
 		deviceID = device.(int)
 	case string:
-		if ipRegex.MatchString(device.(string)) {
-			for _, d := range devices.Devices {
-				if d.IPAddress == device.(string) {
-					deviceID = d.ID
-				}
-			}
-		}
+		// if ipRegex.MatchString(device.(string)) {
+			// for _, d := range devices.Devices {
+				// if d.IPAddress == device.(string) {
+					// deviceID = d.ID
+				// }
+			// }
+		// }
 		for _, d := range devices.Devices {
 			if d.Name == device.(string) {
 				deviceID = d.ID
@@ -767,13 +767,12 @@ func (s *JunosSpace) ModifyVariable(actions ...interface{}) error {
 				ContentType: contentVariable,
 			}
 		case "add":
-			dIDTime := time.Now()
-			fmt.Println("Device ID start ", dIDTime)
+			deviceIDTimeStart := time.Now()
 			deviceID, err := s.getSDDeviceID(actions[2])
 			if err != nil {
 				return err
 			}
-			fmt.Println(time.Since(dIDTime))
+			fmt.Println(time.Since(deviceIDTimeStart))
 			
 			moid := fmt.Sprintf("net.juniper.jnap.sm.om.jpa.SecurityDeviceEntity:%d", deviceID)
 			
