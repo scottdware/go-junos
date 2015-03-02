@@ -18,6 +18,7 @@ Junos Space
 * Modify objects (e.g. add/remove objects from groups, and delete objects).
 * View all policies managed by Junos Space.
 * Publish policies and update devices.
+* Add/modify polymorphic (variable) objects.
 
 ### Examples & Documentation
 Visit the [GoDoc][godoc-go-junos] page for complete package documentation and examples.
