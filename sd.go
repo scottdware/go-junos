@@ -724,7 +724,6 @@ func (s *JunosSpace) ModifyVariable(actions ...interface{}) error {
 	var moid string
 	var vid int
 	var data []byte
-	var deviceID int
 	
 	devices, err := s.SecurityDevices()
 	if err != nil {
