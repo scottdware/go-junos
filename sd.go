@@ -240,7 +240,7 @@ func (s *JunosSpace) getSDDeviceID(device interface{}) (int, error) {
 	var err error
 	var deviceID int
 	ipRegex := regexp.MustCompile(`(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})`)
-	deviceIDTimeStart = time.Now()
+	deviceIDTimeStart := time.Now()
 	devices, err := s.SecurityDevices()
 	if err != nil {
 		return 0, err
