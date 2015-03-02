@@ -724,41 +724,46 @@ func (s *JunosSpace) ModifyVariable(actions ...interface{}) error {
 	var moid string
 	var vid int
 	var data []byte
+	var firewall = actions[2].(string)
+	var variable = actions[1].(string)
+	var address = actions[3].(string)
 	
-	deviceID, _ = s.getDeviceID(actions[2].(string), true)
-	// if err != nil {
-		// return err
-	// }
+	deviceID, err = s.getDeviceID(firewall, true)
+	if err != nil {
+		return err
+	}
 	
 	moid = fmt.Sprintf("net.juniper.jnap.sm.om.jpa.SecurityDeviceEntity:%d", deviceID)
-	varID, _ = s.getVariableID(actions[1].(string))
-	// if err != nil {
-		// return err
-	// }
+	varID, err = s.getVariableID(variable)
+	if err != nil {
+		return err
+	}
 	
-	vid, _ = s.getObjectID(actions[3].(string), true)
-	// if err != nil {
-		// return err
-	// }
+	vid, err = s.getObjectID(address, true)
+	if err != nil {
+		return err
+	}
 
 	existing := &APIRequest{
 		Method: "get",
 		URL:    fmt.Sprintf("/api/juniper/sd/variable-management/variable-definitions/%d", varID),
 	}
-	data, _ = s.APICall(existing)
-	// if err != nil {
-		// return err
-	// }
+	data, err = s.APICall(existing)
+	if err != nil {
+		return err
+	}
 	
 	err = xml.Unmarshal(data, &varData)
 	if err != nil {
 		return err
 	}
 		
-	varContent := s.modifyVariableContent(&varData, moid, actions[2].(string), actions[3].(string), vid)
+	varContent := s.modifyVariableContent(&varData, moid, firewall, address, vid)
 	modifyVariable := fmt.Sprintf(modifyVariableXML, varData.Name, varData.Type, varData.Description, varData.Version, varData.DefaultName, varData.DefaultValue, varContent)
 
+	fmt.Println(varContent)
 	fmt.Println(modifyVariable)
+	
 	if varID != 0 {
 		switch actions[0].(string) {
 		case "delete":
