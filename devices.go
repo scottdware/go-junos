@@ -78,10 +78,11 @@ func (s *JunosSpace) getDeviceID(device interface{}, sd bool) (int, error) {
 						deviceID = d.ID
 					}
 				}
-			}
-			for _, d := range sds.Devices {
-				if d.Name == device {
-					deviceID = d.ID
+			} else {
+				for _, d := range sds.Devices {
+					if d.Name == device {
+						deviceID = d.ID
+					}
 				}
 			}
 		}
