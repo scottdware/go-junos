@@ -319,8 +319,8 @@ To add objects to Junos Space, you can do the following:
 Adding polymorphic (variable) objects works in a similar way:
 
 	// Add a variable
-	// The parameters are as follows: variable-name, type (address or zone), description, default-value
-	space.AddVariable("test-variable", "address", "Our test variable", "default-object")
+	// The parameters are as follows: variable-name, description, default-value
+	space.AddVariable("test-variable", "Our test variable", "default-object")
 
 	// Modify a variable by assigning devices/objects to it
 	// The parameters are as follows: action (add or delete), variable-name, SD device (firewall), address-object
