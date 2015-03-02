@@ -730,7 +730,7 @@ func (s *JunosSpace) ModifyVariable(actions ...interface{}) error {
 		if err != nil {
 			return err
 		}
-	}()
+	}() error
 	
 	go func() {
 		moid = fmt.Sprintf("net.juniper.jnap.sm.om.jpa.SecurityDeviceEntity:%d", deviceID)
@@ -738,7 +738,7 @@ func (s *JunosSpace) ModifyVariable(actions ...interface{}) error {
 		if err != nil {
 			return err
 		}
-	}()
+	}() error
 	
 	go func() {
 		vid, err = s.getObjectID(actions[3].(string), true)
@@ -754,7 +754,7 @@ func (s *JunosSpace) ModifyVariable(actions ...interface{}) error {
 		if err != nil {
 			return err
 		}
-	}()
+	}() error
 
 	err = xml.Unmarshal(data, &varData)
 	if err != nil {
