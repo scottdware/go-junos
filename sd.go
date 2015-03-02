@@ -732,7 +732,7 @@ func (s *JunosSpace) ModifyVariable(actions ...interface{}) error {
 	log.Println(deviceID)
 	
 	moid = fmt.Sprintf("net.juniper.jnap.sm.om.jpa.SecurityDeviceEntity:%d", deviceID)
-	varID, err = s.getVariableID(actions[1])
+	varID, err = s.getVariableID(actions[1].(string))
 	if err != nil {
 		return err
 	}
