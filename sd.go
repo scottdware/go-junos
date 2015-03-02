@@ -751,41 +751,11 @@ func (s *JunosSpace) ModifyVariable(actions ...interface{}) error {
 	var req *APIRequest
 	var varData existingVariable
 		
-	deviceID, err := s.getSDDeviceID(actions[2])
-	if err != nil {
-		return err
-	}
-	
-	moid := fmt.Sprintf("net.juniper.jnap.sm.om.jpa.SecurityDeviceEntity:%d", deviceID)
 	varID, err := s.getVariableID(actions[1].(string))
 	if err != nil {
 		return err
 	}
-	
-	vid, err := s.getObjectID(actions[3], true)
-	if err != nil {
-		return err
-	}
-
-	existing := &APIRequest{
-		Method: "get",
-		URL:    fmt.Sprintf("/api/juniper/sd/variable-management/variable-definitions/%d", varID),
-	}
-	data, err := s.APICall(existing)
-	if err != nil {
-		return err
-	}
-	
-	err = xml.Unmarshal(data, &varData)
-	if err != nil {
-		return err
-	}
 		
-	varContent := s.modifyVariableContent(&varData, moid, actions[2].(string), actions[3].(string), vid)
-	modifyVariable := fmt.Sprintf(modifyVariableXML, varData.Name, varData.Type, varData.Description, varData.Version, varData.DefaultName, varData.DefaultValue, varContent)
-
-	log.Println(modifyVariable)
-	
 	if varID != 0 {
 		switch actions[0].(string) {
 		case "delete":
@@ -795,6 +765,35 @@ func (s *JunosSpace) ModifyVariable(actions ...interface{}) error {
 				ContentType: contentVariable,
 			}
 		case "add":
+			deviceID, err := s.getSDDeviceID(actions[2])
+			if err != nil {
+				return err
+			}
+			
+			moid := fmt.Sprintf("net.juniper.jnap.sm.om.jpa.SecurityDeviceEntity:%d", deviceID)
+			
+			vid, err := s.getObjectID(actions[3], true)
+			if err != nil {
+				return err
+			}
+
+			existing := &APIRequest{
+				Method: "get",
+				URL:    fmt.Sprintf("/api/juniper/sd/variable-management/variable-definitions/%d", varID),
+			}
+			data, err := s.APICall(existing)
+			if err != nil {
+				return err
+			}
+			
+			err = xml.Unmarshal(data, &varData)
+			if err != nil {
+				return err
+			}
+			
+			varContent := s.modifyVariableContent(&varData, moid, actions[2].(string), actions[3].(string), vid)
+			modifyVariable := fmt.Sprintf(modifyVariableXML, varData.Name, varData.Type, varData.Description, varData.Version, varData.DefaultName, varData.DefaultValue, varContent)
+	
 			req = &APIRequest{
 				Method:      "put",
 				URL:         fmt.Sprintf("/api/juniper/sd/variable-management/variable-definitions/%d", varID),
