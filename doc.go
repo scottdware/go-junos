@@ -316,6 +316,19 @@ To add objects to Junos Space, you can do the following:
     // Add a service object with a port range
     space.AddService("tcp", "high-port-range", 40000, 65000, "TCP high ports", 0)
 
+Adding polymorphic (variable) objects works in a similar way:
+
+	// Add a variable
+	// The parameters are as follows: variable-name, type (address or zone), description, default-value
+	space.AddVariable("test-variable", "address", "Our test variable", "default-object")
+
+	// Modify a variable by assigning devices/objects to it
+	// The parameters are as follows: action (add or delete), variable-name, SD device (firewall), address-object
+	space.ModifyVariable("add", "test-variable", "srx-firewall1", "my-home-network")
+
+	// Delete a variable
+	space.ModifyVariable("delete", "test-variable")
+
 If you want to modify an existing object, you can do that with the ModifyObject() function. The
 first parameter is whether the object is an address (true) or a service object (false).
 
