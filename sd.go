@@ -4,6 +4,7 @@ import (
 	"encoding/xml"
 	"errors"
 	"fmt"
+	"log"
 	"net/url"
 	"regexp"
 	"strconv"
@@ -728,10 +729,11 @@ func (s *JunosSpace) ModifyVariable(actions ...interface{}) error {
 	var variable = actions[1].(string)
 	var address = actions[3].(string)
 	
-	deviceID, err = s.getDeviceID(firewall, false)
+	deviceID, err = s.getDeviceID(firewall, true)
 	if err != nil {
 		return err
 	}
+	log.Println(deviceID)
 	
 	moid = fmt.Sprintf("net.juniper.jnap.sm.om.jpa.SecurityDeviceEntity:%d", deviceID)
 	varID, err = s.getVariableID(variable)
@@ -761,8 +763,7 @@ func (s *JunosSpace) ModifyVariable(actions ...interface{}) error {
 	varContent := s.modifyVariableContent(&varData, moid, firewall, address, vid)
 	modifyVariable := fmt.Sprintf(modifyVariableXML, varData.Name, varData.Type, varData.Description, varData.Version, varData.DefaultName, varData.DefaultValue, varContent)
 
-	fmt.Println(varContent)
-	fmt.Println(modifyVariable)
+	log.Println(modifyVariable)
 	
 	if varID != 0 {
 		switch actions[0].(string) {
