@@ -728,7 +728,7 @@ func (s *JunosSpace) ModifyVariable(actions ...interface{}) error {
 	var variable = actions[1].(string)
 	var address = actions[3].(string)
 	
-	deviceID, err = s.getDeviceID(firewall, true)
+	deviceID, err = s.getDeviceID(firewall, false)
 	if err != nil {
 		return err
 	}
