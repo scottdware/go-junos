@@ -722,13 +722,15 @@ func (s *JunosSpace) Variables() (*Variables, error) {
 }
 
 // AddVariable creates a new polymorphic object (variable) on the Junos Space server.
-func (s *JunosSpace) AddVariable(name, vtype, desc, obj string) error {
-	objID, err := s.getObjectID(obj, true)
+// The address option is a default address that will be used. This address object must
+// already exist on the server.
+func (s *JunosSpace) AddVariable(name, vtype, desc, address string) error {
+	objectID, err := s.getObjectID(address, true)
 	if err != nil {
 		return err
 	}
 
-	varBody := fmt.Sprintf(createVariableXML, name, strings.ToUpper(vtype), desc, obj, objID)
+	varBody := fmt.Sprintf(createVariableXML, name, strings.ToUpper(vtype), desc, address, objectID)
 	req := &APIRequest{
 		Method:      "post",
 		URL:         "/api/juniper/sd/variable-management/variable-definitions",
