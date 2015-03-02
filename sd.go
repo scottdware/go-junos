@@ -759,6 +759,7 @@ func (s *JunosSpace) AddVariable(name, desc, address string) error {
 // <action> (delete), <variable-name>
 //
 // ModifyVariable("add", "test-variable", "srx-firewall1", "server-network")
+//
 // ModifyVariable("delete", "test-variable")
 func (s *JunosSpace) ModifyVariable(actions ...interface{}) error {
 	var err error
