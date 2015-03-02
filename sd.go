@@ -726,35 +726,35 @@ func (s *JunosSpace) ModifyVariable(actions ...interface{}) error {
 	var data []byte
 	
 	go func() {
-		deviceID, err = s.getDeviceID(actions[2].(string), true)
-		if err != nil {
-			return err
-		}
-	}() error
+		deviceID, _ = s.getDeviceID(actions[2].(string), true)
+		// if err != nil {
+			// return err
+		// }
+	}()
 	
 	go func() {
 		moid = fmt.Sprintf("net.juniper.jnap.sm.om.jpa.SecurityDeviceEntity:%d", deviceID)
-		varID, err = s.getVariableID(actions[1].(string))
-		if err != nil {
-			return err
-		}
-	}() error
+		varID, _ = s.getVariableID(actions[1].(string))
+		// if err != nil {
+			// return err
+		// }
+	}()
 	
 	go func() {
-		vid, err = s.getObjectID(actions[3].(string), true)
-		if err != nil {
-			return err
-		}
+		vid, _ = s.getObjectID(actions[3].(string), true)
+		// if err != nil {
+			// return err
+		// }
 
 		existing := &APIRequest{
 			Method: "get",
 			URL:    fmt.Sprintf("/api/juniper/sd/variable-management/variable-definitions/%d", varID),
 		}
-		data, err = s.APICall(existing)
-		if err != nil {
-			return err
-		}
-	}() error
+		data, _ = s.APICall(existing)
+		// if err != nil {
+			// return err
+		// }
+	}()
 
 	err = xml.Unmarshal(data, &varData)
 	if err != nil {
