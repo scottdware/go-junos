@@ -314,7 +314,7 @@ func (s *JunosSpace) getVariableID(variable string) (int, error) {
 	return variableID, nil
 }
 
-func (s *JunosSpace) modifyVariableContent(data *existingVariable, moid, firewall, obj string, vid int) string {
+func (s *JunosSpace) modifyVariableContent(data *existingVariable, moid, firewall, address string, vid int) string {
 	// var varValuesList = "<variable-values-list>"
 	var varValuesList string
 	for _, d := range data.VariableValuesList {
@@ -322,8 +322,7 @@ func (s *JunosSpace) modifyVariableContent(data *existingVariable, moid, firewal
 		varValuesList += fmt.Sprintf("<variable-value-detail><variable-value>%s</variable-value><name>%s</name></variable-value-detail></variable-values>", d.VariableValue, d.VariableName)
 	}
 	varValuesList += fmt.Sprintf("<variable-values><device><moid>%s</moid><name>%s</name></device>", moid, firewall)
-	varValuesList += fmt.Sprintf("<variable-value-detail><variable-value>net.juniper.jnap.sm.om.jpa.AddressEntity:%d</variable-value><name>%s</name></variable-value-detail></variable-values>", vid, obj)
-	// varValuesList += "</variable-values-list>"
+	varValuesList += fmt.Sprintf("<variable-value-detail><variable-value>net.juniper.jnap.sm.om.jpa.AddressEntity:%d</variable-value><name>%s</name></variable-value-detail></variable-values>", vid, address)
 	
 	return varValuesList
 }
@@ -725,23 +724,20 @@ func (s *JunosSpace) ModifyVariable(actions ...interface{}) error {
 	var moid string
 	var vid int
 	var data []byte
-	var firewall = actions[2]
-	var variable = actions[1]
-	var address = actions[3]
 	
-	deviceID, err = s.getDeviceID(firewall, true)
+	deviceID, err = s.getDeviceID(actions[2], true)
 	if err != nil {
 		return err
 	}
 	log.Println(deviceID)
 	
 	moid = fmt.Sprintf("net.juniper.jnap.sm.om.jpa.SecurityDeviceEntity:%d", deviceID)
-	varID, err = s.getVariableID(variable)
+	varID, err = s.getVariableID(actions[1])
 	if err != nil {
 		return err
 	}
 	
-	vid, err = s.getObjectID(address, true)
+	vid, err = s.getObjectID(actions[3], true)
 	if err != nil {
 		return err
 	}
@@ -760,7 +756,7 @@ func (s *JunosSpace) ModifyVariable(actions ...interface{}) error {
 		return err
 	}
 		
-	varContent := s.modifyVariableContent(&varData, moid, firewall, address, vid)
+	varContent := s.modifyVariableContent(&varData, moid, actions[2].(string), actions[3].(string), vid)
 	modifyVariable := fmt.Sprintf(modifyVariableXML, varData.Name, varData.Type, varData.Description, varData.Version, varData.DefaultName, varData.DefaultValue, varContent)
 
 	log.Println(modifyVariable)
