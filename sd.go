@@ -239,23 +239,25 @@ var modifyVariableXML = `
 func (s *JunosSpace) getSDDeviceID(device interface{}) (int, error) {
 	var err error
 	var deviceID int
-	// ipRegex := regexp.MustCompile(`(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})`)
+	ipRegex := regexp.MustCompile(`(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})`)
+	deviceIDTimeStart = time.Now()
 	devices, err := s.SecurityDevices()
 	if err != nil {
 		return 0, err
 	}
+	fmt.Println("getSDDeviceID: ", time.Since(deviceIDTimeStart))
 
 	switch device.(type) {
 	case int:
 		deviceID = device.(int)
 	case string:
-		// if ipRegex.MatchString(device.(string)) {
-			// for _, d := range devices.Devices {
-				// if d.IPAddress == device.(string) {
-					// deviceID = d.ID
-				// }
-			// }
-		// }
+		if ipRegex.MatchString(device.(string)) {
+			for _, d := range devices.Devices {
+				if d.IPAddress == device.(string) {
+					deviceID = d.ID
+				}
+			}
+		}
 		for _, d := range devices.Devices {
 			if d.Name == device.(string) {
 				deviceID = d.ID
