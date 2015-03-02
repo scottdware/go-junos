@@ -744,35 +744,25 @@ func (s *JunosSpace) AddVariable(name, vtype, desc, obj string) error {
 	return nil
 }
 
-// ModifyVariable adds or deletes entries to the polymorphic (variable) object.
+// ModifyVariable adds device and values to the polymorphic (variable) object, or
+// deletes the variable all together.
 func (s *JunosSpace) ModifyVariable(actions ...interface{}) error {
 	var err error
 	var req *APIRequest
 	var varData existingVariable
-	var deviceID int
-	var varID int
-	var moid string
-	var vid int
-	var data []byte
-	
-	deviceID, err = s.getSDDeviceID(actions[2])
+		
+	deviceID, err := s.getSDDeviceID(actions[2])
 	if err != nil {
 		return err
 	}
 	
-	// for _, d := range devices.Devices {
-		// if d.Name == actions[2].(string) {
-			// deviceID = d.ID
-		// }
-	// }
-	
-	moid = fmt.Sprintf("net.juniper.jnap.sm.om.jpa.SecurityDeviceEntity:%d", deviceID)
-	varID, err = s.getVariableID(actions[1].(string))
+	moid := fmt.Sprintf("net.juniper.jnap.sm.om.jpa.SecurityDeviceEntity:%d", deviceID)
+	varID, err := s.getVariableID(actions[1].(string))
 	if err != nil {
 		return err
 	}
 	
-	vid, err = s.getObjectID(actions[3], true)
+	vid, err := s.getObjectID(actions[3], true)
 	if err != nil {
 		return err
 	}
@@ -781,7 +771,7 @@ func (s *JunosSpace) ModifyVariable(actions ...interface{}) error {
 		Method: "get",
 		URL:    fmt.Sprintf("/api/juniper/sd/variable-management/variable-definitions/%d", varID),
 	}
-	data, err = s.APICall(existing)
+	data, err := s.APICall(existing)
 	if err != nil {
 		return err
 	}
