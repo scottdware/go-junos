@@ -726,41 +726,35 @@ func (s *JunosSpace) ModifyVariable(actions ...interface{}) error {
 	var vid int
 	var data []byte
 	
-	go func() {
-		deviceID, _ = s.getDeviceID(actions[2].(string), true)
-		// if err != nil {
-			// return err
-		// }
-	}()
+	deviceID, _ = s.getDeviceID(actions[2].(string), true)
+	// if err != nil {
+		// return err
+	// }
 	
-	go func() {
-		moid = fmt.Sprintf("net.juniper.jnap.sm.om.jpa.SecurityDeviceEntity:%d", deviceID)
-		varID, _ = s.getVariableID(actions[1].(string))
-		// if err != nil {
-			// return err
-		// }
-	}()
+	moid = fmt.Sprintf("net.juniper.jnap.sm.om.jpa.SecurityDeviceEntity:%d", deviceID)
+	varID, _ = s.getVariableID(actions[1].(string))
+	// if err != nil {
+		// return err
+	// }
 	
-	go func() {
-		vid, _ = s.getObjectID(actions[3].(string), true)
-		// if err != nil {
-			// return err
-		// }
+	vid, _ = s.getObjectID(actions[3].(string), true)
+	// if err != nil {
+		// return err
+	// }
 
-		existing := &APIRequest{
-			Method: "get",
-			URL:    fmt.Sprintf("/api/juniper/sd/variable-management/variable-definitions/%d", varID),
-		}
-		data, _ = s.APICall(existing)
-		// if err != nil {
-			// return err
-		// }
-		
-		err = xml.Unmarshal(data, &varData)
-		if err != nil {
-			log.Fatal(err)
-		}
-	}()
+	existing := &APIRequest{
+		Method: "get",
+		URL:    fmt.Sprintf("/api/juniper/sd/variable-management/variable-definitions/%d", varID),
+	}
+	data, _ = s.APICall(existing)
+	// if err != nil {
+		// return err
+	// }
+	
+	err = xml.Unmarshal(data, &varData)
+	if err != nil {
+		return err
+	}
 		
 	varContent := s.modifyVariableContent(&varData, moid, actions[2].(string), actions[3].(string), vid)
 	modifyVariable := fmt.Sprintf(modifyVariableXML, varData.Name, varData.Type, varData.Description, varData.Version, varData.DefaultName, varData.DefaultValue, varContent)
