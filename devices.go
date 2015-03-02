@@ -74,26 +74,26 @@ func (s *JunosSpace) getDeviceID(device interface{}, sd bool) (int, error) {
 		if sd {
 			if ipRegex.MatchString(device.(string)) {
 				for _, d := range sds.Devices {
-					if d.IPAddress == device {
+					if d.IPAddress == device.(string) {
 						deviceID = d.ID
 					}
 				}
 			}
 			for _, d := range sds.Devices {
-				if d.Name == device {
+				if d.Name == device.(string) {
 					deviceID = d.ID
 				}
 			}
 		}
 		if ipRegex.MatchString(device.(string)) {
 			for _, d := range devices.Devices {
-				if d.IPAddress == device {
+				if d.IPAddress == device.(string) {
 					deviceID = d.ID
 				}
 			}
 		}
 		for _, d := range devices.Devices {
-			if d.Name == device {
+			if d.Name == device.(string) {
 				deviceID = d.ID
 			}
 		}
