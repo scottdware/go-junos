@@ -240,12 +240,10 @@ func (s *JunosSpace) getSDDeviceID(device interface{}) (int, error) {
 	var err error
 	var deviceID int
 	ipRegex := regexp.MustCompile(`(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})`)
-	deviceIDTimeStart := time.Now()
 	devices, err := s.SecurityDevices()
 	if err != nil {
 		return 0, err
 	}
-	fmt.Println("getSDDeviceID: ", time.Since(deviceIDTimeStart))
 
 	switch device.(type) {
 	case int:
@@ -597,11 +595,13 @@ func (s *JunosSpace) SecurityDevices() (*SecurityDevices, error) {
 		Method: "get",
 		URL:    "/api/juniper/sd/device-management/devices",
 	}
+	deviceIDTimeStart := time.Now()
 	data, err := s.APICall(req)
 	if err != nil {
 		return nil, err
 	}
-
+	fmt.Println("SecurityDevices() ", time.Since(deviceIDTimeStart))
+	
 	err = xml.Unmarshal(data, &devices)
 	if err != nil {
 		return nil, err
