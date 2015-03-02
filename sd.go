@@ -77,6 +77,7 @@ type Variable struct {
 	Description string `xml:"description"`
 }
 
+// existingVariable holds all of our information in regards to said polymorphic (variable) object.
 type existingVariable struct {
 	XMLName            xml.Name         `xml:"variable-definition"`
 	Name               string           `xml:"name"`
@@ -88,6 +89,7 @@ type existingVariable struct {
 	VariableValuesList []variableValues `xml:"variable-values-list>variable-values"`
 }
 
+// variableValues holds the information for each device/object tied to the polymorphic (variable) object.
 type variableValues struct {
 	XMLName       xml.Name `xml:"variable-values"`
 	DeviceMOID    string   `xml:"device>moid"`
@@ -219,6 +221,7 @@ var createVariableXML = `
 </variable-definition>
 `
 
+// modifyVariableXML is the XML we send (PUT) for modifying variable objects.
 var modifyVariableXML = `
 <variable-definition>
     <name>%s</name>
