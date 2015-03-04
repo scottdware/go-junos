@@ -54,14 +54,10 @@ var addDeviceHostXML = `
 `
 
 // getDeviceID returns the ID of a managed device.
-func (s *JunosSpace) getDeviceID(device interface{}, sd bool) (int, error) {
+func (s *JunosSpace) getDeviceID(device interface{}) (int, error) {
 	var err error
 	var deviceID int
-	var sds *SecurityDevices
 	ipRegex := regexp.MustCompile(`(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})`)
-	if sd {
-		sds, err = s.SecurityDevices()
-	}
 	devices, err := s.Devices()
 	if err != nil {
 		return 0, err
@@ -71,20 +67,6 @@ func (s *JunosSpace) getDeviceID(device interface{}, sd bool) (int, error) {
 	case int:
 		deviceID = device.(int)
 	case string:
-		if sd {
-			if ipRegex.MatchString(device.(string)) {
-				for _, d := range sds.Devices {
-					if d.IPAddress == device.(string) {
-						deviceID = d.ID
-					}
-				}
-			}
-			for _, d := range sds.Devices {
-				if d.Name == device.(string) {
-					deviceID = d.ID
-				}
-			}
-		}
 		if ipRegex.MatchString(device.(string)) {
 			for _, d := range devices.Devices {
 				if d.IPAddress == device.(string) {
@@ -158,7 +140,7 @@ func (s *JunosSpace) Devices() (*Devices, error) {
 // or IP address.
 func (s *JunosSpace) RemoveDevice(device interface{}) error {
 	var err error
-	deviceID, err := s.getDeviceID(device, false)
+	deviceID, err := s.getDeviceID(device)
 	if err != nil {
 		return err
 	}
