@@ -90,7 +90,7 @@ func (s *JunosSpace) getSoftwareID(image string) (int, error) {
 // with the options specified.
 func (s *JunosSpace) DeploySoftware(device, image string, options *SoftwareUpgrade) (int, error) {
 	var job jobID
-	deviceID, _ := s.getDeviceID(device, false)
+	deviceID, _ := s.getDeviceID(device)
 	softwareID, _ := s.getSoftwareID(image)
 	deploy := fmt.Sprintf(deployXML, deviceID, options.UseDownloaded, options.Validate, options.Reboot, options.RebootAfter, options.Cleanup, options.RemoveAfter)
 	req := &APIRequest{
@@ -115,7 +115,7 @@ func (s *JunosSpace) DeploySoftware(device, image string, options *SoftwareUpgra
 // RemoveStagedSoftware will delete the staged software image on the device.
 func (s *JunosSpace) RemoveStagedSoftware(device, image string) (int, error) {
 	var job jobID
-	deviceID, _ := s.getDeviceID(device, false)
+	deviceID, _ := s.getDeviceID(device)
 	softwareID, _ := s.getSoftwareID(image)
 	remove := fmt.Sprintf(removeStagedXML, deviceID)
 	req := &APIRequest{
@@ -162,7 +162,7 @@ func (s *JunosSpace) Software() (*SoftwarePackages, error) {
 // upgrade it. The package is placed in the /var/tmp directory.
 func (s *JunosSpace) StageSoftware(device, image string, cleanup bool) (int, error) {
 	var job jobID
-	deviceID, _ := s.getDeviceID(device, false)
+	deviceID, _ := s.getDeviceID(device)
 	softwareID, _ := s.getSoftwareID(image)
 	stage := fmt.Sprintf(stageXML, deviceID, cleanup)
 	req := &APIRequest{
