@@ -680,7 +680,7 @@ func (s *JunosSpace) PublishPolicy(object interface{}, update bool) (int, error)
 // Junos Space.
 func (s *JunosSpace) UpdateDevice(device interface{}) (int, error) {
 	var job jobID
-	deviceID, err := s.getDeviceID(device, true)
+	deviceID, err := s.getDeviceID(device)
 	if err != nil {
 		return 0, err
 	}
