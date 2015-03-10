@@ -44,10 +44,16 @@ var (
 
 // Junos contains our session state.
 type Junos struct {
-	Session      *netconf.Session
-	Hostname     string
-	RouteEngines int
-	Platform     []routingEngine
+	Session        *netconf.Session
+	Hostname       string
+	RoutingEngines int
+	Platform       []RoutingEngine
+}
+
+// RoutingEngine contains the hardware and software information for each route engine.
+type RoutingEngine struct {
+	Model   string
+	Version string
 }
 
 type commandXML struct {
@@ -68,11 +74,6 @@ type commitResults struct {
 type diffXML struct {
 	XMLName xml.Name `xml:"rollback-information"`
 	Config  string   `xml:"configuration-information>configuration-output"`
-}
-
-type routingEngine struct {
-	Model   string
-	Version string
 }
 
 type hardwareRouteEngines struct {
@@ -290,7 +291,7 @@ func (j *Junos) PrintFacts() {
 	fpcRegex := regexp.MustCompile(`^(EX).*`)
 	srxRegex := regexp.MustCompile(`^(SRX).*`)
 	mRegex := regexp.MustCompile(`^(M[X]?).*`)
-	str += fmt.Sprintf("Routing Engines/FPC's: %d\n\n", j.RouteEngines)
+	str += fmt.Sprintf("Routing Engines/FPC's: %d\n\n", j.RoutingEngines)
 	for i, p := range j.Platform {
 		model := p.Model
 		version := p.Version
@@ -447,19 +448,19 @@ func NewSession(host, user, password string) (*Junos, error) {
 
 		numRE := len(facts.RE)
 		hostname := facts.RE[0].Hostname
-		res := make([]routingEngine, 0, numRE)
+		res := make([]RoutingEngine, 0, numRE)
 
 		for i := 0; i < numRE; i++ {
 			version := rex.FindStringSubmatch(facts.RE[i].PackageInfo[0].SoftwareVersion[0])
 			model := strings.ToUpper(facts.RE[i].Platform)
-			res = append(res, routingEngine{Model: model, Version: version[1]})
+			res = append(res, RoutingEngine{Model: model, Version: version[1]})
 		}
 
 		return &Junos{
-			Session:      s,
-			Hostname:     hostname,
-			RouteEngines: numRE,
-			Platform:     res,
+			Session:        s,
+			Hostname:       hostname,
+			RoutingEngines: numRE,
+			Platform:       res,
 		}, nil
 	}
 
@@ -469,17 +470,17 @@ func NewSession(host, user, password string) (*Junos, error) {
 		return nil, err
 	}
 
-	res := make([]routingEngine, 0)
+	res := make([]RoutingEngine, 0)
 	hostname := facts.Hostname
 	version := rex.FindStringSubmatch(facts.PackageInfo[0].SoftwareVersion[0])
 	model := strings.ToUpper(facts.Platform)
-	res = append(res, routingEngine{Model: model, Version: version[1]})
+	res = append(res, RoutingEngine{Model: model, Version: version[1]})
 
 	return &Junos{
-		Session:      s,
-		Hostname:     hostname,
-		RouteEngines: 1,
-		Platform:     res,
+		Session:        s,
+		Hostname:       hostname,
+		RoutingEngines: 1,
+		Platform:       res,
 	}, nil
 }
 
