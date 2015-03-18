@@ -27,7 +27,7 @@ Visit the [GoDoc][godoc-go-junos] page for complete package documentation and ex
  [Juniper Networks][juniper]
 
 ### License
-[MIT][license]
+go-junos is licensed under the [MIT License][license].
 
 [netconf-rfc]: https://tools.ietf.org/html/rfc6241
 [go-netconf]: https://github.com/Juniper/go-netconf
