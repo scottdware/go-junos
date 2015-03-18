@@ -33,4 +33,4 @@ go-junos is licensed under the [MIT License][license].
 [go-netconf]: https://github.com/Juniper/go-netconf
 [juniper]: http://www.juniper.net
 [godoc-go-junos]: https://godoc.org/github.com/scottdware/go-junos
-[license]: https://github.com/scottdware/go-junos/blob/master/LICENSE.txt
+[license]: https://github.com/scottdware/go-junos/blob/master/LICENSE
