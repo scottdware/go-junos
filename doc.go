@@ -177,7 +177,7 @@ Junos Space - Network Management Platform Functions
 Here's an example of how to connect to a Junos Space server, and get information about
 all of the managed devices:
 
-Package example_junosspace
+example_junosspace
 
     // Establish a connection to a Junos Space server.
     space := junos.NewServer("space.company.com", "admin", "juniper123")
