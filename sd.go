@@ -391,10 +391,10 @@ func (s *JunosSpace) Addresses(filter string) (*Addresses, error) {
 // AddAddress adds a new address object to Junos Space, and returns the Job ID.
 func (s *JunosSpace) AddAddress(name, ip, desc string) (int, error) {
 	var job jobID
-	var addrType = "IPADDRESS"
+	var addrType = "NETWORK"
 
-	if strings.Contains(ip, "/") {
-		addrType = "NETWORK"
+	if !strings.Contains(ip, "/32") || !strings.Contains(ip, "/") {
+		addrType = "IPADDRESS"
 	}
 
 	address := fmt.Sprintf(addressesXML, name, addrType, ip, desc)
