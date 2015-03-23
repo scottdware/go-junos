@@ -5,7 +5,7 @@ import (
 	"github.com/scottdware/go-junos"
 )
 
-func Example_JunosSpace() {
+func Example() {
 	// Establish a connection to a Junos Space server.
 	space := junos.NewServer("space.company.com", "admin", "juniper123")
 
