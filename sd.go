@@ -392,19 +392,20 @@ func (s *JunosSpace) Addresses(filter string) (*Addresses, error) {
 func (s *JunosSpace) AddAddress(name, ip, desc string) (int, error) {
 	var job jobID
 	var addrType string
+	var ipaddr string
 	r := regexp.MustCompile(`(\d+\.\d+\.\d+\.\d+)(\/\d+)?`)
 	match := r.FindStringSubmatch(ip)
 
 	switch match[2] {
-	case "":
+	case "", "/32":
 		addrType = "IPADDRESS"
-	case "/32":
-		addrType = "IPADDRESS"
+		ipaddr = match[1]
 	default:
 		addrType = "NETWORK"
+		ipaddr = ip
 	}
 
-	address := fmt.Sprintf(addressesXML, name, addrType, ip, desc)
+	address := fmt.Sprintf(addressesXML, name, addrType, ipaddr, desc)
 	req := &APIRequest{
 		Method:      "post",
 		URL:         "/api/juniper/sd/address-management/addresses",
