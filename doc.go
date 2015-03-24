@@ -6,14 +6,17 @@ Establishing A Session
 
 To connect to a Junos device, the process is fairly straightforward:
 
-    jnpr := junos.NewSession(host, user, password)
+    jnpr, err := junos.NewSession(host, user, password)
+    if err != nil {
+		log.Fatal(err)
+    }
     defer jnpr.Close()
 
 Viewing The Configuration
 
-To View the entire configuration, use the keyword "full" for the second
+To View the entire configuration, use the keyword "full" for the first
 argument. If anything else outside of "full" is specified, it will return
-the configuration of that section only. So "security" would return everything
+the configuration of the specified top-level stanza only. So "security" would return everything
 under the "security" stanza.
 
     // Output format can be "text" or "xml"
@@ -23,17 +26,10 @@ under the "security" stanza.
     }
     fmt.Println(config)
 
-    // Viewing only a certain part of the configuration
-    routing, err := jnpr.GetConfig("routing-instances", "text")
-    if err != nil {
-        fmt.Println(err)
-    }
-    fmt.Println(routing)
-
 Compare Rollback Configurations
 
 If you want to view the difference between the current configuration and a rollback
-one, then you can use the ConfigDiff() function:
+one, then you can use the ConfigDiff() function to specify a previous config:
 
     diff, err := jnpr.ConfigDiff(3)
     if err != nil {
@@ -41,11 +37,9 @@ one, then you can use the ConfigDiff() function:
     }
     fmt.Println(diff)
 
-This will output exactly how it does on the CLI when you "| compare."
-
 Rolling Back to a Previous State
 
-You can also rollback to a previous state, or the rescue configuration by using
+You can rollback to a previous state, or the rescue configuration by using
 the RollbackConfig() function:
 
     err := jnpr.RollbackConfig(3)
@@ -79,7 +73,7 @@ There are multiple ways to commit a configuration as well:
     // Commit the configuration as normal
     Commit()
 
-    // Check the configuration for any syntax errors (NOTE: you must still issue a Commit())
+    // Check the configuration for any syntax errors (NOTE: you must still issue a Commit() afterwards)
     CommitCheck()
 
     // Commit at a later time, i.e. 4:30 PM
@@ -91,7 +85,7 @@ There are multiple ways to commit a configuration as well:
 You can configure the Junos device by uploading a local file, or pulling from an
 FTP/HTTP server. The LoadConfig() function takes three arguments:
 
-    filename or URL, format, and commit-on-load
+    filename or URL, format, and a boolean (true/false) "commit-on-load"
 
 If you specify a URL, it must be in the following format:
 
@@ -122,7 +116,7 @@ The format of the commands within the file must be one of the following types:
 
 If the third option is "true" then after the configuration is loaded, a commit
 will be issued. If set to "false," you will have to commit the configuration
-using the Commit() function.
+using one of the Commit() functions.
 
     jnpr.Lock()
     err := jnpr.LoadConfig("path-to-file.txt", "set", true)
@@ -130,10 +124,6 @@ using the Commit() function.
         fmt.Println(err)
     }
     jnpr.Unlock()
-
-You don't have to use Lock() and Unlock() if you wish, but if by chance someone
-else tries to edit the device configuration at the same time, there can be conflics
-and most likely an error will be returned.
 
 Running Commands
 
@@ -205,25 +195,8 @@ How to add and remove devices:
         fmt.Println(err)
     }
 
-    // Here's a good way to loop through all devices, and find the one you want to delete:
-    d, err := space.Devices()
-    if err != nil {
-        fmt.Println(err)
-    }
-
-    for _, device := range d.Devices {
-        if device.Name == "sdubs-fw" {
-            err = space.RemoveDevice(device.Name)
-            if err != nil {
-                fmt.Println(err)
-            }
-
-            fmt.Printf("Deleted device: %s\n", device.Name)
-        }
-    }
-
-Stage a software image on a device. This basically just downloads it to the device, and does
-not upgrade it:
+How to stage a software image on a device (this just downloads the image to the device, and does
+not upgrade it):
 
     // The third parameter is whether or not to remove any existing images from the device - true or false.
     jobID, err := space.StageSoftware("sdubs-fw", "junos-srxsme-12.1X46-D30.2-domestic.tgz", false)
@@ -258,7 +231,7 @@ Remove a staged image from a device:
 
 Junos Space - Security Director Functions
 
-List all security devices, and display the SecurityDevices struct information about them:
+List all security devices:
 
     devices, err := space.SecurityDevices()
     if err != nil {
@@ -270,10 +243,9 @@ List all security devices, and display the SecurityDevices struct information ab
     }
 
 To view the address and service objects, you use the Addresses() and Services() functions. Both of them
-take a "filter" parameter, which lets you search for objects matching your filter. If you specify "all",
-then the full list is returned.
+take a "filter" parameter, which lets you search for objects matching your filter.
 
-If you leave the parameter blank (e.g. ""), all objects are returned.
+If you leave the parameter blank (e.g. ""), or specify "all", then every object is returned.
 
     // Address objects
     addresses, err := space.Addresses("all")
@@ -323,14 +295,14 @@ Adding polymorphic (variable) objects works in a similar way:
 	space.AddVariable("test-variable", "Our test variable", "default-object")
 
 	// Modify a variable by assigning devices/objects to it
-	// The parameters are as follows: action (add or delete), variable-name, SD device (firewall), address-object
+	// The parameters are as follows: <action> (add or delete), <variable-name>, <SD device> (firewall), <address-object>
 	space.ModifyVariable("add", "test-variable", "srx-firewall1", "my-home-network")
 
 	// Delete a variable
 	space.ModifyVariable("delete", "test-variable")
 
-If you want to modify an existing object, you can do that with the ModifyObject() function. The
-first parameter is whether the object is an address (true) or a service object (false).
+If you want to modify an existing object group, you do this with the ModifyObject() function. The
+first parameter is whether the object is an address group (true) or a service group (false).
 
     // Add a service to a group
     space.ModifyObject(false, "add", "service-group", "service-name")
@@ -344,7 +316,7 @@ first parameter is whether the object is an address (true) or a service object (
     // Delete an object
     space.ModifyObject(true, "delete", "my-laptop")
 
-Let's take a look at what security policies Space manages:
+List all security policies Junos Space manages:
 
     policies, err := space.Policies()
     if err != nil {
@@ -355,8 +327,8 @@ Let's take a look at what security policies Space manages:
         fmt.Printf("%s\n", policy.Name)
     }
 
-For example, say we have been adding and removing objects to/from a group. That group
-is referenced in a firewall policy, so let's update it:
+For example, say we have been adding and removing objects in a group, and that group
+is referenced in a firewall policy. Here's how to update the policy:
 
     // Update the policy. If "false" is specified, then the policy is only published, and the
     // device is not updated.
