@@ -105,6 +105,16 @@ type versionPackageInfo struct {
 	SoftwareVersion []string `xml:"comment"`
 }
 
+type RPCMethod interface {
+	MarshalMethod() string
+}
+
+type RawMethod string
+
+func (r RawMethod) MarshalMethod() string {
+	return string(r)
+}
+
 // Close disconnects our session to the device.
 func (j *Junos) Close() {
 	j.Session.Transport.Close()
@@ -114,14 +124,15 @@ func (j *Junos) Close() {
 // Format can be one of "text" or "xml."
 func (j *Junos) Command(cmd, format string) (string, error) {
 	var c commandXML
-	var command = fmt.Sprintf(rpcCommand, cmd)
+	var command RawMethod
+	command = RawMethod(fmt.Sprintf(rpcCommand, cmd))
 	errMessage := "No output available. Please check the syntax of your command."
 
 	if format == "xml" {
-		command = fmt.Sprintf(rpcCommandXML, cmd)
+		command = RawMethod(fmt.Sprintf(rpcCommandXML, cmd))
 	}
 
-	reply, err := j.Session.Exec(command)
+	reply, err := j.Session.Exec(command.MarshalMethod())
 	if err != nil {
 		return errMessage, err
 	}
