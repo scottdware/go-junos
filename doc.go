@@ -8,7 +8,7 @@ To connect to a Junos device, the process is fairly straightforward:
 
     jnpr, err := junos.NewSession(host, user, password)
     if err != nil {
-		log.Fatal(err)
+        log.Fatal(err)
     }
     defer jnpr.Close()
 
