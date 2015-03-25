@@ -105,16 +105,6 @@ type versionPackageInfo struct {
 	SoftwareVersion []string `xml:"comment"`
 }
 
-type RawMethod string
-
-type RPCMethod interface {
-	MarshalMethod() string
-}
-
-func (r RawMethod) MarshalMethod() string {
-	return string(r)
-}
-
 // Close disconnects our session to the device.
 func (j *Junos) Close() {
 	j.Session.Transport.Close()
@@ -124,15 +114,15 @@ func (j *Junos) Close() {
 // Format can be one of "text" or "xml."
 func (j *Junos) Command(cmd, format string) (string, error) {
 	var c commandXML
-	var command RawMethod
-	command = RawMethod(fmt.Sprintf(rpcCommand, cmd))
+	var command string
+	command = fmt.Sprintf(rpcCommand, cmd)
 	errMessage := "No output available. Please check the syntax of your command."
 
 	if format == "xml" {
-		command = RawMethod(fmt.Sprintf(rpcCommandXML, cmd))
+		command = fmt.Sprintf(rpcCommandXML, cmd)
 	}
 
-	reply, err := j.Session.Exec(command.MarshalMethod())
+	reply, err := j.Session.Exec(command)
 	if err != nil {
 		return errMessage, err
 	}
@@ -158,9 +148,7 @@ func (j *Junos) Command(cmd, format string) (string, error) {
 // Commit commits the configuration.
 func (j *Junos) Commit() error {
 	var errs commitResults
-	var command RawMethod
-	command = RawMethod(rpcCommit)
-	reply, err := j.Session.Exec(command.MarshalMethod())
+	reply, err := j.Session.Exec(rpcCommit)
 	if err != nil {
 		return err
 	}
@@ -189,7 +177,7 @@ func (j *Junos) Commit() error {
 // CommitAt commits the configuration at the specified <time>.
 func (j *Junos) CommitAt(time string) error {
 	var errs commitResults
-	command := string(fmt.Sprintf(rpcCommitAt, time))
+	command := fmt.Sprintf(rpcCommitAt, time)
 	reply, err := j.Session.Exec(command)
 	if err != nil {
 		return err
@@ -219,7 +207,7 @@ func (j *Junos) CommitAt(time string) error {
 // CommitCheck checks the configuration for syntax errors.
 func (j *Junos) CommitCheck() error {
 	var errs commitResults
-	reply, err := j.Session.Exec(string(rpcCommitCheck))
+	reply, err := j.Session.Exec(rpcCommitCheck)
 	if err != nil {
 		return err
 	}
@@ -248,7 +236,7 @@ func (j *Junos) CommitCheck() error {
 // CommitConfirm rolls back the configuration after <delay> minutes.
 func (j *Junos) CommitConfirm(delay int) error {
 	var errs commitResults
-	command := string(fmt.Sprintf(rpcCommitConfirm, delay))
+	command := fmt.Sprintf(rpcCommitConfirm, delay)
 	reply, err := j.Session.Exec(command)
 	if err != nil {
 		return err
@@ -278,7 +266,7 @@ func (j *Junos) CommitConfirm(delay int) error {
 // ConfigDiff compares the current active configuration to a given rollback configuration.
 func (j *Junos) ConfigDiff(compare int) (string, error) {
 	var rb diffXML
-	command := string(fmt.Sprintf(rpcGetRollbackCompare, compare))
+	command := fmt.Sprintf(rpcGetRollbackCompare, compare)
 	reply, err := j.Session.Exec(command)
 	if err != nil {
 		return "", err
@@ -327,7 +315,7 @@ func (j *Junos) PrintFacts() {
 // GetConfig returns the full configuration, or configuration starting at <section>.
 // Format can be one of "text" or "xml."
 func (j *Junos) GetConfig(section, format string) (string, error) {
-	command := string(fmt.Sprintf("<rpc><get-configuration format=\"%s\"><configuration>", format))
+	command := fmt.Sprintf("<rpc><get-configuration format=\"%s\"><configuration>", format)
 	if section == "full" {
 		command += "</configuration></get-configuration></rpc>"
 	}
@@ -364,34 +352,34 @@ func (j *Junos) LoadConfig(path, format string, commit bool) error {
 	switch format {
 	case "set":
 		if strings.Contains(path, "tp://") {
-			command = string(fmt.Sprintf(rpcConfigURLSet, path))
+			command = fmt.Sprintf(rpcConfigURLSet, path)
 		}
 		data, err := ioutil.ReadFile(path)
 		if err != nil {
 			return err
 		}
 
-		command = string(fmt.Sprintf(rpcConfigFileSet, string(data)))
+		command = fmt.Sprintf(rpcConfigFileSet, string(data))
 	case "text":
 		if strings.Contains(path, "tp://") {
-			command = string(fmt.Sprintf(rpcConfigURLText, path))
+			command = fmt.Sprintf(rpcConfigURLText, path)
 		}
 		data, err := ioutil.ReadFile(path)
 		if err != nil {
 			return err
 		}
 
-		command = string(fmt.Sprintf(rpcConfigFileText, string(data)))
+		command = fmt.Sprintf(rpcConfigFileText, string(data))
 	case "xml":
 		if strings.Contains(path, "tp://") {
-			command = string(fmt.Sprintf(rpcConfigURLXML, path))
+			command = fmt.Sprintf(rpcConfigURLXML, path)
 		}
 		data, err := ioutil.ReadFile(path)
 		if err != nil {
 			return err
 		}
 
-		command = string(fmt.Sprintf(rpcConfigFileXML, string(data)))
+		command = fmt.Sprintf(rpcConfigFileXML, string(data))
 	}
 
 	reply, err := j.Session.Exec(command)
@@ -417,7 +405,7 @@ func (j *Junos) LoadConfig(path, format string, commit bool) error {
 
 // Lock locks the candidate configuration.
 func (j *Junos) Lock() error {
-	reply, err := j.Session.Exec(string(rpcLock))
+	reply, err := j.Session.Exec(rpcLock)
 	if err != nil {
 		return err
 	}
@@ -499,10 +487,10 @@ func NewSession(host, user, password string) (*Junos, error) {
 
 // Rescue will create or delete the rescue configuration given "save" or "delete."
 func (j *Junos) Rescue(action string) error {
-	command := string(fmt.Sprintf(rpcRescueSave))
+	command := fmt.Sprintf(rpcRescueSave)
 
 	if action == "delete" {
-		command = string(fmt.Sprintf(rpcRescueDelete))
+		command = fmt.Sprintf(rpcRescueDelete)
 	}
 
 	reply, err := j.Session.Exec(command)
@@ -521,10 +509,10 @@ func (j *Junos) Rescue(action string) error {
 
 // RollbackConfig loads and commits the configuration of a given rollback or rescue state.
 func (j *Junos) RollbackConfig(option interface{}) error {
-	var command = string(fmt.Sprintf(rpcRollbackConfig, option))
+	var command = fmt.Sprintf(rpcRollbackConfig, option)
 
 	if option == "rescue" {
-		command = string(fmt.Sprintf(rpcRescueConfig))
+		command = fmt.Sprintf(rpcRescueConfig)
 	}
 
 	reply, err := j.Session.Exec(command)
@@ -548,7 +536,7 @@ func (j *Junos) RollbackConfig(option interface{}) error {
 
 // Unlock unlocks the candidate configuration.
 func (j *Junos) Unlock() error {
-	reply, err := j.Session.Exec(string(rpcUnlock))
+	reply, err := j.Session.Exec(rpcUnlock)
 	if err != nil {
 		return err
 	}
