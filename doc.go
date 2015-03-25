@@ -305,12 +305,12 @@ first parameter is whether the object is an address group (true) or a service gr
 
 Adding polymorphic (variable) objects works in a similar way:
 
-	// Add a variable
-	// The parameters are as follows: variable-name, description, default-value
-	space.AddVariable("test-variable", "Our test variable", "default-object")
+    // Add a variable
+    // The parameters are as follows: variable-name, description, default-value
+    space.AddVariable("test-variable", "Our test variable", "default-object")
 
-	// Create our session state for modifying variables
-	v, err := space.ModifyVariable()
+    // Create our session state for modifying variables
+    v, err := space.ModifyVariable()
     if err != nil {
         log.Fatal(err)
     }
@@ -319,8 +319,8 @@ Adding polymorphic (variable) objects works in a similar way:
     v.Add("test-variable", "srx-1", "user-pc")
     v.Add("test-variable", "corp-firewall", "db-server")
 
-	// Delete a variable
-	space.DeleteVariable("test-variable")
+    // Delete a variable
+    space.DeleteVariable("test-variable")
 
 List all security policies Junos Space manages:
 
