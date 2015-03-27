@@ -184,7 +184,7 @@ func ExampleJunosSpace_devices() {
 }
 
 // Software upgrades using Junos Space.
-func ExampleJunosSpace_softwareUpgrades() {
+func ExampleJunosSpace_softwareUpgrade() {
 	// Staging software on a device. The last parameter is whether or not to remove any
 	// existing images from the device; boolean.
 	//
@@ -219,8 +219,7 @@ func ExampleJunosSpace_softwareUpgrades() {
 	}
 }
 
-// Junos Space Security Director examples: adding/removing address and service
-// objects, modifying groups, adding and modifying polymorphic (variable) objects.
+// Viewing information about Security Director devices (SRX, J-series, etc.).
 func ExampleJunosSpace_securityDirectorDevices() {
 	// List all security devices:
 	devices, err := space.SecurityDevices()
@@ -231,7 +230,10 @@ func ExampleJunosSpace_securityDirectorDevices() {
 	for _, device := range devices.Devices {
 		fmt.Printf("%+v\n", device)
 	}
+}
 
+// Working with address and service objects.
+func ExampleJunosSpace_addressObjects() {
 	// To view the address and service objects, you use the Addresses() and Services() functions. Both of them
 	// take a "filter" parameter, which lets you search for objects matching your filter.
 
@@ -290,7 +292,10 @@ func ExampleJunosSpace_securityDirectorDevices() {
 
 	// Delete an object
 	space.ModifyObject(true, "delete", "my-laptop")
+}
 
+// Working with polymorphic (variable) objects.
+func ExampleJunosSpace_variables() {
 	// Add a variable
 	// The parameters are as follows: variable-name, description, default-value
 	space.AddVariable("test-variable", "Our test variable", "default-object")
@@ -307,7 +312,10 @@ func ExampleJunosSpace_securityDirectorDevices() {
 
 	// Delete a variable
 	space.DeleteVariable("test-variable")
+}
 
+// Working with policies.
+func ExampleJunosSpace_policies() {
 	// List all security policies Junos Space manages:
 	policies, err := space.Policies()
 	if err != nil {
