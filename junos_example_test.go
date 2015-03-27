@@ -116,3 +116,48 @@ func Example_configuringDevices() {
 	}
 	jnpr.Unlock()
 }
+
+// Running Commands on a Device
+func Example_runCommands() {
+	// You can run operational mode commands such as "show" and "request" by using the
+	// Command() function. Output formats can be "text" or "xml":
+
+	// Results returned in text format
+	txtOutput, err := jnpr.Command("show chassis hardware", "text")
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(txtOutput)
+
+	// Results returned in XML format
+	xmlOutput, err := jnpr.Command("show chassis hardware", "xml")
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(xmlOutput)
+}
+
+func Example_displayPlatformInformation() {
+	// When you call the PrintFacts() function, it prints out the platform and software information:
+	jnpr.PrintFacts()
+
+	// Output:
+	// node0
+	// --------------------------------------------------------------------------
+	// Hostname: firewall-1
+	// Model: SRX240H2
+	// Version: 12.1X47-D10.4
+
+	// node1
+	// --------------------------------------------------------------------------
+	// Hostname: firewall-1
+	// Model: SRX240H2
+	// Version: 12.1X47-D10.4
+
+	// You can also loop over the struct field that contains this information yourself:
+	fmt.Printf("Hostname: %s", jnpr.Hostname)
+	for _, data := range jnpr.Platform {
+		fmt.Printf("Model: %s, Version: %s", data.Model, data.Version)
+	}
+	// Output: Model: SRX240H2, Version: 12.1X47-D10.4
+}
