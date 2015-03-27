@@ -1,19 +1,17 @@
 package junos
 
-// Establishing a session to the Junos device.
-func ExampleJunos() {
-	jnpr, err := junos.NewSession(host, user, password)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer jnpr.Close()
-}
-
 // To View the entire configuration, use the keyword "full" for the first
 // argument. If anything else outside of "full" is specified, it will return
 // the configuration of the specified top-level stanza only. So "security"
 // would return everything under the "security" stanza.
 func ExampleJunos_viewConfiguration() {
+	// Establish our session first.
+	jnpr, err := junos.NewSession(host, user, password)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer jnpr.Close()
+
 	// Output format can be "text" or "xml".
 	config, err := jnpr.GetConfig("full", "text")
 	if err != nil {
@@ -24,6 +22,13 @@ func ExampleJunos_viewConfiguration() {
 
 // Comparing and working with rollback configurations.
 func ExampleJunos_rollbackConfigurations() {
+	// Establish our session first.
+	jnpr, err := junos.NewSession(host, user, password)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer jnpr.Close()
+
 	// If you want to view the difference between the current configuration and a rollback
 	// one, then you can use the ConfigDiff() function to specify a previous config:
 	diff, err := jnpr.ConfigDiff(3)
@@ -107,6 +112,13 @@ func ExampleJunos_configuringDevices() {
 	//     </name-server>
 	// </system>
 
+	// Establish our session first.
+	jnpr, err := junos.NewSession(host, user, password)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer jnpr.Close()
+
 	// If the third option is "true" then after the configuration is loaded, a commit
 	// will be issued. If set to "false," you will have to commit the configuration
 	// using one of the Commit() functions.
@@ -120,6 +132,13 @@ func ExampleJunos_configuringDevices() {
 
 // Running operational mode commands on a device.
 func ExampleJunos_runCommands() {
+	// Establish our session first.
+	jnpr, err := junos.NewSession(host, user, password)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer jnpr.Close()
+
 	// You can run operational mode commands such as "show" and "request" by using the
 	// Command() function. Output formats can be "text" or "xml".
 
@@ -140,6 +159,13 @@ func ExampleJunos_runCommands() {
 
 // Viewing basic information about the device.
 func ExampleJunos_deviceInformation() {
+	// Establish our session first.
+	jnpr, err := junos.NewSession(host, user, password)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer jnpr.Close()
+
 	// When you call the PrintFacts() function, it just prints out the platform
 	// and software information to the console.
 	jnpr.PrintFacts()
@@ -185,6 +211,9 @@ func ExampleJunosSpace_devices() {
 
 // Software upgrades using Junos Space.
 func ExampleJunosSpace_softwareUpgrade() {
+	// Establish a connection to a Junos Space server.
+	space := junos.NewServer("space.company.com", "admin", "juniper123")
+
 	// Staging software on a device. The last parameter is whether or not to remove any
 	// existing images from the device; boolean.
 	//
@@ -221,6 +250,9 @@ func ExampleJunosSpace_softwareUpgrade() {
 
 // Viewing information about Security Director devices (SRX, J-series, etc.).
 func ExampleJunosSpace_securityDirectorDevices() {
+	// Establish a connection to a Junos Space server.
+	space := junos.NewServer("space.company.com", "admin", "juniper123")
+
 	// List all security devices:
 	devices, err := space.SecurityDevices()
 	if err != nil {
@@ -234,6 +266,9 @@ func ExampleJunosSpace_securityDirectorDevices() {
 
 // Working with address and service objects.
 func ExampleJunosSpace_addressObjects() {
+	// Establish a connection to a Junos Space server.
+	space := junos.NewServer("space.company.com", "admin", "juniper123")
+
 	// To view the address and service objects, you use the Addresses() and Services() functions. Both of them
 	// take a "filter" parameter, which lets you search for objects matching your filter.
 
@@ -296,6 +331,9 @@ func ExampleJunosSpace_addressObjects() {
 
 // Working with polymorphic (variable) objects.
 func ExampleJunosSpace_variables() {
+	// Establish a connection to a Junos Space server.
+	space := junos.NewServer("space.company.com", "admin", "juniper123")
+
 	// Add a variable
 	// The parameters are as follows: variable-name, description, default-value
 	space.AddVariable("test-variable", "Our test variable", "default-object")
@@ -316,6 +354,9 @@ func ExampleJunosSpace_variables() {
 
 // Working with policies.
 func ExampleJunosSpace_policies() {
+	// Establish a connection to a Junos Space server.
+	space := junos.NewServer("space.company.com", "admin", "juniper123")
+
 	// List all security policies Junos Space manages:
 	policies, err := space.Policies()
 	if err != nil {
