@@ -1,7 +1,7 @@
 package junos
 
 // Establishing a session to the Junos device.
-func Example() {
+func ExampleJunos() {
 	jnpr, err := junos.NewSession(host, user, password)
 	if err != nil {
 		log.Fatal(err)
@@ -13,7 +13,7 @@ func Example() {
 // argument. If anything else outside of "full" is specified, it will return
 // the configuration of the specified top-level stanza only. So "security"
 // would return everything under the "security" stanza.
-func Example_viewConfiguration() {
+func ExampleJunos_viewConfiguration() {
 	// Output format can be "text" or "xml".
 	config, err := jnpr.GetConfig("full", "text")
 	if err != nil {
@@ -23,7 +23,7 @@ func Example_viewConfiguration() {
 }
 
 // Comparing and working with rollback configurations.
-func Example_rollbackConfigurations() {
+func ExampleJunos_rollbackConfigurations() {
 	// If you want to view the difference between the current configuration and a rollback
 	// one, then you can use the ConfigDiff() function to specify a previous config:
 	diff, err := jnpr.ConfigDiff(3)
@@ -53,7 +53,7 @@ func Example_rollbackConfigurations() {
 }
 
 // Configuring devices.
-func Example_configuringDevices() {
+func ExampleJunos_configuringDevices() {
 	// Use the LoadConfig() function to load the configuration from a file.
 
 	// When configuring a device, it is good practice to lock the configuration database,
@@ -119,7 +119,7 @@ func Example_configuringDevices() {
 }
 
 // Running operational mode commands on a device.
-func Example_runCommands() {
+func ExampleJunos_runCommands() {
 	// You can run operational mode commands such as "show" and "request" by using the
 	// Command() function. Output formats can be "text" or "xml".
 
@@ -139,7 +139,7 @@ func Example_runCommands() {
 }
 
 // Viewing basic information about the device.
-func Example_deviceInformation() {
+func ExampleJunos_deviceInformation() {
 	// When you call the PrintFacts() function, it just prints out the platform
 	// and software information to the console.
 	jnpr.PrintFacts()
@@ -153,7 +153,7 @@ func Example_deviceInformation() {
 }
 
 // Establishing a connection to Junos Space and working with devices.
-func Example_junosSpaceDevices() {
+func ExampleJunosSpace_devices() {
 	// Establish a connection to a Junos Space server.
 	space := junos.NewServer("space.company.com", "admin", "juniper123")
 
@@ -184,7 +184,7 @@ func Example_junosSpaceDevices() {
 }
 
 // Software upgrades using Junos Space.
-func Example_junosSpaceSoftware() {
+func ExampleJunosSpace_softwareUpgrades() {
 	// Staging software on a device. The last parameter is whether or not to remove any
 	// existing images from the device; boolean.
 	//
@@ -221,7 +221,7 @@ func Example_junosSpaceSoftware() {
 
 // Junos Space Security Director examples: adding/removing address and service
 // objects, modifying groups, adding and modifying polymorphic (variable) objects.
-func Example_junosSpaceSecurityDirector() {
+func ExampleJunosSpace_securityDirectorDevices() {
 	// List all security devices:
 	devices, err := space.SecurityDevices()
 	if err != nil {
