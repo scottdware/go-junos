@@ -1,6 +1,6 @@
 package junos
 
-// Establishing a session
+// Establishing a session to the Junos device.
 func Example() {
 	jnpr, err := junos.NewSession(host, user, password)
 	if err != nil {
@@ -14,7 +14,7 @@ func Example() {
 // the configuration of the specified top-level stanza only. So "security" would return everything
 // under the "security" stanza.
 func Example_viewConfiguration() {
-	// Output format can be "text" or "xml"
+	// Output format can be "text" or "xml".
 	config, err := jnpr.GetConfig("full", "text")
 	if err != nil {
 		fmt.Println(err)
@@ -22,7 +22,7 @@ func Example_viewConfiguration() {
 	fmt.Println(config)
 }
 
-// Comparing and Rolling Back Configurations
+// Comparing and working with rollback configurations.
 func Example_rollbackConfigurations() {
 	// If you want to view the difference between the current configuration and a rollback
 	// one, then you can use the ConfigDiff() function to specify a previous config:
@@ -52,23 +52,23 @@ func Example_rollbackConfigurations() {
 	}
 }
 
-// Device Configuration
+// Configuring devices.
 func Example_configuringDevices() {
 	// Use the LoadConfig() function to load the configuration from a file.
 
 	// When configuring a device, it is good practice to lock the configuration database,
 	// load the config, commit the configuration, and then unlock the configuration database.
-	// You can do this with the following functions: Lock(), Commit(), Unlock()
+	// You can do this with the following functions: Lock(), Commit(), Unlock().
 
-	// Multiple ways to commit a configuration
+	// Multiple ways to commit a configuration.
 
-	// Commit the configuration as normal
+	// Commit the configuration as normal.
 	Commit()
 
-	// Check the configuration for any syntax errors (NOTE: you must still issue a Commit() afterwards)
+	// Check the configuration for any syntax errors (NOTE: you must still issue a Commit() afterwards).
 	CommitCheck()
 
-	// Commit at a later time, i.e. 4:30 PM
+	// Commit at a later time, i.e. 4:30 PM.
 	CommitAt("16:30:00")
 
 	// Rollback configuration if a Commit() is not issued within the given <minutes>.
@@ -77,7 +77,7 @@ func Example_configuringDevices() {
 	// You can configure the Junos device by uploading a local file, or pulling from an
 	// FTP/HTTP server. The LoadConfig() function takes three arguments:
 
-	// filename or URL, format, and a boolean (true/false) "commit-on-load"
+	// filename or URL, format, and a boolean (true/false) "commit-on-load".
 
 	// If you specify a URL, it must be in the following format:
 
@@ -117,19 +117,19 @@ func Example_configuringDevices() {
 	jnpr.Unlock()
 }
 
-// Running Commands on a Device
+// Running operational mode commands on a device.
 func Example_runCommands() {
 	// You can run operational mode commands such as "show" and "request" by using the
-	// Command() function. Output formats can be "text" or "xml":
+	// Command() function. Output formats can be "text" or "xml".
 
-	// Results returned in text format
+	// Results returned in text format.
 	txtOutput, err := jnpr.Command("show chassis hardware", "text")
 	if err != nil {
 		fmt.Println(err)
 	}
 	fmt.Println(txtOutput)
 
-	// Results returned in XML format
+	// Results returned in XML format.
 	xmlOutput, err := jnpr.Command("show chassis hardware", "xml")
 	if err != nil {
 		fmt.Println(err)
@@ -137,7 +137,8 @@ func Example_runCommands() {
 	fmt.Println(xmlOutput)
 }
 
-func Example_displayPlatform_Information() {
+// Viewing basic information about the device.
+func Example_deviceInformation() {
 	// When you call the PrintFacts() function, it just prints out the platform
 	// and software information to the console.
 	jnpr.PrintFacts()
