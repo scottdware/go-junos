@@ -54,6 +54,8 @@ func Example_rollbackConfigurations() {
 
 // Device Configuration
 func Example_configuringDevices() {
+	// Use the LoadConfig() function to load the configuration from a file.
+
 	// When configuring a device, it is good practice to lock the configuration database,
 	// load the config, commit the configuration, and then unlock the configuration database.
 	// You can do this with the following functions: Lock(), Commit(), Unlock()
