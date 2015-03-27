@@ -138,21 +138,9 @@ func Example_runCommands() {
 }
 
 func Example_displayPlatformInformation() {
-	// When you call the PrintFacts() function, it prints out the platform and software information:
+	// When you call the PrintFacts() function, it just prints out the platform
+	// and software information to the console.
 	jnpr.PrintFacts()
-
-	// Output:
-	// node0
-	// --------------------------------------------------------------------------
-	// Hostname: firewall-1
-	// Model: SRX240H2
-	// Version: 12.1X47-D10.4
-
-	// node1
-	// --------------------------------------------------------------------------
-	// Hostname: firewall-1
-	// Model: SRX240H2
-	// Version: 12.1X47-D10.4
 
 	// You can also loop over the struct field that contains this information yourself:
 	fmt.Printf("Hostname: %s", jnpr.Hostname)
