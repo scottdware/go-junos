@@ -131,7 +131,7 @@ func ExampleJunos_configuringDevices() {
 }
 
 // Running operational mode commands on a device.
-func ExampleJunos_runCommands() {
+func ExampleJunos_runningCommands() {
 	// Establish our session first.
 	jnpr, err := junos.NewSession(host, user, password)
 	if err != nil {
