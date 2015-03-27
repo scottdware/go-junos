@@ -1,3 +1,5 @@
+// Package junos provides automation for Junos (Juniper Networks) devices, as
+// well as interaction with Junos Space.
 package junos
 
 import (
