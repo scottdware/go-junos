@@ -51,3 +51,66 @@ func Example_rollbackConfigurations() {
 		fmt.Println(err)
 	}
 }
+
+// Device Configuration
+func Example_configuringDevices() {
+	// When configuring a device, it is good practice to lock the configuration database,
+	// load the config, commit the configuration, and then unlock the configuration database.
+	// You can do this with the following functions: Lock(), Commit(), Unlock()
+
+	// Multiple ways to commit a configuration
+
+	// Commit the configuration as normal
+	Commit()
+
+	// Check the configuration for any syntax errors (NOTE: you must still issue a Commit() afterwards)
+	CommitCheck()
+
+	// Commit at a later time, i.e. 4:30 PM
+	CommitAt("16:30:00")
+
+	// Rollback configuration if a Commit() is not issued within the given <minutes>.
+	CommitConfirm(15)
+
+	// You can configure the Junos device by uploading a local file, or pulling from an
+	// FTP/HTTP server. The LoadConfig() function takes three arguments:
+
+	// filename or URL, format, and a boolean (true/false) "commit-on-load"
+
+	// If you specify a URL, it must be in the following format:
+
+	// ftp://<username>:<password>@hostname/pathname/file-name
+	// http://<username>:<password>@hostname/pathname/file-name
+
+	// Note: The default value for the FTP path variable is the user’s home directory. Thus,
+	// by default the file path to the configuration file is relative to the user directory.
+	// To specify an absolute path when using FTP, start the path with the characters %2F;
+	// for example: ftp://username:password@hostname/%2Fpath/filename.
+
+	// The format of the commands within the file must be one of the following types:
+
+	// set
+	// system name-server 1.1.1.1
+
+	// text
+	// system {
+	//     name-server 1.1.1.1;
+	// }
+
+	// xml
+	// <system>
+	//     <name-server>
+	//         <name>1.1.1.1</name>
+	//     </name-server>
+	// </system>
+
+	// If the third option is "true" then after the configuration is loaded, a commit
+	// will be issued. If set to "false," you will have to commit the configuration
+	// using one of the Commit() functions.
+	jnpr.Lock()
+	err := jnpr.LoadConfig("path-to-file.txt", "set", true)
+	if err != nil {
+		fmt.Println(err)
+	}
+	jnpr.Unlock()
+}
