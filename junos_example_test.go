@@ -137,7 +137,7 @@ func Example_runCommands() {
 	fmt.Println(xmlOutput)
 }
 
-func Example_displayPlatformInformation() {
+func Example_PlatformInformation() {
 	// When you call the PrintFacts() function, it just prints out the platform
 	// and software information to the console.
 	jnpr.PrintFacts()
