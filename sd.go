@@ -508,14 +508,8 @@ func (s *JunosSpace) AddGroup(otype bool, name, desc string) error {
 	return nil
 }
 
-// ModifyObject modifies an existing address, service or group. The actions are as follows:
-//
-// "otype" is either "true" (for address) or "false" (for service)
-//
-// ModifyObject(otype, "add", "existing-group", "member-to-add")
-// ModifyObject(otype, "remove", "existing-group", "member-to-remove")
-// ModifyObject(otype, "rename", "old-name", "new-name")
-// ModifyObject(otype, "delete", "object-to-delete")
+// ModifyObject modifies an existing address, service or group. See the examples
+// for complete usage.
 func (s *JunosSpace) ModifyObject(otype bool, actions ...interface{}) error {
 	var err error
 	var uri string
