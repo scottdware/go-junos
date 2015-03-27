@@ -11,8 +11,8 @@ func Example() {
 
 // To View the entire configuration, use the keyword "full" for the first
 // argument. If anything else outside of "full" is specified, it will return
-// the configuration of the specified top-level stanza only. So "security" would return everything
-// under the "security" stanza.
+// the configuration of the specified top-level stanza only. So "security"
+// would return everything under the "security" stanza.
 func Example_viewConfiguration() {
 	// Output format can be "text" or "xml".
 	config, err := jnpr.GetConfig("full", "text")
@@ -65,7 +65,8 @@ func Example_configuringDevices() {
 	// Commit the configuration as normal.
 	Commit()
 
-	// Check the configuration for any syntax errors (NOTE: you must still issue a Commit() afterwards).
+	// Check the configuration for any syntax errors (NOTE: you must still issue a
+	// Commit() afterwards).
 	CommitCheck()
 
 	// Commit at a later time, i.e. 4:30 PM.
@@ -149,4 +150,68 @@ func Example_deviceInformation() {
 		fmt.Printf("Model: %s, Version: %s", data.Model, data.Version)
 	}
 	// Output: Model: SRX240H2, Version: 12.1X47-D10.4
+}
+
+// Establishing a connection to Junos Space and working with devices.
+func Example_junosSpaceDevices() {
+	// Establish a connection to a Junos Space server.
+	space := junos.NewServer("space.company.com", "admin", "juniper123")
+
+	// Get the list of devices.
+	devices, err := space.Devices()
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	// Iterate over our device list and display some information about them.
+	for _, device := range devices.Devices {
+		fmt.Printf("Name: %s, IP Address: %s, Platform: %s\n", device.Name, device.IP, device.Platform)
+	}
+
+	// Add a device to Junos Space.
+	jobID, err = space.AddDevice("sdubs-fw", "admin", "juniper123")
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(jobID)
+	// Output: 1345283
+
+	// Remove a device from Junos Space.
+	err = space.RemoveDevice("sdubs-fw")
+	if err != nil {
+		fmt.Println(err)
+	}
+}
+
+// Software upgrades using Junos Space.
+func Example_junosSpaceSoftware() {
+	// Staging software on a device. The last parameter is whether or not to remove any
+	// existing images from the device; boolean.
+	jobID, err := space.StageSoftware("sdubs-fw", "junos-srxsme-12.1X46-D30.2-domestic.tgz", false)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	// If you want to issue a software upgrade to the device, here's how:
+
+	// Configure our options, such as whether or not to reboot the device, etc.
+	options := &junos.SoftwareUpgrade{
+		UseDownloaded: true,
+		Validate:      false,
+		Reboot:        false,
+		RebootAfter:   0,
+		Cleanup:       false,
+		RemoveAfter:   false,
+	}
+
+	jobID, err := space.DeploySoftware("sdubs-fw", "junos-srxsme-12.1X46-D30.2-domestic.tgz", options)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	// Remove a staged image from the device.
+	jobID, err := space.RemoveStagedSoftware("sdubs-fw", "junos-srxsme-12.1X46-D30.2-domestic.tgz")
+	if err != nil {
+		fmt.Println(err)
+	}
 }

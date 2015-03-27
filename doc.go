@@ -2,39 +2,6 @@
 Package junos provides automation for Junos (Juniper Networks) devices, as
 well as interaction with Junos Space.
 
-Junos Space - Network Management Platform Functions
-
-Here's an example of how to connect to a Junos Space server, and get information about
-all of the managed devices:
-
-    // Establish a connection to a Junos Space server.
-    space := junos.NewServer("space.company.com", "admin", "juniper123")
-
-    // Get the list of devices.
-    devices, err := space.Devices()
-    if err != nil {
-        fmt.Println(err)
-    }
-
-    // Iterate over our device list and display some information about them.
-    for _, device := range devices.Devices {
-        fmt.Printf("Name: %s, IP Address: %s, Platform: %s\n", device.Name, device.IP, device.Platform)
-    }
-
-How to add and remove devices:
-
-    // Add a device to Junos Space.
-    jobID, err = space.AddDevice("sdubs-fw", "admin", "juniper123")
-    if err != nil {
-        fmt.Println(err)
-    }
-
-    // Remove a device from Junos Space.
-    err = space.RemoveDevice("sdubs-fw")
-    if err != nil {
-        fmt.Println(err)
-    }
-
 How to stage a software image on a device (this just downloads the image to the device, and does
 not upgrade it):
 
