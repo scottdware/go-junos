@@ -21,3 +21,33 @@ func Example_viewConfiguration() {
 	}
 	fmt.Println(config)
 }
+
+// Comparing and Rolling Back Configurations
+func Example_rollbackConfigurations() {
+	// If you want to view the difference between the current configuration and a rollback
+	// one, then you can use the ConfigDiff() function to specify a previous config:
+	diff, err := jnpr.ConfigDiff(3)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(diff)
+
+	// You can rollback to a previous state, or the rescue configuration by using
+	// the RollbackConfig() function:
+	err := jnpr.RollbackConfig(3)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	// Create a rescue config from the active configuration.
+	jnpr.Rescue("save")
+
+	// You can also delete a rescue config.
+	jnpr.Rescue("delete")
+
+	// Rollback to the "rescue" configuration.
+	err := jnpr.RollbackConfig("rescue")
+	if err != nil {
+		fmt.Println(err)
+	}
+}
