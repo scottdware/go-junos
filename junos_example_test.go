@@ -214,7 +214,8 @@ func ExampleJunosSpace_devices() {
 	if err != nil {
 		fmt.Println(err)
 	}
-	fmt.Printf("Job ID: %d\n", job)
+	fmt.Println(job)
+	// Output: 1542348
 }
 
 // Software upgrades using Junos Space.
