@@ -29,6 +29,9 @@ var (
 	rpcConfigURLSet       = "<rpc><load-configuration action=\"set\" format=\"text\" url=\"%s\"/></rpc>"
 	rpcConfigURLText      = "<rpc><load-configuration format=\"text\" url=\"%s\"/></rpc>"
 	rpcConfigURLXML       = "<rpc><load-configuration format=\"xml\" url=\"%s\"/></rpc>"
+	rpcConfigStringSet    = "<rpc><load-configuration action=\"set\" format=\"text\"><configuration-set>%s</configuration-set></load-configuration></rpc>"
+	rpcConfigStringText   = "<rpc><load-configuration format=\"text\"><configuration-text>%s</configuration-text></load-configuration></rpc>"
+	rpcConfigStringXML    = "<rpc><load-configuration format=\"xml\"><configuration>%s</configuration></load-configuration></rpc>"
 	rpcGetRescue          = "<rpc><get-rescue-information><format>text</format></get-rescue-information></rpc>"
 	rpcGetRollback        = "<rpc><get-rollback-information><rollback>%d</rollback><format>text</format></get-rollback-information></rpc>"
 	rpcGetRollbackCompare = "<rpc><get-rollback-information><rollback>0</rollback><compare>%d</compare><format>text</format></get-rollback-information></rpc>"
@@ -347,41 +350,73 @@ func (j *Junos) GetConfig(section, format string) (string, error) {
 	return reply.Data, nil
 }
 
-// LoadConfig loads a given configuration file from your local machine or
-// a remote (FTP or HTTP server) location. Format can be one of "set" "text" or "xml."
-func (j *Junos) LoadConfig(path, format string, commit bool) error {
+// LoadConfig loads a given configuration file from your local machine,
+// a remote (FTP or HTTP server) location, or via configuration statements
+// from variables (type string or []string) within your script. Format can be one of
+// "set" "text" or "xml."
+func (j *Junos) LoadConfig(path interface{}, format string, commit bool) error {
 	var command string
 	switch format {
 	case "set":
-		if strings.Contains(path, "tp://") {
-			command = fmt.Sprintf(rpcConfigURLSet, path)
-		}
-		data, err := ioutil.ReadFile(path)
-		if err != nil {
-			return err
-		}
+		switch path.(type) {
+		case string:
+			if strings.Contains(path.(string), "tp://") {
+				command = fmt.Sprintf(rpcConfigURLSet, path.(string))
+			}
 
-		command = fmt.Sprintf(rpcConfigFileSet, string(data))
+			if _, err := ioutil.ReadFile(path.(string)); err != nil {
+				command = fmt.Sprintf(rpcConfigStringSet, path.(string))
+			} else {
+				data, err := ioutil.ReadFile(path.(string))
+				if err != nil {
+					return err
+				}
+
+				command = fmt.Sprintf(rpcConfigFileSet, string(data))
+			}
+		case []string:
+			command = fmt.Sprintf(rpcConfigStringSet, strings.Join(path.([]string), "\n"))
+		}
 	case "text":
-		if strings.Contains(path, "tp://") {
-			command = fmt.Sprintf(rpcConfigURLText, path)
-		}
-		data, err := ioutil.ReadFile(path)
-		if err != nil {
-			return err
-		}
+		switch path.(type) {
+		case string:
+			if strings.Contains(path.(string), "tp://") {
+				command = fmt.Sprintf(rpcConfigURLText, path.(string))
+			}
 
-		command = fmt.Sprintf(rpcConfigFileText, string(data))
+			if _, err := ioutil.ReadFile(path.(string)); err != nil {
+				command = fmt.Sprintf(rpcConfigStringText, path.(string))
+			} else {
+				data, err := ioutil.ReadFile(path.(string))
+				if err != nil {
+					return err
+				}
+
+				command = fmt.Sprintf(rpcConfigFileText, string(data))
+			}
+		case []string:
+			command = fmt.Sprintf(rpcConfigStringText, strings.Join(path.([]string), "\n"))
+		}
 	case "xml":
-		if strings.Contains(path, "tp://") {
-			command = fmt.Sprintf(rpcConfigURLXML, path)
-		}
-		data, err := ioutil.ReadFile(path)
-		if err != nil {
-			return err
-		}
+		switch path.(type) {
+		case string:
+			if strings.Contains(path.(string), "tp://") {
+				command = fmt.Sprintf(rpcConfigURLXML, path.(string))
+			}
 
-		command = fmt.Sprintf(rpcConfigFileXML, string(data))
+			if _, err := ioutil.ReadFile(path.(string)); err != nil {
+				command = fmt.Sprintf(rpcConfigStringXML, path.(string))
+			} else {
+				data, err := ioutil.ReadFile(path.(string))
+				if err != nil {
+					return err
+				}
+
+				command = fmt.Sprintf(rpcConfigFileXML, string(data))
+			}
+		case []string:
+			command = fmt.Sprintf(rpcConfigStringXML, strings.Join(path.([]string), "\n"))
+		}
 	}
 
 	reply, err := j.Session.Exec(command)
