@@ -158,3 +158,30 @@ func (s *JunosSpace) RemoveDevice(device interface{}) error {
 
 	return nil
 }
+
+// Resync synchronizes the device with Junos Space. Good to use if you make a lot of
+// changes outside of Junos Space such as adding interfaces, zones, etc.
+func (s *JunosSpace) Resync(device interface{}) (int, error) {
+	var job jobID
+	deviceID, err := s.getDeviceID(device)
+	if err != nil {
+		return 0, err
+	}
+
+	req := &APIRequest{
+		Method:      "post",
+		URL:         fmt.Sprintf("/api/space/device-management/devices/%d/exec-resync", deviceID),
+		ContentType: contentResync,
+	}
+	data, err := s.APICall(req)
+	if err != nil {
+		return 0, err
+	}
+
+	err = xml.Unmarshal(data, &job)
+	if err != nil {
+		return 0, err
+	}
+
+	return job.ID, nil
+}
