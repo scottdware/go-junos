@@ -119,15 +119,35 @@ func ExampleJunos_configuringDevices() {
 	}
 	defer jnpr.Close()
 
+	// Configure a device from a file:
+
 	// If the third option is "true" then after the configuration is loaded, a commit
 	// will be issued. If set to "false," you will have to commit the configuration
 	// using one of the Commit() functions.
 	jnpr.Lock()
-	err := jnpr.LoadConfig("path-to-file.txt", "set", true)
+	err = jnpr.LoadConfig("path-to-file.txt", "set", true)
 	if err != nil {
 		fmt.Println(err)
 	}
 	jnpr.Unlock()
+
+	// Configure a device using commands specified in a []string:
+
+	// You can also use the following format also:
+	//
+	// var config = `
+	//     set interfaces ge-0/0/5.0 family inet address 192.168.0.1/24
+	//     set security zones security-zone trust interfaces ge-0/0/5.0
+	// `
+	//
+	configCommands := []string{
+		"set interfaces ge-0/0/5.0 family inet address 192.168.0.1/24",
+		"set security zones security-zone trust interfaces ge-0/0/5.0",
+	}
+	err = jnpr.LoadConfig(configCommands, "set", true)
+	if err != nil {
+		fmt.Println(err)
+	}
 }
 
 // Running operational mode commands on a device.
