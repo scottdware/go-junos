@@ -22,6 +22,7 @@ var (
 	contentService         = "application/vnd.juniper.sd.service-management.service+xml;version=1;charset=UTF-8"
 	contentServicePatch    = "application/vnd.juniper.sd.service-management.service_patch+xml;version=1;charset=UTF-8"
 	contentVariable        = "application/vnd.juniper.sd.variable-management.variable-definition+xml;version=1;charset=UTF-8"
+	contentResync          = "application/vnd.net.juniper.space.device-management.exec-resync+xml;version=1"
 )
 
 // JunosSpace contains our session state.
