@@ -207,6 +207,14 @@ func ExampleJunosSpace_devices() {
 	if err != nil {
 		fmt.Println(err)
 	}
+
+	// Resynchronize a device. A good option if you do a lot of configuration to a device
+	// outside of Junos Space.
+	job, err := space.Resync("firewall-A")
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Printf("Job ID: %d\n", job)
 }
 
 // Software upgrades using Junos Space.
