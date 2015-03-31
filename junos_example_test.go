@@ -200,7 +200,6 @@ func ExampleJunosSpace_devices() {
 		fmt.Println(err)
 	}
 	fmt.Println(jobID)
-	// Output: 1345283
 
 	// Remove a device from Junos Space.
 	err = space.RemoveDevice("sdubs-fw")
@@ -215,7 +214,6 @@ func ExampleJunosSpace_devices() {
 		fmt.Println(err)
 	}
 	fmt.Println(job)
-	// Output: 1542348
 }
 
 // Software upgrades using Junos Space.
