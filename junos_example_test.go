@@ -59,7 +59,7 @@ func ExampleJunos_rollbackConfigurations() {
 
 // Configuring devices.
 func ExampleJunos_configuringDevices() {
-	// Use the LoadConfig() function to load the configuration from a file.
+	// Use the Config() function to configure a Junos device.
 
 	// When configuring a device, it is good practice to lock the configuration database,
 	// load the config, commit the configuration, and then unlock the configuration database.
@@ -125,7 +125,7 @@ func ExampleJunos_configuringDevices() {
 	// will be issued. If set to "false," you will have to commit the configuration
 	// using one of the Commit() functions.
 	jnpr.Lock()
-	err = jnpr.LoadConfig("path-to-file.txt", "set", true)
+	err = jnpr.Config("path-to-file.txt", "set", true)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -135,7 +135,7 @@ func ExampleJunos_configuringDevices() {
 
 	// You can also use the following format also:
 	//
-	// var config = `
+	// var configCommands = `
 	//     set interfaces ge-0/0/5.0 family inet address 192.168.0.1/24
 	//     set security zones security-zone trust interfaces ge-0/0/5.0
 	// `
@@ -144,7 +144,7 @@ func ExampleJunos_configuringDevices() {
 		"set interfaces ge-0/0/5.0 family inet address 192.168.0.1/24",
 		"set security zones security-zone trust interfaces ge-0/0/5.0",
 	}
-	err = jnpr.LoadConfig(configCommands, "set", true)
+	err = jnpr.Config(configCommands, "set", true)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -163,18 +163,21 @@ func ExampleJunos_runningCommands() {
 	// Command() function. Output formats can be "text" or "xml".
 
 	// Results returned in text format.
-	txtOutput, err := jnpr.Command("show chassis hardware", "text")
+	txtOutput, err := jnpr.RunCommand("show chassis hardware", "text")
 	if err != nil {
 		fmt.Println(err)
 	}
 	fmt.Println(txtOutput)
 
 	// Results returned in XML format.
-	xmlOutput, err := jnpr.Command("show chassis hardware", "xml")
+	xmlOutput, err := jnpr.RunCommand("show chassis hardware", "xml")
 	if err != nil {
 		fmt.Println(err)
 	}
 	fmt.Println(xmlOutput)
+
+	// Reboot the device
+	jnpr.Reboot()
 }
 
 // Viewing basic information about the device.

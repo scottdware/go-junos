@@ -45,6 +45,7 @@ var (
 	rpcSoftware           = "<rpc><get-software-information/></rpc>"
 	rpcUnlock             = "<rpc><unlock><target><candidate/></target></unlock></rpc>"
 	rpcVersion            = "<rpc><get-software-information/></rpc>"
+	rpcReboot             = "<rpc><request-reboot/></rpc>"
 )
 
 // Junos contains our session state.
@@ -115,9 +116,9 @@ func (j *Junos) Close() {
 	j.Session.Transport.Close()
 }
 
-// Command runs any operational mode command, such as "show" or "request."
+// RunCommand executes any operational mode command, such as "show" or "request."
 // Format can be one of "text" or "xml."
-func (j *Junos) Command(cmd, format string) (string, error) {
+func (j *Junos) RunCommand(cmd, format string) (string, error) {
 	var c commandXML
 	var command string
 	command = fmt.Sprintf(rpcCommand, cmd)
@@ -350,11 +351,11 @@ func (j *Junos) GetConfig(section, format string) (string, error) {
 	return reply.Data, nil
 }
 
-// LoadConfig loads a given configuration file from your local machine,
+// Config loads a given configuration file from your local machine,
 // a remote (FTP or HTTP server) location, or via configuration statements
 // from variables (type string or []string) within your script. Format can be one of
 // "set" "text" or "xml."
-func (j *Junos) LoadConfig(path interface{}, format string, commit bool) error {
+func (j *Junos) Config(path interface{}, format string, commit bool) error {
 	var command string
 	switch format {
 	case "set":
@@ -574,6 +575,22 @@ func (j *Junos) RollbackConfig(option interface{}) error {
 // Unlock unlocks the candidate configuration.
 func (j *Junos) Unlock() error {
 	reply, err := j.Session.Exec(rpcUnlock)
+	if err != nil {
+		return err
+	}
+
+	if reply.Errors != nil {
+		for _, m := range reply.Errors {
+			return errors.New(m.Message)
+		}
+	}
+
+	return nil
+}
+
+// Reboot
+func (j *Junos) Reboot() error {
+	reply, err := j.Session.Exec(rpcReboot)
 	if err != nil {
 		return err
 	}
