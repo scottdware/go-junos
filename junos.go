@@ -588,7 +588,7 @@ func (j *Junos) Unlock() error {
 	return nil
 }
 
-// Reboot
+// Reboot will reboot the device.
 func (j *Junos) Reboot() error {
 	reply, err := j.Session.Exec(rpcReboot)
 	if err != nil {
