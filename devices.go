@@ -14,13 +14,15 @@ type Devices struct {
 
 // A Device contains information about each individual device.
 type Device struct {
-	ID        int    `xml:"key,attr"`
-	Family    string `xml:"deviceFamily"`
-	Version   string `xml:"OSVersion"`
-	Platform  string `xml:"platform"`
-	Serial    string `xml:"serialNumber"`
-	IPAddress string `xml:"ipAddr"`
-	Name      string `xml:"name"`
+	ID               int    `xml:"key,attr"`
+	Family           string `xml:"deviceFamily"`
+	Version          string `xml:"OSVersion"`
+	Platform         string `xml:"platform"`
+	Serial           string `xml:"serialNumber"`
+	IPAddress        string `xml:"ipAddr"`
+	Name             string `xml:"name"`
+	ConnectionStatus string `xml:"connectionStatus"`
+	ManagedStatus    string `xml:"managedStatus"`
 }
 
 // addDeviceIPXML is the XML we send (POST) for adding a device by IP address.
