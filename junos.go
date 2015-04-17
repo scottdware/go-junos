@@ -13,9 +13,11 @@ import (
 	"strings"
 )
 
+type RawMethod string
+
 // All of our RPC calls we use.
 var (
-	rpcCommand            = "<rpc><command format=\"text\">%s</command></rpc>"
+	rpcCommand            = RawMethod("<rpc><command format=\"text\">%s</command></rpc>")
 	rpcCommandXML         = "<rpc><command format=\"xml\">%s</command></rpc>"
 	rpcCommit             = "<rpc><commit-configuration/></rpc>"
 	rpcCommitAt           = "<rpc><commit-configuration><at-time>%s</at-time></commit-configuration></rpc>"
@@ -115,8 +117,6 @@ type versionPackageInfo struct {
 func (j *Junos) Close() {
 	j.Session.Transport.Close()
 }
-
-type RawMethod string
 
 func (r RawMethod) MarshalMethod() string {
 	return string(r)
