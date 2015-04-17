@@ -116,11 +116,17 @@ func (j *Junos) Close() {
 	j.Session.Transport.Close()
 }
 
+type RawMethod string
+
+func (r RawMethod) MarshalMethod() string {
+	return string(r)
+}
+
 // RunCommand executes any operational mode command, such as "show" or "request."
 // Format can be one of "text" or "xml."
 func (j *Junos) RunCommand(cmd, format string) (string, error) {
 	var c commandXML
-	var command string
+	var command RawMethod
 	command = fmt.Sprintf(rpcCommand, cmd)
 	errMessage := "No output available. Please check the syntax of your command."
 
@@ -128,7 +134,7 @@ func (j *Junos) RunCommand(cmd, format string) (string, error) {
 		command = fmt.Sprintf(rpcCommandXML, cmd)
 	}
 
-	reply, err := j.Session.Exec(command)
+	reply, err := j.Session.Exec(command.MarshalMethod())
 	if err != nil {
 		return errMessage, err
 	}
