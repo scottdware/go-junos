@@ -6,7 +6,7 @@ import (
 	"encoding/xml"
 	"errors"
 	"fmt"
-	"github.com/Juniper/go-netconf/netconf"
+	"github.com/scottdware/go-netconf/netconf"
 	"io/ioutil"
 	"log"
 	"regexp"
@@ -116,30 +116,19 @@ func (j *Junos) Close() {
 	j.Session.Transport.Close()
 }
 
-type RPCMethod interface {
-	MarshalMethod() string
-}
-
-type RawMethod string
-
-func (r RawMethod) MarshalMethod() string {
-	return string(r)
-}
-
 // RunCommand executes any operational mode command, such as "show" or "request."
 // Format can be one of "text" or "xml."
 func (j *Junos) RunCommand(cmd, format string) (string, error) {
 	var c commandXML
 	var command string
-	command = fmt.Sprintf(rpcCommand, cmd)
+	command = fmt.Sprintf("<command format=\"text\">%s</command>", cmd)
 	errMessage := "No output available. Please check the syntax of your command."
 
 	if format == "xml" {
-		command = fmt.Sprintf(rpcCommandXML, cmd)
+		command = fmt.Sprintf("<command format=\"xml\">%s</command>", cmd)
 	}
 
-	rpc := RawMethod(command)
-	reply, err := j.Session.Exec(rpc.MarshalMethod())
+	reply, err := j.Session.Exec(netconf.MethodRPC(command))
 	if err != nil {
 		return errMessage, err
 	}
