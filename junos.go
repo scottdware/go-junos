@@ -116,10 +116,6 @@ func (j *Junos) Close() {
 	j.Session.Transport.Close()
 }
 
-type RPCMethod interface {
-	MarshalMethod() string
-}
-
 type RawMethod string
 
 func (r RawMethod) MarshalMethod() string {
