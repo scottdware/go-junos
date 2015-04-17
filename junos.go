@@ -116,6 +116,10 @@ func (j *Junos) Close() {
 	j.Session.Transport.Close()
 }
 
+type RPCMethod interface {
+	MarshalMethod() string
+}
+
 type RawMethod string
 
 func (r RawMethod) MarshalMethod() string {
@@ -135,7 +139,7 @@ func (j *Junos) RunCommand(cmd, format string) (string, error) {
 	}
 
 	rpc := RawMethod(command)
-	reply, err := j.Session.Exec(rpc)
+	reply, err := j.Session.Exec(rpc.MarshalMethod())
 	if err != nil {
 		return errMessage, err
 	}
