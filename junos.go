@@ -139,7 +139,7 @@ func (j *Junos) RunCommand(cmd, format string) (string, error) {
 	}
 
 	rpc := RawMethod(command)
-	reply, err := j.Session.Exec(rpc.MarshalMethod())
+	reply, err := j.Session.Exec(rpc)
 	if err != nil {
 		return errMessage, err
 	}
