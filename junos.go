@@ -166,7 +166,7 @@ func (j *Junos) RunCommand(cmd, format string) (string, error) {
 func (j *Junos) Commit() error {
 	var errs commitResults
 	rpc := RawMethod(rpcCommit)
-	reply, err := j.Session.Exec(rpc)
+	reply, err := j.Session.Exec(rpc.MarshalMethod())
 	if err != nil {
 		return err
 	}
@@ -197,7 +197,7 @@ func (j *Junos) CommitAt(time string) error {
 	var errs commitResults
 	command := fmt.Sprintf(rpcCommitAt, time)
 	rpc := RawMethod(command)
-	reply, err := j.Session.Exec(rpc)
+	reply, err := j.Session.Exec(rpc.MarshalMethod())
 	if err != nil {
 		return err
 	}
@@ -227,7 +227,7 @@ func (j *Junos) CommitAt(time string) error {
 func (j *Junos) CommitCheck() error {
 	var errs commitResults
 	rpc := RawMethod(rpcCommitCheck)
-	reply, err := j.Session.Exec(rpc)
+	reply, err := j.Session.Exec(rpc.MarshalMethod())
 	if err != nil {
 		return err
 	}
@@ -258,7 +258,7 @@ func (j *Junos) CommitConfirm(delay int) error {
 	var errs commitResults
 	command := fmt.Sprintf(rpcCommitConfirm, delay)
 	rpc := RawMethod(command)
-	reply, err := j.Session.Exec(rpc)
+	reply, err := j.Session.Exec(rpc.MarshalMethod())
 	if err != nil {
 		return err
 	}
@@ -289,7 +289,7 @@ func (j *Junos) ConfigDiff(compare int) (string, error) {
 	var rb diffXML
 	command := fmt.Sprintf(rpcGetRollbackCompare, compare)
 	rpc := RawMethod(command)
-	reply, err := j.Session.Exec(rpc)
+	reply, err := j.Session.Exec(rpc.MarshalMethod())
 	if err != nil {
 		return "", err
 	}
@@ -344,7 +344,7 @@ func (j *Junos) GetConfig(section, format string) (string, error) {
 	command += fmt.Sprintf("<%s/></configuration></get-configuration></rpc>", section)
 
 	rpc := RawMethod(command)
-	reply, err := j.Session.Exec(rpc)
+	reply, err := j.Session.Exec(rpc.MarshalMethod())
 	if err != nil {
 		return "", err
 	}
@@ -438,7 +438,7 @@ func (j *Junos) Config(path interface{}, format string, commit bool) error {
 	}
 
 	rpc := RawMethod(command)
-	reply, err := j.Session.Exec(rpc)
+	reply, err := j.Session.Exec(rpc.MarshalMethod())
 	if err != nil {
 		return err
 	}
@@ -462,7 +462,7 @@ func (j *Junos) Config(path interface{}, format string, commit bool) error {
 // Lock locks the candidate configuration.
 func (j *Junos) Lock() error {
 	rpc := RawMethod(rpcLock)
-	reply, err := j.Session.Exec(rpc)
+	reply, err := j.Session.Exec(rpc.MarshalMethod())
 	if err != nil {
 		return err
 	}
@@ -487,7 +487,7 @@ func NewSession(host, user, password string) (*Junos, error) {
 	}
 
 	rpc := RawMethod(rpcVersion)
-	reply, err := s.Exec(rpc)
+	reply, err := s.Exec(rpc.MarshalMethod())
 	if err != nil {
 		return nil, err
 	}
@@ -552,7 +552,7 @@ func (j *Junos) Rescue(action string) error {
 	}
 
 	rpc := RawMethod(command)
-	reply, err := j.Session.Exec(rpc)
+	reply, err := j.Session.Exec(rpc.MarshalMethod())
 	if err != nil {
 		return err
 	}
@@ -575,7 +575,7 @@ func (j *Junos) RollbackConfig(option interface{}) error {
 	}
 
 	rpc := RawMethod(command)
-	reply, err := j.Session.Exec(rpc)
+	reply, err := j.Session.Exec(rpc.MarshalMethod())
 	if err != nil {
 		return err
 	}
@@ -597,7 +597,7 @@ func (j *Junos) RollbackConfig(option interface{}) error {
 // Unlock unlocks the candidate configuration.
 func (j *Junos) Unlock() error {
 	rpc := RawMethod(rpcUnlock)
-	reply, err := j.Session.Exec(rpc)
+	reply, err := j.Session.Exec(rpc.MarshalMethod())
 	if err != nil {
 		return err
 	}
@@ -614,7 +614,7 @@ func (j *Junos) Unlock() error {
 // Reboot
 func (j *Junos) Reboot() error {
 	rpc := RawMethod(rpcReboot)
-	reply, err := j.Session.Exec(rpc)
+	reply, err := j.Session.Exec(rpc.MarshalMethod())
 	if err != nil {
 		return err
 	}
