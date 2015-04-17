@@ -17,7 +17,7 @@ type RawMethod string
 
 // All of our RPC calls we use.
 var (
-	rpcCommand            = RawMethod("<rpc><command format=\"text\">%s</command></rpc>")
+	rpcCommand            = "<rpc><command format=\"text\">%s</command></rpc>"
 	rpcCommandXML         = "<rpc><command format=\"xml\">%s</command></rpc>"
 	rpcCommit             = "<rpc><commit-configuration/></rpc>"
 	rpcCommitAt           = "<rpc><commit-configuration><at-time>%s</at-time></commit-configuration></rpc>"
@@ -134,7 +134,7 @@ func (j *Junos) RunCommand(cmd, format string) (string, error) {
 		command = fmt.Sprintf(rpcCommandXML, cmd)
 	}
 
-	reply, err := j.Session.Exec(command.MarshalMethod())
+	reply, err := j.Session.Exec(RawMethod(command).MarshalMethod())
 	if err != nil {
 		return errMessage, err
 	}
