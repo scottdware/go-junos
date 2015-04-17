@@ -21,7 +21,7 @@ Junos Space
 * Add/modify polymorphic (variable) objects.
 
 ### Examples & Documentation
-Visit the [GoDoc][godoc-go-junos] page for complete package documentation and examples.
+Visit the [GoDoc][godoc-go-junos] page for package documentation and examples.
 
 > **Note:** This package makes all of it's calls over [Netconf][netconf-rfc] using the [go-netconf][go-netconf] package from
  [Juniper Networks][juniper]
