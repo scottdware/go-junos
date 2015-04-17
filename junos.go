@@ -134,8 +134,8 @@ func (j *Junos) RunCommand(cmd, format string) (string, error) {
 		command = fmt.Sprintf(rpcCommandXML, cmd)
 	}
 
-	c := RawMethod(command)
-	reply, err := j.Session.Exec(c.MarshalMethod())
+	rpc := RawMethod(command)
+	reply, err := j.Session.Exec(rpc.MarshalMethod())
 	if err != nil {
 		return errMessage, err
 	}
