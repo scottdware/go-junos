@@ -126,15 +126,16 @@ func (r RawMethod) MarshalMethod() string {
 // Format can be one of "text" or "xml."
 func (j *Junos) RunCommand(cmd, format string) (string, error) {
 	var c commandXML
-	var command RawMethod
-	command = fmt.Sprintf(RawMethod(rpcCommand), cmd)
+	var command string
+	command = fmt.Sprintf(rpcCommand, cmd)
 	errMessage := "No output available. Please check the syntax of your command."
 
 	if format == "xml" {
-		command = fmt.Sprintf(RawMethod(rpcCommandXML), cmd)
+		command = fmt.Sprintf(rpcCommandXML, cmd)
 	}
 
-	reply, err := j.Session.Exec(command.MarshalMethod())
+	c := RawMethod(command)
+	reply, err := j.Session.Exec(c.MarshalMethod())
 	if err != nil {
 		return errMessage, err
 	}
