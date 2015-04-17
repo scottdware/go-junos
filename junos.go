@@ -13,8 +13,6 @@ import (
 	"strings"
 )
 
-type RawMethod string
-
 // All of our RPC calls we use.
 var (
 	rpcCommand            = "<rpc><command format=\"text\">%s</command></rpc>"
@@ -118,6 +116,8 @@ func (j *Junos) Close() {
 	j.Session.Transport.Close()
 }
 
+type RawMethod string
+
 func (r RawMethod) MarshalMethod() string {
 	return string(r)
 }
@@ -135,7 +135,7 @@ func (j *Junos) RunCommand(cmd, format string) (string, error) {
 	}
 
 	rpc := RawMethod(command)
-	reply, err := j.Session.Exec(rpc.MarshalMethod())
+	reply, err := j.Session.Exec(rpc)
 	if err != nil {
 		return errMessage, err
 	}
