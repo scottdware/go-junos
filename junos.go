@@ -15,37 +15,37 @@ import (
 
 // All of our RPC calls we use.
 var (
-	rpcCommand            = "<rpc><command format=\"text\">%s</command></rpc>"
-	rpcCommandXML         = "<rpc><command format=\"xml\">%s</command></rpc>"
-	rpcCommit             = "<rpc><commit-configuration/></rpc>"
-	rpcCommitAt           = "<rpc><commit-configuration><at-time>%s</at-time></commit-configuration></rpc>"
-	rpcCommitCheck        = "<rpc><commit-configuration><check/></commit-configuration></rpc>"
-	rpcCommitConfirm      = "<rpc><commit-configuration><confirmed/><confirm-timeout>%d</confirm-timeout></commit-configuration></rpc>"
-	rpcFactsRE            = "<rpc><get-route-engine-information/></rpc>"
-	rpcFactsChassis       = "<rpc><get-chassis-inventory/></rpc>"
-	rpcConfigFileSet      = "<rpc><load-configuration action=\"set\" format=\"text\"><configuration-set>%s</configuration-set></load-configuration></rpc>"
-	rpcConfigFileText     = "<rpc><load-configuration format=\"text\"><configuration-text>%s</configuration-text></load-configuration></rpc>"
-	rpcConfigFileXML      = "<rpc><load-configuration format=\"xml\"><configuration>%s</configuration></load-configuration></rpc>"
-	rpcConfigURLSet       = "<rpc><load-configuration action=\"set\" format=\"text\" url=\"%s\"/></rpc>"
-	rpcConfigURLText      = "<rpc><load-configuration format=\"text\" url=\"%s\"/></rpc>"
-	rpcConfigURLXML       = "<rpc><load-configuration format=\"xml\" url=\"%s\"/></rpc>"
-	rpcConfigStringSet    = "<rpc><load-configuration action=\"set\" format=\"text\"><configuration-set>%s</configuration-set></load-configuration></rpc>"
-	rpcConfigStringText   = "<rpc><load-configuration format=\"text\"><configuration-text>%s</configuration-text></load-configuration></rpc>"
-	rpcConfigStringXML    = "<rpc><load-configuration format=\"xml\"><configuration>%s</configuration></load-configuration></rpc>"
-	rpcGetRescue          = "<rpc><get-rescue-information><format>text</format></get-rescue-information></rpc>"
-	rpcGetRollback        = "<rpc><get-rollback-information><rollback>%d</rollback><format>text</format></get-rollback-information></rpc>"
-	rpcGetRollbackCompare = "<rpc><get-rollback-information><rollback>0</rollback><compare>%d</compare><format>text</format></get-rollback-information></rpc>"
-	rpcHardware           = "<rpc><get-chassis-inventory/></rpc>"
-	rpcLock               = "<rpc><lock><target><candidate/></target></lock></rpc>"
-	rpcRescueConfig       = "<rpc><load-configuration rescue=\"rescue\"/></rpc>"
-	rpcRescueDelete       = "<rpc><request-delete-rescue-configuration/></rpc>"
-	rpcRescueSave         = "<rpc><request-save-rescue-configuration/></rpc>"
-	rpcRollbackConfig     = "<rpc><load-configuration rollback=\"%d\"/></rpc>"
-	rpcRoute              = "<rpc><get-route-engine-information/></rpc>"
-	rpcSoftware           = "<rpc><get-software-information/></rpc>"
-	rpcUnlock             = "<rpc><unlock><target><candidate/></target></unlock></rpc>"
-	rpcVersion            = "<rpc><get-software-information/></rpc>"
-	rpcReboot             = "<rpc><request-reboot/></rpc>"
+	rpcCommand            = "<command format=\"text\">%s</command>"
+	rpcCommandXML         = "<command format=\"xml\">%s</command>"
+	rpcCommit             = "<commit-configuration/>"
+	rpcCommitAt           = "<commit-configuration><at-time>%s</at-time></commit-configuration>"
+	rpcCommitCheck        = "<commit-configuration><check/></commit-configuration>"
+	rpcCommitConfirm      = "<commit-configuration><confirmed/><confirm-timeout>%d</confirm-timeout></commit-configuration>"
+	rpcFactsRE            = "<get-route-engine-information/>"
+	rpcFactsChassis       = "<get-chassis-inventory/>"
+	rpcConfigFileSet      = "<load-configuration action=\"set\" format=\"text\"><configuration-set>%s</configuration-set></load-configuration>"
+	rpcConfigFileText     = "<load-configuration format=\"text\"><configuration-text>%s</configuration-text></load-configuration>"
+	rpcConfigFileXML      = "<load-configuration format=\"xml\"><configuration>%s</configuration></load-configuration>"
+	rpcConfigURLSet       = "<load-configuration action=\"set\" format=\"text\" url=\"%s\"/>"
+	rpcConfigURLText      = "<load-configuration format=\"text\" url=\"%s\"/>"
+	rpcConfigURLXML       = "<load-configuration format=\"xml\" url=\"%s\"/>"
+	rpcConfigStringSet    = "<load-configuration action=\"set\" format=\"text\"><configuration-set>%s</configuration-set></load-configuration>"
+	rpcConfigStringText   = "<load-configuration format=\"text\"><configuration-text>%s</configuration-text></load-configuration>"
+	rpcConfigStringXML    = "<load-configuration format=\"xml\"><configuration>%s</configuration></load-configuration>"
+	rpcGetRescue          = "<get-rescue-information><format>text</format></get-rescue-information>"
+	rpcGetRollback        = "<get-rollback-information><rollback>%d</rollback><format>text</format></get-rollback-information>"
+	rpcGetRollbackCompare = "<get-rollback-information><rollback>0</rollback><compare>%d</compare><format>text</format></get-rollback-information>"
+	rpcHardware           = "<get-chassis-inventory/>"
+	rpcLock               = "<lock><target><candidate/></target></lock>"
+	rpcRescueConfig       = "<load-configuration rescue=\"rescue\"/>"
+	rpcRescueDelete       = "<request-delete-rescue-configuration/>"
+	rpcRescueSave         = "<request-save-rescue-configuration/>"
+	rpcRollbackConfig     = "<load-configuration rollback=\"%d\"/>"
+	rpcRoute              = "<get-route-engine-information/>"
+	rpcSoftware           = "<get-software-information/>"
+	rpcUnlock             = "<unlock><target><candidate/></target></unlock>"
+	rpcVersion            = "<get-software-information/>"
+	rpcReboot             = "<request-reboot/>"
 )
 
 // Junos contains our session state.
@@ -121,11 +121,11 @@ func (j *Junos) Close() {
 func (j *Junos) RunCommand(cmd, format string) (string, error) {
 	var c commandXML
 	var command string
-	command = fmt.Sprintf("<command format=\"text\">%s</command>", cmd)
+	command = fmt.Sprintf(rpcCommand, cmd)
 	errMessage := "No output available. Please check the syntax of your command."
 
 	if format == "xml" {
-		command = fmt.Sprintf("<command format=\"xml\">%s</command>", cmd)
+		command = fmt.Sprintf(rpcCommandXML, cmd)
 	}
 
 	reply, err := j.Session.Exec(netconf.MethodRPC(command))
@@ -154,7 +154,7 @@ func (j *Junos) RunCommand(cmd, format string) (string, error) {
 // Commit commits the configuration.
 func (j *Junos) Commit() error {
 	var errs commitResults
-	reply, err := j.Session.Exec(rpcCommit)
+	reply, err := j.Session.Exec(netconf.MethodRPC(rpcCommit))
 	if err != nil {
 		return err
 	}
@@ -184,7 +184,7 @@ func (j *Junos) Commit() error {
 func (j *Junos) CommitAt(time string) error {
 	var errs commitResults
 	command := fmt.Sprintf(rpcCommitAt, time)
-	reply, err := j.Session.Exec(command)
+	reply, err := j.Session.Exec(netconf.MethodRPC(command))
 	if err != nil {
 		return err
 	}
@@ -213,7 +213,7 @@ func (j *Junos) CommitAt(time string) error {
 // CommitCheck checks the configuration for syntax errors.
 func (j *Junos) CommitCheck() error {
 	var errs commitResults
-	reply, err := j.Session.Exec(rpcCommitCheck)
+	reply, err := j.Session.Exec(netconf.MethodRPC(rpcCommitCheck))
 	if err != nil {
 		return err
 	}
@@ -243,7 +243,7 @@ func (j *Junos) CommitCheck() error {
 func (j *Junos) CommitConfirm(delay int) error {
 	var errs commitResults
 	command := fmt.Sprintf(rpcCommitConfirm, delay)
-	reply, err := j.Session.Exec(command)
+	reply, err := j.Session.Exec(netconf.MethodRPC(command))
 	if err != nil {
 		return err
 	}
@@ -273,7 +273,7 @@ func (j *Junos) CommitConfirm(delay int) error {
 func (j *Junos) ConfigDiff(compare int) (string, error) {
 	var rb diffXML
 	command := fmt.Sprintf(rpcGetRollbackCompare, compare)
-	reply, err := j.Session.Exec(command)
+	reply, err := j.Session.Exec(netconf.MethodRPC(command))
 	if err != nil {
 		return "", err
 	}
@@ -321,13 +321,13 @@ func (j *Junos) PrintFacts() {
 // GetConfig returns the full configuration, or configuration starting at <section>.
 // Format can be one of "text" or "xml."
 func (j *Junos) GetConfig(section, format string) (string, error) {
-	command := fmt.Sprintf("<rpc><get-configuration format=\"%s\"><configuration>", format)
+	command := fmt.Sprintf("<get-configuration format=\"%s\"><configuration>", format)
 	if section == "full" {
-		command += "</configuration></get-configuration></rpc>"
+		command += "</configuration></get-configuration>"
 	}
-	command += fmt.Sprintf("<%s/></configuration></get-configuration></rpc>", section)
+	command += fmt.Sprintf("<%s/></configuration></get-configuration>", section)
 
-	reply, err := j.Session.Exec(command)
+	reply, err := j.Session.Exec(netconf.MethodRPC(command))
 	if err != nil {
 		return "", err
 	}
@@ -420,7 +420,7 @@ func (j *Junos) Config(path interface{}, format string, commit bool) error {
 		}
 	}
 
-	reply, err := j.Session.Exec(command)
+	reply, err := j.Session.Exec(netconf.MethodRPC(command))
 	if err != nil {
 		return err
 	}
@@ -443,7 +443,7 @@ func (j *Junos) Config(path interface{}, format string, commit bool) error {
 
 // Lock locks the candidate configuration.
 func (j *Junos) Lock() error {
-	reply, err := j.Session.Exec(rpcLock)
+	reply, err := j.Session.Exec(netconf.MethodRPC(rpcLock))
 	if err != nil {
 		return err
 	}
@@ -467,7 +467,7 @@ func NewSession(host, user, password string) (*Junos, error) {
 		log.Fatal(err)
 	}
 
-	reply, err := s.Exec(rpcVersion)
+	reply, err := s.Exec(netconf.MethodRPC(rpcVersion))
 	if err != nil {
 		return nil, err
 	}
@@ -531,7 +531,7 @@ func (j *Junos) Rescue(action string) error {
 		command = fmt.Sprintf(rpcRescueDelete)
 	}
 
-	reply, err := j.Session.Exec(command)
+	reply, err := j.Session.Exec(netconf.MethodRPC(command))
 	if err != nil {
 		return err
 	}
@@ -553,7 +553,7 @@ func (j *Junos) RollbackConfig(option interface{}) error {
 		command = fmt.Sprintf(rpcRescueConfig)
 	}
 
-	reply, err := j.Session.Exec(command)
+	reply, err := j.Session.Exec(netconf.MethodRPC(command))
 	if err != nil {
 		return err
 	}
@@ -574,7 +574,7 @@ func (j *Junos) RollbackConfig(option interface{}) error {
 
 // Unlock unlocks the candidate configuration.
 func (j *Junos) Unlock() error {
-	reply, err := j.Session.Exec(rpcUnlock)
+	reply, err := j.Session.Exec(netconf.MethodRPC(rpcUnlock))
 	if err != nil {
 		return err
 	}
@@ -590,7 +590,7 @@ func (j *Junos) Unlock() error {
 
 // Reboot
 func (j *Junos) Reboot() error {
-	reply, err := j.Session.Exec(rpcReboot)
+	reply, err := j.Session.Exec(netconf.MethodRPC(rpcReboot))
 	if err != nil {
 		return err
 	}
