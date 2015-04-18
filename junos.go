@@ -128,7 +128,7 @@ func (j *Junos) RunCommand(cmd, format string) (string, error) {
 		command = fmt.Sprintf(rpcCommandXML, cmd)
 	}
 
-	reply, err := j.Session.Exec(netconf.MethodRPC(command))
+	reply, err := j.Session.Exec(netconf.RawRPC(command))
 	if err != nil {
 		return errMessage, err
 	}
@@ -154,7 +154,7 @@ func (j *Junos) RunCommand(cmd, format string) (string, error) {
 // Commit commits the configuration.
 func (j *Junos) Commit() error {
 	var errs commitResults
-	reply, err := j.Session.Exec(netconf.MethodRPC(rpcCommit))
+	reply, err := j.Session.Exec(netconf.RawRPC(rpcCommit))
 	if err != nil {
 		return err
 	}
@@ -184,7 +184,7 @@ func (j *Junos) Commit() error {
 func (j *Junos) CommitAt(time string) error {
 	var errs commitResults
 	command := fmt.Sprintf(rpcCommitAt, time)
-	reply, err := j.Session.Exec(netconf.MethodRPC(command))
+	reply, err := j.Session.Exec(netconf.RawRPC(command))
 	if err != nil {
 		return err
 	}
@@ -213,7 +213,7 @@ func (j *Junos) CommitAt(time string) error {
 // CommitCheck checks the configuration for syntax errors.
 func (j *Junos) CommitCheck() error {
 	var errs commitResults
-	reply, err := j.Session.Exec(netconf.MethodRPC(rpcCommitCheck))
+	reply, err := j.Session.Exec(netconf.RawRPC(rpcCommitCheck))
 	if err != nil {
 		return err
 	}
@@ -243,7 +243,7 @@ func (j *Junos) CommitCheck() error {
 func (j *Junos) CommitConfirm(delay int) error {
 	var errs commitResults
 	command := fmt.Sprintf(rpcCommitConfirm, delay)
-	reply, err := j.Session.Exec(netconf.MethodRPC(command))
+	reply, err := j.Session.Exec(netconf.RawRPC(command))
 	if err != nil {
 		return err
 	}
@@ -273,7 +273,7 @@ func (j *Junos) CommitConfirm(delay int) error {
 func (j *Junos) ConfigDiff(compare int) (string, error) {
 	var rb diffXML
 	command := fmt.Sprintf(rpcGetRollbackCompare, compare)
-	reply, err := j.Session.Exec(netconf.MethodRPC(command))
+	reply, err := j.Session.Exec(netconf.RawRPC(command))
 	if err != nil {
 		return "", err
 	}
@@ -327,7 +327,7 @@ func (j *Junos) GetConfig(section, format string) (string, error) {
 	}
 	command += fmt.Sprintf("<%s/></configuration></get-configuration>", section)
 
-	reply, err := j.Session.Exec(netconf.MethodRPC(command))
+	reply, err := j.Session.Exec(netconf.RawRPC(command))
 	if err != nil {
 		return "", err
 	}
@@ -420,7 +420,7 @@ func (j *Junos) Config(path interface{}, format string, commit bool) error {
 		}
 	}
 
-	reply, err := j.Session.Exec(netconf.MethodRPC(command))
+	reply, err := j.Session.Exec(netconf.RawRPC(command))
 	if err != nil {
 		return err
 	}
@@ -443,7 +443,7 @@ func (j *Junos) Config(path interface{}, format string, commit bool) error {
 
 // Lock locks the candidate configuration.
 func (j *Junos) Lock() error {
-	reply, err := j.Session.Exec(netconf.MethodRPC(rpcLock))
+	reply, err := j.Session.Exec(netconf.RawRPC(rpcLock))
 	if err != nil {
 		return err
 	}
@@ -467,7 +467,7 @@ func NewSession(host, user, password string) (*Junos, error) {
 		log.Fatal(err)
 	}
 
-	reply, err := s.Exec(netconf.MethodRPC(rpcVersion))
+	reply, err := s.Exec(netconf.RawRPC(rpcVersion))
 	if err != nil {
 		return nil, err
 	}
@@ -531,7 +531,7 @@ func (j *Junos) Rescue(action string) error {
 		command = fmt.Sprintf(rpcRescueDelete)
 	}
 
-	reply, err := j.Session.Exec(netconf.MethodRPC(command))
+	reply, err := j.Session.Exec(netconf.RawRPC(command))
 	if err != nil {
 		return err
 	}
@@ -553,7 +553,7 @@ func (j *Junos) RollbackConfig(option interface{}) error {
 		command = fmt.Sprintf(rpcRescueConfig)
 	}
 
-	reply, err := j.Session.Exec(netconf.MethodRPC(command))
+	reply, err := j.Session.Exec(netconf.RawRPC(command))
 	if err != nil {
 		return err
 	}
@@ -574,7 +574,7 @@ func (j *Junos) RollbackConfig(option interface{}) error {
 
 // Unlock unlocks the candidate configuration.
 func (j *Junos) Unlock() error {
-	reply, err := j.Session.Exec(netconf.MethodRPC(rpcUnlock))
+	reply, err := j.Session.Exec(netconf.RawRPC(rpcUnlock))
 	if err != nil {
 		return err
 	}
@@ -590,7 +590,7 @@ func (j *Junos) Unlock() error {
 
 // Reboot
 func (j *Junos) Reboot() error {
-	reply, err := j.Session.Exec(netconf.MethodRPC(rpcReboot))
+	reply, err := j.Session.Exec(netconf.RawRPC(rpcReboot))
 	if err != nil {
 		return err
 	}
