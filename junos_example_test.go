@@ -1,5 +1,11 @@
 package junos
 
+import (
+	"fmt"
+	"github.com/scottdware/go-junos"
+	"log"
+)
+
 // To View the entire configuration, use the keyword "full" for the first
 // argument. If anything else outside of "full" is specified, it will return
 // the configuration of the specified top-level stanza only. So "security"
