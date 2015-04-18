@@ -1,16 +1,16 @@
 package junos
 
-import (
-	"fmt"
-	"github.com/scottdware/go-junos"
-	"log"
-)
-
 // To View the entire configuration, use the keyword "full" for the first
 // argument. If anything else outside of "full" is specified, it will return
 // the configuration of the specified top-level stanza only. So "security"
 // would return everything under the "security" stanza.
 func ExampleJunos_viewConfiguration() {
+	import (
+		"fmt"
+		"github.com/scottdware/go-junos"
+		"log"
+	)
+	
 	// Establish our session first.
 	jnpr, err := junos.NewSession(host, user, password)
 	if err != nil {
@@ -28,6 +28,12 @@ func ExampleJunos_viewConfiguration() {
 
 // Comparing and working with rollback configurations.
 func ExampleJunos_rollbackConfigurations() {
+	import (
+		"fmt"
+		"github.com/scottdware/go-junos"
+		"log"
+	)
+	
 	// Establish our session first.
 	jnpr, err := junos.NewSession(host, user, password)
 	if err != nil {
@@ -65,6 +71,12 @@ func ExampleJunos_rollbackConfigurations() {
 
 // Configuring devices.
 func ExampleJunos_configuringDevices() {
+	import (
+		"fmt"
+		"github.com/scottdware/go-junos"
+		"log"
+	)
+	
 	// Use the Config() function to configure a Junos device.
 
 	// When configuring a device, it is good practice to lock the configuration database,
@@ -158,6 +170,12 @@ func ExampleJunos_configuringDevices() {
 
 // Running operational mode commands on a device.
 func ExampleJunos_runningCommands() {
+	import (
+		"fmt"
+		"github.com/scottdware/go-junos"
+		"log"
+	)
+	
 	// Establish our session first.
 	jnpr, err := junos.NewSession(host, user, password)
 	if err != nil {
@@ -188,6 +206,12 @@ func ExampleJunos_runningCommands() {
 
 // Viewing basic information about the device.
 func ExampleJunos_deviceInformation() {
+	import (
+		"fmt"
+		"github.com/scottdware/go-junos"
+		"log"
+	)
+	
 	// Establish our session first.
 	jnpr, err := junos.NewSession(host, user, password)
 	if err != nil {
@@ -209,6 +233,11 @@ func ExampleJunos_deviceInformation() {
 
 // Establishing a connection to Junos Space and working with devices.
 func ExampleJunosSpace_devices() {
+	import (
+		"fmt"
+		"github.com/scottdware/go-junos"
+	)
+	
 	// Establish a connection to a Junos Space server.
 	space := junos.NewServer("space.company.com", "admin", "juniper123")
 
@@ -248,6 +277,11 @@ func ExampleJunosSpace_devices() {
 
 // Software upgrades using Junos Space.
 func ExampleJunosSpace_softwareUpgrade() {
+	import (
+		"fmt"
+		"github.com/scottdware/go-junos"
+	)
+	
 	// Establish a connection to a Junos Space server.
 	space := junos.NewServer("space.company.com", "admin", "juniper123")
 
@@ -287,6 +321,11 @@ func ExampleJunosSpace_softwareUpgrade() {
 
 // Viewing information about Security Director devices (SRX, J-series, etc.).
 func ExampleJunosSpace_securityDirectorDevices() {
+	import (
+		"fmt"
+		"github.com/scottdware/go-junos"
+	)
+	
 	// Establish a connection to a Junos Space server.
 	space := junos.NewServer("space.company.com", "admin", "juniper123")
 
@@ -303,6 +342,11 @@ func ExampleJunosSpace_securityDirectorDevices() {
 
 // Working with address and service objects.
 func ExampleJunosSpace_addressObjects() {
+	import (
+		"fmt"
+		"github.com/scottdware/go-junos"
+	)
+	
 	// Establish a connection to a Junos Space server.
 	space := junos.NewServer("space.company.com", "admin", "juniper123")
 
@@ -368,6 +412,11 @@ func ExampleJunosSpace_addressObjects() {
 
 // Working with polymorphic (variable) objects.
 func ExampleJunosSpace_variables() {
+	import (
+		"github.com/scottdware/go-junos"
+		"log"
+	)
+	
 	// Establish a connection to a Junos Space server.
 	space := junos.NewServer("space.company.com", "admin", "juniper123")
 
@@ -391,6 +440,11 @@ func ExampleJunosSpace_variables() {
 
 // Working with policies.
 func ExampleJunosSpace_policies() {
+	import (
+		"fmt"
+		"github.com/scottdware/go-junos"
+	)
+	
 	// Establish a connection to a Junos Space server.
 	space := junos.NewServer("space.company.com", "admin", "juniper123")
 
