@@ -1,10 +1,20 @@
 package junos
 
-// To View the entire configuration, use the keyword "full" for the first
-// argument. If anything else outside of "full" is specified, it will return
-// the configuration of the specified top-level stanza only. So "security"
-// would return everything under the "security" stanza.
-func ExampleJunos_viewConfiguration() {
+import (
+	"fmt"
+	"github.com/scottdware/go-junos"
+	"log"
+)
+
+func main() {
+	//
+	// ** Junos Examples **
+	//
+	
+	host := "srx-firewall"
+	user := "admin"
+	password := "secret"
+	
 	// Establish our session first.
 	jnpr, err := junos.NewSession(host, user, password)
 	if err != nil {
@@ -12,22 +22,16 @@ func ExampleJunos_viewConfiguration() {
 	}
 	defer jnpr.Close()
 
+	// To View the entire configuration, use the keyword "full" for the first
+	// argument. If anything else outside of "full" is specified, it will return
+	// the configuration of the specified top-level stanza only. So "security"
+	// would return everything under the "security" stanza.
 	// Output format can be "text" or "xml".
 	config, err := jnpr.GetConfig("full", "text")
 	if err != nil {
 		fmt.Println(err)
 	}
 	fmt.Println(config)
-}
-
-// Comparing and working with rollback configurations.
-func ExampleJunos_rollbackConfigurations() {
-	// Establish our session first.
-	jnpr, err := junos.NewSession(host, user, password)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer jnpr.Close()
 
 	// If you want to view the difference between the current configuration and a rollback
 	// one, then you can use the ConfigDiff() function to specify a previous config:
@@ -39,7 +43,7 @@ func ExampleJunos_rollbackConfigurations() {
 
 	// You can rollback to a previous state, or the rescue configuration by using
 	// the RollbackConfig() function:
-	err := jnpr.RollbackConfig(3)
+	err = jnpr.RollbackConfig(3)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -51,14 +55,11 @@ func ExampleJunos_rollbackConfigurations() {
 	jnpr.Rescue("delete")
 
 	// Rollback to the "rescue" configuration.
-	err := jnpr.RollbackConfig("rescue")
+	err = jnpr.RollbackConfig("rescue")
 	if err != nil {
 		fmt.Println(err)
 	}
-}
-
-// Configuring devices.
-func ExampleJunos_configuringDevices() {
+	
 	// Use the Config() function to configure a Junos device.
 
 	// When configuring a device, it is good practice to lock the configuration database,
@@ -68,17 +69,17 @@ func ExampleJunos_configuringDevices() {
 	// Multiple ways to commit a configuration.
 
 	// Commit the configuration as normal.
-	Commit()
+	jnpr.Commit()
 
 	// Check the configuration for any syntax errors (NOTE: you must still issue a
 	// Commit() afterwards).
-	CommitCheck()
+	jnpr.CommitCheck()
 
 	// Commit at a later time, i.e. 4:30 PM.
-	CommitAt("16:30:00")
+	jnpr.CommitAt("16:30:00")
 
 	// Rollback configuration if a Commit() is not issued within the given <minutes>.
-	CommitConfirm(15)
+	jnpr.CommitConfirm(15)
 
 	// You can configure the Junos device by uploading a local file, or pulling from an
 	// FTP/HTTP server. The LoadConfig() function takes three arguments:
@@ -112,13 +113,6 @@ func ExampleJunos_configuringDevices() {
 	//     </name-server>
 	// </system>
 
-	// Establish our session first.
-	jnpr, err := junos.NewSession(host, user, password)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer jnpr.Close()
-
 	// Configure a device from a file:
 
 	// If the third option is "true" then after the configuration is loaded, a commit
@@ -148,17 +142,7 @@ func ExampleJunos_configuringDevices() {
 	if err != nil {
 		fmt.Println(err)
 	}
-}
-
-// Running operational mode commands on a device.
-func ExampleJunos_runningCommands() {
-	// Establish our session first.
-	jnpr, err := junos.NewSession(host, user, password)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer jnpr.Close()
-
+	
 	// You can run operational mode commands such as "show" and "request" by using the
 	// Command() function. Output formats can be "text" or "xml".
 
@@ -178,17 +162,7 @@ func ExampleJunos_runningCommands() {
 
 	// Reboot the device
 	jnpr.Reboot()
-}
-
-// Viewing basic information about the device.
-func ExampleJunos_deviceInformation() {
-	// Establish our session first.
-	jnpr, err := junos.NewSession(host, user, password)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer jnpr.Close()
-
+	
 	// When you call the PrintFacts() function, it just prints out the platform
 	// and software information to the console.
 	jnpr.PrintFacts()
@@ -199,10 +173,11 @@ func ExampleJunos_deviceInformation() {
 		fmt.Printf("Model: %s, Version: %s", data.Model, data.Version)
 	}
 	// Output: Model: SRX240H2, Version: 12.1X47-D10.4
-}
-
-// Establishing a connection to Junos Space and working with devices.
-func ExampleJunosSpace_devices() {
+	
+	//
+	// ** Junos Space Examples **
+	//
+	
 	// Establish a connection to a Junos Space server.
 	space := junos.NewServer("space.company.com", "admin", "juniper123")
 
@@ -214,11 +189,11 @@ func ExampleJunosSpace_devices() {
 
 	// Iterate over our device list and display some information about them.
 	for _, device := range devices.Devices {
-		fmt.Printf("Name: %s, IP Address: %s, Platform: %s\n", device.Name, device.IP, device.Platform)
+		fmt.Printf("Name: %s, IP Address: %s, Platform: %s\n", device.Name, device.IPAddress, device.Platform)
 	}
 
 	// Add a device to Junos Space.
-	jobID, err = space.AddDevice("sdubs-fw", "admin", "juniper123")
+	jobID, err := space.AddDevice("sdubs-fw", "admin", "juniper123")
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -232,10 +207,11 @@ func ExampleJunosSpace_devices() {
 
 	// Resynchronize a device. A good option if you do a lot of configuration to a device
 	// outside of Junos Space.
-	job, err := space.Resync("firewall-A")
+	jobID, err = space.Resync("firewall-A")
 	if err != nil {
 		fmt.Println(err)
 	}
+<<<<<<< HEAD:junos_example_test.go
 	fmt.Println(job)
 }
 
@@ -244,12 +220,16 @@ func ExampleJunosSpace_softwareUpgrade() {
 	// Establish a connection to a Junos Space server.
 	space := junos.NewServer("space.company.com", "admin", "juniper123")
 
+=======
+	fmt.Printf("Job ID: %d\n", jobID)
+	
+>>>>>>> features:examples/go-junos_example.go
 	// Staging software on a device. The last parameter is whether or not to remove any
 	// existing images from the device; boolean.
 	//
 	// This will not upgrade the device, but only place the image there to be used at a later
 	// time.
-	jobID, err := space.StageSoftware("sdubs-fw", "junos-srxsme-12.1X46-D30.2-domestic.tgz", false)
+	jobID, err = space.StageSoftware("sdubs-fw", "junos-srxsme-12.1X46-D30.2-domestic.tgz", false)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -266,39 +246,27 @@ func ExampleJunosSpace_softwareUpgrade() {
 		RemoveAfter:   false,
 	}
 
-	jobID, err := space.DeploySoftware("sdubs-fw", "junos-srxsme-12.1X46-D30.2-domestic.tgz", options)
+	jobID, err = space.DeploySoftware("sdubs-fw", "junos-srxsme-12.1X46-D30.2-domestic.tgz", options)
 	if err != nil {
 		fmt.Println(err)
 	}
 
 	// Remove a staged image from the device.
-	jobID, err := space.RemoveStagedSoftware("sdubs-fw", "junos-srxsme-12.1X46-D30.2-domestic.tgz")
+	jobID, err = space.RemoveStagedSoftware("sdubs-fw", "junos-srxsme-12.1X46-D30.2-domestic.tgz")
 	if err != nil {
 		fmt.Println(err)
 	}
-}
-
-// Viewing information about Security Director devices (SRX, J-series, etc.).
-func ExampleJunosSpace_securityDirectorDevices() {
-	// Establish a connection to a Junos Space server.
-	space := junos.NewServer("space.company.com", "admin", "juniper123")
-
+	
 	// List all security devices:
-	devices, err := space.SecurityDevices()
+	sdDevices, err := space.SecurityDevices()
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	for _, device := range devices.Devices {
-		fmt.Printf("%+v\n", device)
+	for _, sd := range sdDevices.Devices {
+		fmt.Printf("%+v\n", sd)
 	}
-}
-
-// Working with address and service objects.
-func ExampleJunosSpace_addressObjects() {
-	// Establish a connection to a Junos Space server.
-	space := junos.NewServer("space.company.com", "admin", "juniper123")
-
+	
 	// To view the address and service objects, you use the Addresses() and Services() functions. Both of them
 	// take a "filter" parameter, which lets you search for objects matching your filter.
 
@@ -357,13 +325,7 @@ func ExampleJunosSpace_addressObjects() {
 
 	// Delete an object
 	space.ModifyObject(true, "delete", "my-laptop")
-}
-
-// Working with polymorphic (variable) objects.
-func ExampleJunosSpace_variables() {
-	// Establish a connection to a Junos Space server.
-	space := junos.NewServer("space.company.com", "admin", "juniper123")
-
+	
 	// Add a variable
 	// The parameters are as follows: variable-name, description, default-value
 	space.AddVariable("test-variable", "Our test variable", "default-object")
@@ -380,13 +342,7 @@ func ExampleJunosSpace_variables() {
 
 	// Delete a variable
 	space.DeleteVariable("test-variable")
-}
-
-// Working with policies.
-func ExampleJunosSpace_policies() {
-	// Establish a connection to a Junos Space server.
-	space := junos.NewServer("space.company.com", "admin", "juniper123")
-
+	
 	// List all security policies Junos Space manages:
 	policies, err := space.Policies()
 	if err != nil {
@@ -402,16 +358,16 @@ func ExampleJunosSpace_policies() {
 
 	// Update the policy. If "false" is specified, then the policy is only published, and the
 	// device is not updated.
-	job, err := space.PublishPolicy("Internet-Firewall-Policy", true)
+	jobID, err = space.PublishPolicy("Internet-Firewall-Policy", true)
 	if err != nil {
 		fmt.Println(err)
 	}
-	fmt.Printf("Job ID: %d\n", job)
+	fmt.Printf("Job ID: %d\n", jobID)
 
 	// Let's update a device knowing that we have some previously published services.
-	job, err := space.UpdateDevice("firewall-1.company.com")
+	jobID, err = space.UpdateDevice("firewall-1.company.com")
 	if err != nil {
 		fmt.Println(err)
 	}
-	fmt.Printf("Job ID: %d\n", job)
+	fmt.Printf("Job ID: %d\n", jobID)
 }
