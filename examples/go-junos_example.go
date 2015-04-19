@@ -211,19 +211,8 @@ func main() {
 	if err != nil {
 		fmt.Println(err)
 	}
-<<<<<<< HEAD:junos_example_test.go
-	fmt.Println(job)
-}
-
-// Software upgrades using Junos Space.
-func ExampleJunosSpace_softwareUpgrade() {
-	// Establish a connection to a Junos Space server.
-	space := junos.NewServer("space.company.com", "admin", "juniper123")
-
-=======
 	fmt.Printf("Job ID: %d\n", jobID)
 	
->>>>>>> features:examples/go-junos_example.go
 	// Staging software on a device. The last parameter is whether or not to remove any
 	// existing images from the device; boolean.
 	//
