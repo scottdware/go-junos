@@ -22,7 +22,7 @@ func main() {
 	}
 
 	// Add a device to Junos Space.
-	jobID, err = space.AddDevice("sdubs-fw", "admin", "juniper123")
+	jobID, err := space.AddDevice("sdubs-fw", "admin", "juniper123")
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -37,7 +37,7 @@ func main() {
 
 	// Resynchronize a device. A good option if you do a lot of configuration to a device
 	// outside of Junos Space.
-	job, err := space.Resync("firewall-A")
+	jobID, err = space.Resync("firewall-A")
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -77,12 +77,12 @@ func main() {
 	}
 	
 	// List all security devices:
-	devices, err := space.SecurityDevices()
+	sdDevices, err := space.SecurityDevices()
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	for _, device := range devices.Devices {
+	for _, sd := range sdDevices.Devices {
 		fmt.Printf("%+v\n", device)
 	}
 	
@@ -177,14 +177,14 @@ func main() {
 
 	// Update the policy. If "false" is specified, then the policy is only published, and the
 	// device is not updated.
-	job, err = space.PublishPolicy("Internet-Firewall-Policy", true)
+	jobID, err = space.PublishPolicy("Internet-Firewall-Policy", true)
 	if err != nil {
 		fmt.Println(err)
 	}
 	fmt.Printf("Job ID: %d\n", job)
 
 	// Let's update a device knowing that we have some previously published services.
-	job, err = space.UpdateDevice("firewall-1.company.com")
+	jobID, err = space.UpdateDevice("firewall-1.company.com")
 	if err != nil {
 		fmt.Println(err)
 	}

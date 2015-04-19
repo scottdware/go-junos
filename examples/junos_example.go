@@ -7,6 +7,10 @@ import (
 )
 
 func main() {
+	host := "srx-firewall"
+	user := "admin"
+	password := "secret"
+	
 	// Establish our session first.
 	jnpr, err := junos.NewSession(host, user, password)
 	if err != nil {
