@@ -18,7 +18,7 @@ func main() {
 
 	// Iterate over our device list and display some information about them.
 	for _, device := range devices.Devices {
-		fmt.Printf("Name: %s, IP Address: %s, Platform: %s\n", device.Name, device.IP, device.Platform)
+		fmt.Printf("Name: %s, IP Address: %s, Platform: %s\n", device.Name, device.IPAddress, device.Platform)
 	}
 
 	// Add a device to Junos Space.
@@ -41,7 +41,7 @@ func main() {
 	if err != nil {
 		fmt.Println(err)
 	}
-	fmt.Printf("Job ID: %d\n", job)
+	fmt.Printf("Job ID: %d\n", jobID)
 	
 	// Staging software on a device. The last parameter is whether or not to remove any
 	// existing images from the device; boolean.
@@ -83,7 +83,7 @@ func main() {
 	}
 
 	for _, sd := range sdDevices.Devices {
-		fmt.Printf("%+v\n", device)
+		fmt.Printf("%+v\n", sd)
 	}
 	
 	// To view the address and service objects, you use the Addresses() and Services() functions. Both of them
@@ -181,12 +181,12 @@ func main() {
 	if err != nil {
 		fmt.Println(err)
 	}
-	fmt.Printf("Job ID: %d\n", job)
+	fmt.Printf("Job ID: %d\n", jobID)
 
 	// Let's update a device knowing that we have some previously published services.
 	jobID, err = space.UpdateDevice("firewall-1.company.com")
 	if err != nil {
 		fmt.Println(err)
 	}
-	fmt.Printf("Job ID: %d\n", job)
+	fmt.Printf("Job ID: %d\n", jobID)
 }
