@@ -119,7 +119,6 @@ func (j *Junos) Close() {
 // RunCommand executes any operational mode command, such as "show" or "request."
 // Format can be one of "text" or "xml."
 func (j *Junos) RunCommand(cmd, format string) (string, error) {
-	var c commandXML
 	var command string
 	command = fmt.Sprintf(rpcCommand, cmd)
 	errMessage := "No output available. Please check the syntax of your command."
@@ -139,16 +138,21 @@ func (j *Junos) RunCommand(cmd, format string) (string, error) {
 		}
 	}
 
-	err = xml.Unmarshal([]byte(reply.Data), &c)
-	if err != nil {
-		return errMessage, err
-	}
-
-	if c.Config == "" {
+	if reply.Data == "" {
 		return errMessage, nil
 	}
 
-	return c.Config, nil
+	if format == "text" {
+		var output commandXML
+		err = xml.Unmarshal([]byte(reply.Data), &output)
+		if err != nil {
+			return "", err
+		}
+
+		return output.Config, nil
+	}
+
+	return reply.Data, nil
 }
 
 // Commit commits the configuration.
@@ -319,13 +323,27 @@ func (j *Junos) PrintFacts() {
 }
 
 // GetConfig returns the full configuration, or configuration starting at <section>.
-// Format can be one of "text" or "xml."
+// Format can be one of "text" or "xml." You can do sub-sections by separating the
+// <section> path with a ">" symbol, i.e. "system>login"
 func (j *Junos) GetConfig(section, format string) (string, error) {
+	secs := strings.Split(section, ">")
+	nSecs := len(secs) - 1
 	command := fmt.Sprintf("<get-configuration format=\"%s\"><configuration>", format)
 	if section == "full" {
 		command += "</configuration></get-configuration>"
 	}
-	command += fmt.Sprintf("<%s/></configuration></get-configuration>", section)
+
+	if nSecs >= 0 {
+		for i := 0; i < nSecs; i++ {
+			command += fmt.Sprintf("<%s>", secs[i])
+		}
+		command += fmt.Sprintf("<%s/>", secs[nSecs])
+
+		for j := nSecs - 1; j >= 0; j-- {
+			command += fmt.Sprintf("</%s>", secs[j])
+		}
+		command += fmt.Sprint("</configuration></get-configuration>")
+	}
 
 	reply, err := j.Session.Exec(netconf.RawRPC(command))
 	if err != nil {
