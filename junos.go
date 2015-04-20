@@ -119,7 +119,6 @@ func (j *Junos) Close() {
 // RunCommand executes any operational mode command, such as "show" or "request."
 // Format can be one of "text" or "xml."
 func (j *Junos) RunCommand(cmd, format string) (string, error) {
-	// var c commandXML
 	var command string
 	command = fmt.Sprintf(rpcCommand, cmd)
 	errMessage := "No output available. Please check the syntax of your command."
