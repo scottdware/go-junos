@@ -76,8 +76,8 @@ type Variable struct {
 	Description string `xml:"description"`
 }
 
-// VariableModification holds our session state when updating a polymorphic (variable) object.
-type VariableModification struct {
+// VariableManagement holds our session state when updating a polymorphic (variable) object.
+type VariableManagement struct {
 	Devices []SecurityDevice
 	Space   *JunosSpace
 }
@@ -785,20 +785,20 @@ func (s *JunosSpace) DeleteVariable(name string) error {
 // a polymorphic (variable) object. We do this to only get the list of
 // security devices (SecurityDevices()) once, instead of call the function
 // each time we want to modify a variable.
-func (s *JunosSpace) ModifyVariable() (*VariableModification, error) {
+func (s *JunosSpace) ModifyVariable() (*VariableManagement, error) {
 	devices, err := s.SecurityDevices()
 	if err != nil {
 		return nil, err
 	}
 
-	return &VariableModification{
+	return &VariableManagement{
 		Devices: devices.Devices,
 		Space:   s,
 	}, nil
 }
 
 // Add appends an address object to the given polymorphic (variable) object.
-func (v *VariableModification) Add(name, firewall, object string) error {
+func (v *VariableManagement) Add(name, firewall, object string) error {
 	var req *APIRequest
 	var varData existingVariable
 	var deviceID int
