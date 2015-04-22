@@ -10,11 +10,11 @@ func main() {
 	//
 	// ** Junos Examples **
 	//
-	
+
 	host := "srx-firewall"
 	user := "admin"
 	password := "secret"
-	
+
 	// Establish our session first.
 	jnpr, err := junos.NewSession(host, user, password)
 	if err != nil {
@@ -59,7 +59,7 @@ func main() {
 	if err != nil {
 		fmt.Println(err)
 	}
-	
+
 	// Use the Config() function to configure a Junos device.
 
 	// When configuring a device, it is good practice to lock the configuration database,
@@ -142,7 +142,7 @@ func main() {
 	if err != nil {
 		fmt.Println(err)
 	}
-	
+
 	// You can run operational mode commands such as "show" and "request" by using the
 	// Command() function. Output formats can be "text" or "xml".
 
@@ -162,7 +162,7 @@ func main() {
 
 	// Reboot the device
 	jnpr.Reboot()
-	
+
 	// When you call the PrintFacts() function, it just prints out the platform
 	// and software information to the console.
 	jnpr.PrintFacts()
@@ -173,11 +173,11 @@ func main() {
 		fmt.Printf("Model: %s, Version: %s", data.Model, data.Version)
 	}
 	// Output: Model: SRX240H2, Version: 12.1X47-D10.4
-	
+
 	//
 	// ** Junos Space Examples **
 	//
-	
+
 	// Establish a connection to a Junos Space server.
 	space := junos.NewServer("space.company.com", "admin", "juniper123")
 
@@ -212,7 +212,7 @@ func main() {
 		fmt.Println(err)
 	}
 	fmt.Printf("Job ID: %d\n", jobID)
-	
+
 	// Staging software on a device. The last parameter is whether or not to remove any
 	// existing images from the device; boolean.
 	//
@@ -245,7 +245,7 @@ func main() {
 	if err != nil {
 		fmt.Println(err)
 	}
-	
+
 	// List all security devices:
 	sdDevices, err := space.SecurityDevices()
 	if err != nil {
@@ -255,7 +255,7 @@ func main() {
 	for _, sd := range sdDevices.Devices {
 		fmt.Printf("%+v\n", sd)
 	}
-	
+
 	// To view the address and service objects, you use the Addresses() and Services() functions. Both of them
 	// take a "filter" parameter, which lets you search for objects matching your filter.
 
@@ -283,10 +283,10 @@ func main() {
 
 	// Add an address group. "true" as the first parameter means that we assume the
 	// group is going to be an address group.
-	space.AddGroup(true, "Blacklist-IPs", "Blacklisted IP addresses")
+	space.AddGroup("address", "Blacklist-IPs", "Blacklisted IP addresses")
 
 	// Add a service group. We do this by specifying "false" as the first parameter.
-	space.AddGroup(false, "Web-Protocols", "All web-based protocols and ports")
+	space.AddGroup("service", "Web-Protocols", "All web-based protocols and ports")
 
 	// Add an address object
 	space.AddAddress("my-laptop", "2.2.2.2", "My personal laptop")
@@ -304,17 +304,17 @@ func main() {
 	// first parameter is whether the object is an address group (true) or a service group (false).
 
 	// Add a service to a group
-	space.ModifyObject(false, "add", "service-group", "service-name")
+	space.ModifyObject("service", "add", "service-group", "service-name")
 
 	// Remove an address object from a group
-	space.ModifyObject(true, "remove", "Whitelisted-Addresses", "bad-ip")
+	space.ModifyObject("address", "remove", "Whitelisted-Addresses", "bad-ip")
 
 	// Rename an object
-	space.ModifyObject(false, "rename", "Web-Services", "Web-Ports")
+	space.ModifyObject("service", "rename", "Web-Services", "Web-Ports")
 
 	// Delete an object
-	space.ModifyObject(true, "delete", "my-laptop")
-	
+	space.ModifyObject("address", "delete", "my-laptop")
+
 	// Add a variable
 	// The parameters are as follows: variable-name, description, default-value
 	space.AddVariable("test-variable", "Our test variable", "default-object")
@@ -331,7 +331,7 @@ func main() {
 
 	// Delete a variable
 	space.DeleteVariable("test-variable")
-	
+
 	// List all security policies Junos Space manages:
 	policies, err := space.Policies()
 	if err != nil {
