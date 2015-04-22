@@ -103,7 +103,7 @@ type variableValues struct {
 	VariableName  string   `xml:"variable-value-detail>name"`
 }
 
-// addressesXML is XML we send (POST) for creating an address object.
+// XML for creating an address object.
 var addressesXML = `
 <address>
     <name>%s</name>
@@ -118,7 +118,7 @@ var addressesXML = `
 </address>
 `
 
-// serviceXML is XML we send (POST) for creating a service object.
+// XML for creating a service object.
 var serviceXML = `
 <service>
     <name>%s</name>
@@ -139,7 +139,7 @@ var serviceXML = `
 </service>
 `
 
-// addressGroupXML is XML we send (POST) for adding an address group.
+// XML for adding an address group.
 var addressGroupXML = `
 <address>
     <name>%s</name>
@@ -152,7 +152,7 @@ var addressGroupXML = `
 </address>
 `
 
-// serviceGroupXML is XML we send (POST) for adding a service group.
+// XML for adding a service group.
 var serviceGroupXML = `
 <service>
     <name>%s</name>
@@ -161,14 +161,14 @@ var serviceGroupXML = `
 </service>
 `
 
-// removeXML is XML we send (POST) for removing an address or service from a group.
+// XML for removing an address or service from a group.
 var removeXML = `
 <diff>
     <remove sel="%s/members/member[name='%s']"/>
 </diff>
 `
 
-// addGroupMemberXML is XML we send (POST) for adding addresses or services to a group.
+// XML for adding addresses or services to a group.
 var addGroupMemberXML = `
 <diff>
     <add sel="%s/members">
@@ -179,7 +179,7 @@ var addGroupMemberXML = `
 </diff>
 `
 
-// renameXML is XML we send (POST) for renaming an address or service object.
+// XML for renaming an address or service object.
 var renameXML = `
 <diff>
     <replace sel="%s/name">
@@ -188,7 +188,7 @@ var renameXML = `
 </diff>
 `
 
-// updateDeviceXML is XML we send (POST) for updating a security device.
+// XML for updating a security device.
 var updateDeviceXML = `
 <update-devices>
     <sd-ids>
@@ -203,7 +203,7 @@ var updateDeviceXML = `
 </update-devices>
 `
 
-// publishPolicyXML is XML we send (POST) for publishing a changed policy.
+// XML for publishing a changed policy.
 var publishPolicyXML = `
 <publish>
     <policy-ids>
@@ -212,7 +212,7 @@ var publishPolicyXML = `
 </publish>
 `
 
-// createVariableXML is the XML we send (POST) for adding a new variable object.
+// XML for adding a new variable object.
 var createVariableXML = `
 <variable-definition>
     <name>%s</name>
@@ -226,7 +226,7 @@ var createVariableXML = `
 </variable-definition>
 `
 
-// modifyVariableXML is the XML we send (PUT) for modifying variable objects.
+// XML for modifying variable objects.
 var modifyVariableXML = `
 <variable-definition>
     <name>%s</name>
@@ -276,12 +276,12 @@ func (s *JunosSpace) getSDDeviceID(device interface{}) (int, error) {
 }
 
 // getObjectID returns the ID of the address or service object.
-func (s *JunosSpace) getObjectID(object interface{}, otype bool) (int, error) {
+func (s *JunosSpace) getObjectID(object interface{}, otype string) (int, error) {
 	var err error
 	var objectID int
 	var services *Services
 	ipRegex := regexp.MustCompile(`(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\/\d+)`)
-	if !otype {
+	if otype == "service" {
 		services, err = s.Services(object.(string))
 	}
 	objects, err := s.Addresses(object.(string))
@@ -293,7 +293,7 @@ func (s *JunosSpace) getObjectID(object interface{}, otype bool) (int, error) {
 	case int:
 		objectID = object.(int)
 	case string:
-		if !otype {
+		if otype == "service" {
 			for _, o := range services.Services {
 				if o.Name == object {
 					objectID = o.ID
@@ -353,8 +353,8 @@ func (s *JunosSpace) getVariableID(variable string) (int, error) {
 	return variableID, nil
 }
 
+// modifyVariableContent creates the XML we use when modifying an existing polymorphic (variable) object.
 func (s *JunosSpace) modifyVariableContent(data *existingVariable, moid, firewall, address string, vid int) string {
-	// var varValuesList = "<variable-values-list>"
 	var varValuesList string
 	for _, d := range data.VariableValuesList {
 		varValuesList += fmt.Sprintf("<variable-values><device><moid>%s</moid><name>%s</name></device>", d.DeviceMOID, d.DeviceName)
@@ -394,9 +394,19 @@ func (s *JunosSpace) Addresses(filter string) (*Addresses, error) {
 	return &addresses, nil
 }
 
-// AddAddress adds a new address object to Junos Space, and returns the Job ID.
-func (s *JunosSpace) AddAddress(name, ip, desc string) (int, error) {
-	var job jobID
+// AddAddress creates a new address object in Junos Space.
+//
+// Options are: <name>, <ip>, <description> (optional).
+func (s *JunosSpace) AddAddress(options ...string) error {
+	nargs := len(options)
+
+	if nargs < 2 {
+		return errors.New("too few arguments: you must define a name and IP/subnet")
+	}
+
+	name := options[0]
+	ip := options[1]
+	desc := ""
 	var addrType string
 	var ipaddr string
 	r := regexp.MustCompile(`(\d+\.\d+\.\d+\.\d+)(\/\d+)?`)
@@ -411,6 +421,10 @@ func (s *JunosSpace) AddAddress(name, ip, desc string) (int, error) {
 		ipaddr = ip
 	}
 
+	if nargs > 2 {
+		desc = options[2]
+	}
+
 	address := fmt.Sprintf(addressesXML, name, addrType, ipaddr, desc)
 	req := &APIRequest{
 		Method:      "post",
@@ -418,24 +432,19 @@ func (s *JunosSpace) AddAddress(name, ip, desc string) (int, error) {
 		Body:        address,
 		ContentType: contentAddress,
 	}
-	data, err := s.APICall(req)
+	_, err := s.APICall(req)
 	if err != nil {
-		return 0, err
+		return err
 	}
 
-	err = xml.Unmarshal(data, &job)
-	if err != nil {
-		return 0, err
-	}
-
-	return job.ID, nil
+	return nil
 }
 
-// AddService adds a new service object to Junos Space, and returns the Job ID. If adding just
-// a single port, then enter in the same number in both the "low" and "high" parameters. For a
-// range of ports, enter the starting port in "low" and the uppper limit in "high."
-func (s *JunosSpace) AddService(proto, name string, low, high int, desc string, timeout int) (int, error) {
-	var job jobID
+// AddService creates a new service object to Junos Space. If adding just
+// a single port/service, then enter in the same port/service number in both the
+// "low" and "high" parameters. For a range of ports, enter the starting port in
+// "low" and the uppper limit in "high."
+func (s *JunosSpace) AddService(proto, name string, low, high int, desc string, timeout int) error {
 	var port string
 	var protoNumber int
 	var inactivity string
@@ -467,26 +476,33 @@ func (s *JunosSpace) AddService(proto, name string, low, high int, desc string, 
 		Body:        service,
 		ContentType: contentService,
 	}
-	data, err := s.APICall(req)
+	_, err := s.APICall(req)
 	if err != nil {
-		return 0, err
+		return err
 	}
 
-	err = xml.Unmarshal(data, &job)
-	if err != nil {
-		return 0, err
-	}
-
-	return job.ID, nil
+	return nil
 }
 
-// AddGroup adds a new address or service group to Junos Space, and returns the Job ID.
-func (s *JunosSpace) AddGroup(otype bool, name, desc string) error {
+// AddGroup creates a new address or service group in Junos Space.
+func (s *JunosSpace) AddGroup(otype string, options ...string) error {
+	nargs := len(options)
+
+	if nargs < 1 {
+		return errors.New("too few arguments: you must define a name")
+	}
+
 	uri := "/api/juniper/sd/address-management/addresses"
 	addGroupXML := addressGroupXML
 	content := contentAddress
+	name := options[0]
+	desc := ""
 
-	if !otype {
+	if nargs > 1 {
+		desc = options[1]
+	}
+
+	if otype == "service" {
 		uri = "/api/juniper/sd/service-management/services"
 		addGroupXML = serviceGroupXML
 		content = contentService
@@ -508,9 +524,14 @@ func (s *JunosSpace) AddGroup(otype bool, name, desc string) error {
 	return nil
 }
 
-// ModifyObject modifies an existing address, service or group. See the examples
-// for complete usage.
-func (s *JunosSpace) ModifyObject(otype bool, actions ...interface{}) error {
+// ModifyObject modifies an existing address, service or group. <otype> is either
+// "address" or "service."
+//
+// ModifyObject("address", "add", "Some_Group_Name", "object-to-add")
+// ModifyObject("address", "remove", "Some_Group_Name", "object-to-remove")
+// ModifyObject("address", "rename", "Old_Group_Name", "New_Group_Name")
+// ModifyObject("address", "delete", "Group_to_Delete")
+func (s *JunosSpace) ModifyObject(otype string, actions ...interface{}) error {
 	var err error
 	var uri string
 	var content string
@@ -526,7 +547,7 @@ func (s *JunosSpace) ModifyObject(otype bool, actions ...interface{}) error {
 		content = contentAddressPatch
 		rel = "address"
 
-		if !otype {
+		if otype == "service" {
 			uri = fmt.Sprintf("/api/juniper/sd/service-management/services/%d", objectID)
 			content = contentServicePatch
 			rel = "service"
@@ -734,12 +755,23 @@ func (s *JunosSpace) Variables() (*Variables, error) {
 }
 
 // AddVariable creates a new polymorphic object (variable) on the Junos Space server.
-// The address option is a default address that will be used. This address object must
+//
+// Options are: <name>, <address>, and <description> (optional).
+//
+// The <address> option is a default address object that will be used. This address object must
 // already exist on the server.
-func (s *JunosSpace) AddVariable(name, desc, address string) error {
-	objectID, err := s.getObjectID(address, true)
+func (s *JunosSpace) AddVariable(options ...string) error {
+	nargs := len(options)
+	name := options[0]
+	address := options[1]
+	desc := ""
+	objectID, err := s.getObjectID(address, "address")
 	if err != nil {
 		return err
+	}
+
+	if nargs > 2 {
+		desc = options[2]
 	}
 
 	varBody := fmt.Sprintf(createVariableXML, name, "ADDRESS", desc, address, objectID)
@@ -758,8 +790,8 @@ func (s *JunosSpace) AddVariable(name, desc, address string) error {
 }
 
 // DeleteVariable removes the polymorphic (variable) object from Junos Space.
-// If the variable object is in use, it will not be deleted until you remove
-// it from the policy.
+// If the variable object is in use by a policy, then it will not be deleted
+// until you remove it from the policy.
 func (s *JunosSpace) DeleteVariable(name string) error {
 	var req *APIRequest
 	varID, err := s.getVariableID(name)
@@ -798,6 +830,9 @@ func (s *JunosSpace) ModifyVariable() (*VariableManagement, error) {
 }
 
 // Add appends an address object to the given polymorphic (variable) object.
+//
+// <name> is the variable object, <firewall> is the name of the device you
+// want to associate the variable to, and <object> is the address object.
 func (v *VariableManagement) Add(name, firewall, object string) error {
 	var req *APIRequest
 	var varData existingVariable
@@ -815,7 +850,7 @@ func (v *VariableManagement) Add(name, firewall, object string) error {
 	}
 	moid := fmt.Sprintf("net.juniper.jnap.sm.om.jpa.SecurityDeviceEntity:%d", deviceID)
 
-	vid, err := v.Space.getObjectID(object, true)
+	vid, err := v.Space.getObjectID(object, "address")
 	if err != nil {
 		return err
 	}
