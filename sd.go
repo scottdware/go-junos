@@ -24,6 +24,18 @@ type Address struct {
 	IPAddress   string `xml:"ip-address"`
 }
 
+// GroupMembers contains a list of all the members within a address or service
+// group.
+type GroupMembers struct {
+	Members []Member `xml:"members>member"`
+}
+
+// Member contains information about each individual group member.
+type Member struct {
+	ID   int    `xml:"id"`
+	Name string `xml:"name"`
+}
+
 // Services contains a list of service objects.
 type Services struct {
 	Services []Service `xml:"service"`
@@ -617,6 +629,34 @@ func (s *JunosSpace) Services(filter string) (*Services, error) {
 	}
 
 	return &services, nil
+}
+
+// GroupMembers lists all of the <address> or <service> objects within the
+// given group.
+func (s *JunosSpace) GroupMembers(otype, name string) (*GroupMembers, error) {
+	var members GroupMembers
+	objectID, err := s.getObjectID(name, otype)
+	url := fmt.Sprintf("/api/juniper/sd/address-management/addresses/%d", objectID)
+
+	if otype == "service" {
+		url = fmt.Sprintf("/api/juniper/sd/service-management/services/%d", objectID)
+	}
+
+	req := &APIRequest{
+		Method: "get",
+		URL:    url,
+	}
+	data, err := s.APICall(req)
+	if err != nil {
+		return nil, err
+	}
+
+	err = xml.Unmarshal(data, &members)
+	if err != nil {
+		return nil, err
+	}
+
+	return &members, nil
 }
 
 // SecurityDevices queries the Junos Space server and returns all of the information
