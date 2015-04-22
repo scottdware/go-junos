@@ -540,11 +540,8 @@ func (s *JunosSpace) AddGroup(otype string, options ...string) error {
 // "address" or "service."
 //
 // ModifyObject("address", "add", "Some_Group_Name", "object-to-add")
-//
 // ModifyObject("address", "remove", "Some_Group_Name", "object-to-remove")
-//
 // ModifyObject("address", "rename", "Old_Group_Name", "New_Group_Name")
-//
 // ModifyObject("address", "delete", "Group_to_Delete")
 func (s *JunosSpace) ModifyObject(otype string, actions ...interface{}) error {
 	var err error
