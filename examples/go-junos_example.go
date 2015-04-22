@@ -24,14 +24,20 @@ func main() {
 
 	// To View the entire configuration, use the keyword "full" for the first
 	// argument. If anything else outside of "full" is specified, it will return
-	// the configuration of the specified top-level stanza only. So "security"
-	// would return everything under the "security" stanza.
+	// the configuration of the specified configuration path. You can do sub-sections
+	// by separating the <section> path with a ">" symbol, i.e. "system>login"
 	// Output format can be "text" or "xml".
 	config, err := jnpr.GetConfig("full", "text")
 	if err != nil {
 		fmt.Println(err)
 	}
 	fmt.Println(config)
+
+	users, err := jnpr.GetConfig("system>login", "text")
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(users)
 
 	// If you want to view the difference between the current configuration and a rollback
 	// one, then you can use the ConfigDiff() function to specify a previous config:
@@ -279,6 +285,24 @@ func main() {
 
 	for _, service := range services.Services {
 		fmt.Printf("%+v\n", service)
+	}
+
+	// List all of the objects within a group
+	addressMembers, err := space.GroupMembers("address", "Some-Group")
+	if err != nil {
+		fmt.Println(err)
+	}
+	for _, addr := range addressMembers.Members {
+		fmt.Println(addr.Name)
+	}
+
+	// The same can be done for service groups
+	serviceMembers, err := space.GroupMembers("service", "Web-Services")
+	if err != nil {
+		fmt.Println(err)
+	}
+	for _, svc := range serviceMembers.Members {
+		fmt.Println(svc.Name)
 	}
 
 	// Add an address group. "true" as the first parameter means that we assume the
