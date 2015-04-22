@@ -631,8 +631,9 @@ func (s *JunosSpace) Services(filter string) (*Services, error) {
 	return &services, nil
 }
 
-// GroupMembers lists all of the <address> or <service> objects within the
-// given group.
+// GroupMembers lists all of the address or service objects within the
+// given group. <otype> is either "address" or "service", and <name> is
+// the name of the group you wish to view members for.
 func (s *JunosSpace) GroupMembers(otype, name string) (*GroupMembers, error) {
 	var members GroupMembers
 	objectID, err := s.getObjectID(name, otype)
