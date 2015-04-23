@@ -192,7 +192,7 @@ func (j *Junos) CommitHistory() (*CommitHistory, error) {
 		return nil, err
 	}
 
-	return history, nil
+	return &history, nil
 }
 
 // Commit commits the configuration.
