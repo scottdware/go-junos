@@ -46,6 +46,7 @@ var (
 	rpcUnlock             = "<unlock><target><candidate/></target></unlock>"
 	rpcVersion            = "<get-software-information/>"
 	rpcReboot             = "<request-reboot/>"
+	rpcCommitHistory      = "<get-commit-information/>"
 )
 
 // Junos contains our session state.
@@ -54,6 +55,19 @@ type Junos struct {
 	Hostname       string
 	RoutingEngines int
 	Platform       []RoutingEngine
+}
+
+// CommitHistory holds all of the commit entries.
+type CommitHistory struct {
+	Entries []CommitEntry `xml:"commit-history"`
+}
+
+// CommitEntry holds information about each prevous commit.
+type CommitEntry struct {
+	Sequence  int    `xml:"sequence-number"`
+	User      string `xml:"user"`
+	Method    string `xml:"client"`
+	Timestamp string `xml:"date-time"`
 }
 
 // RoutingEngine contains the hardware and software information for each route engine.
@@ -153,6 +167,32 @@ func (j *Junos) RunCommand(cmd, format string) (string, error) {
 	}
 
 	return reply.Data, nil
+}
+
+// CommitHistory gathers all the information about previous commits.
+func (j *Junos) CommitHistory() (*CommitHistory, error) {
+	var history CommitHistory
+	reply, err := j.Session.Exec(netconf.RawRPC(rpcCommitHistory))
+	if err != nil {
+		return nil, err
+	}
+
+	if reply.Errors != nil {
+		for _, m := range reply.Errors {
+			return nil, errors.New(m.Message)
+		}
+	}
+
+	if reply.Data == "" {
+		return nil, errors.New("could not load commit history")
+	}
+
+	err = xml.Unmarshal([]byte(reply.Data), &history)
+	if err != nil {
+		return nil, err
+	}
+
+	return &history, nil
 }
 
 // Commit commits the configuration.
