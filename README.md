@@ -1,5 +1,6 @@
 ## go-junos
 [![GoDoc](https://godoc.org/github.com/scottdware/go-junos?status.svg)](https://godoc.org/github.com/scottdware/go-junos) [![Travis-CI](https://travis-ci.org/scottdware/go-junos.svg?branch=master)](https://travis-ci.org/scottdware/go-junos)
+[![license](http://img.shields.io/badge/license-MIT-red.svg?style=flat)](https://raw.githubusercontent.com/scottdware/go-junos/master/LICENSE)
 
 A Go package that interacts with Junos devices, as well as Junos Space, and allows you to do the following:
 
