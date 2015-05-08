@@ -131,7 +131,7 @@ func (j *Junos) Close() {
 }
 
 // RunCommand executes any operational mode command, such as "show" or "request."
-// Format can be one of "text" or "xml."
+// <format> can be one of "text" or "xml."
 func (j *Junos) RunCommand(cmd, format string) (string, error) {
 	var command string
 	command = fmt.Sprintf(rpcCommand, cmd)
@@ -363,8 +363,8 @@ func (j *Junos) PrintFacts() {
 }
 
 // GetConfig returns the full configuration, or configuration starting at <section>.
-// Format can be one of "text" or "xml." You can do sub-sections by separating the
-// <section> path with a ">" symbol, i.e. "system>login"
+// <format> can be one of "text" or "xml." You can do sub-sections by separating the
+// <section> path with a ">" symbol, i.e. "system>login" or "protocols>ospf>area".
 func (j *Junos) GetConfig(section, format string) (string, error) {
 	secs := strings.Split(section, ">")
 	nSecs := len(secs) - 1
