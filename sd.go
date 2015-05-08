@@ -88,13 +88,13 @@ type Variable struct {
 	Description string `xml:"description"`
 }
 
-// VariableManagement holds our session state when updating a polymorphic (variable) object.
+// VariableManagement contains our session state when updating a polymorphic (variable) object.
 type VariableManagement struct {
 	Devices []SecurityDevice
 	Space   *JunosSpace
 }
 
-// existingVariable holds all of our information in regards to said polymorphic (variable) object.
+// existingVariable contains all of our information in regards to said polymorphic (variable) object.
 type existingVariable struct {
 	XMLName            xml.Name         `xml:"variable-definition"`
 	Name               string           `xml:"name"`
@@ -106,7 +106,7 @@ type existingVariable struct {
 	VariableValuesList []variableValues `xml:"variable-values-list>variable-values"`
 }
 
-// variableValues holds the information for each device/object tied to the polymorphic (variable) object.
+// variableValues contains the information for each device/object tied to the polymorphic (variable) object.
 type variableValues struct {
 	XMLName       xml.Name `xml:"variable-values"`
 	DeviceMOID    string   `xml:"device>moid"`
@@ -454,8 +454,8 @@ func (s *JunosSpace) AddAddress(options ...string) error {
 
 // AddService creates a new service object to Junos Space. If adding just
 // a single port/service, then enter in the same port/service number in both the
-// "low" and "high" parameters. For a range of ports, enter the starting port in
-// "low" and the uppper limit in "high."
+// <low> and <high> parameters. For a range of ports, enter the starting port in
+// <low> and the uppper limit in <high>.
 func (s *JunosSpace) AddService(proto, name string, low, high int, desc string, timeout int) error {
 	var port string
 	var protoNumber int
