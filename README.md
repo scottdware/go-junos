@@ -27,9 +27,6 @@ Visit the [GoDoc][godoc-go-junos] page for package documentation and examples.
 > **Note:** This package makes all of it's calls over [Netconf][netconf-rfc] using the [go-netconf][go-netconf] package from
  [Juniper Networks][juniper]
 
-### License
-go-junos is licensed under the [MIT License][license].
-
 [netconf-rfc]: https://tools.ietf.org/html/rfc6241
 [go-netconf]: https://github.com/Juniper/go-netconf
 [juniper]: http://www.juniper.net
