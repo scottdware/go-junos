@@ -115,6 +115,13 @@ type variableValues struct {
 	VariableName  string   `xml:"variable-value-detail>name"`
 }
 
+// existingAddress contains information about an address object before modification.
+type existingAddress struct {
+	Name        string `xml:"name"`
+	EditVersion int    `xml:"edit-version"`
+	Description string `xml:"description"`
+}
+
 // XML for creating an address object.
 var addressesXML = `
 <address>
@@ -122,6 +129,20 @@ var addressesXML = `
     <address-type>%s</address-type>
     <host-name/>
     <edit-version/>
+    <members/>
+    <address-version>IPV4</address-version>
+    <definition-type>CUSTOM</definition-type>
+    <ip-address>%s</ip-address>
+    <description>%s</description>
+</address>
+`
+
+var modifyAddressXML = `
+<address>
+    <name>%s</name>
+    <address-type>%s</address-type>
+    <host-name/>
+    <edit-version>%d</edit-version>
     <members/>
     <address-version>IPV4</address-version>
     <definition-type>CUSTOM</definition-type>
@@ -365,6 +386,25 @@ func (s *JunosSpace) getVariableID(variable string) (int, error) {
 	return variableID, nil
 }
 
+// getAddrTypeIP returns the address type and IP address of the given <address> object.
+func (s *JunosSpace) getAddrTypeIP(address string) []string {
+	var addrType string
+	var ipaddr string
+	r := regexp.MustCompile(`(\d+\.\d+\.\d+\.\d+)(\/\d+)?`)
+	match := r.FindStringSubmatch(address)
+
+	switch match[2] {
+	case "", "/32":
+		addrType = "IPADDRESS"
+		ipaddr = match[1]
+	default:
+		addrType = "NETWORK"
+		ipaddr = address
+	}
+
+	return []string{addrType, ipaddr}
+}
+
 // modifyVariableContent creates the XML we use when modifying an existing polymorphic (variable) object.
 func (s *JunosSpace) modifyVariableContent(data *existingVariable, moid, firewall, address string, vid int) string {
 	var varValuesList string
@@ -419,25 +459,13 @@ func (s *JunosSpace) AddAddress(options ...string) error {
 	name := options[0]
 	ip := options[1]
 	desc := ""
-	var addrType string
-	var ipaddr string
-	r := regexp.MustCompile(`(\d+\.\d+\.\d+\.\d+)(\/\d+)?`)
-	match := r.FindStringSubmatch(ip)
-
-	switch match[2] {
-	case "", "/32":
-		addrType = "IPADDRESS"
-		ipaddr = match[1]
-	default:
-		addrType = "NETWORK"
-		ipaddr = ip
-	}
+	addrInfo := s.getAddrTypeIP(ip)
 
 	if nargs > 2 {
 		desc = options[2]
 	}
 
-	address := fmt.Sprintf(addressesXML, name, addrType, ipaddr, desc)
+	address := fmt.Sprintf(addressesXML, name, addrInfo[0], addrInfo[1], desc)
 	req := &APIRequest{
 		Method:      "post",
 		URL:         "/api/juniper/sd/address-management/addresses",
@@ -445,6 +473,48 @@ func (s *JunosSpace) AddAddress(options ...string) error {
 		ContentType: contentAddress,
 	}
 	_, err := s.APICall(req)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// ModifyAddress changes the IP/Network of the given address object <name>.
+func (s *JunosSpace) ModifyAddress(name, newip string) error {
+	var existing existingAddress
+	addrInfo := s.getAddrTypeIP(newip)
+
+	objectID, err := s.getObjectID(name, "address")
+	if err != nil {
+		return err
+	}
+
+	req := &APIRequest{
+		URL:         fmt.Sprintf("/api/juniper/sd/address-management/addresses/%d", objectID),
+		Method:      "get",
+		ContentType: contentAddress,
+	}
+
+	data, err := s.APICall(req)
+	if err != nil {
+		return err
+	}
+
+	err = xml.Unmarshal(data, &existing)
+	if err != nil {
+		return err
+	}
+
+	updateContent := fmt.Sprintf(modifyAddressXML, existing.Name, addrInfo[0], existing.EditVersion, addrInfo[1], existing.Description)
+	modifyReq := &APIRequest{
+		Method:      "put",
+		URL:         fmt.Sprintf("/api/juniper/sd/address-management/addresses/%d", objectID),
+		Body:        updateContent,
+		ContentType: contentAddress,
+	}
+
+	_, err = s.APICall(modifyReq)
 	if err != nil {
 		return err
 	}
