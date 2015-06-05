@@ -318,6 +318,9 @@ func main() {
 	// Add a network
 	space.AddAddress("corporate-users", "192.168.1.0/24", "People on campus")
 
+	// Modify an existing address object (i.e. change the IP address).
+	space.ModifyAddress("my-laptop", "2.2.2.4")
+
 	// Add a service object with an 1800 second inactivity timeout (using "0" disables this feature)
 	space.AddService("udp", "udp-5000", 5000, 5000, "UDP port 5000", 1800)
 
