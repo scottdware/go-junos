@@ -21,6 +21,7 @@ var (
 	rpcCommitAt           = "<commit-configuration><at-time>%s</at-time></commit-configuration>"
 	rpcCommitCheck        = "<commit-configuration><check/></commit-configuration>"
 	rpcCommitConfirm      = "<commit-configuration><confirmed/><confirm-timeout>%d</confirm-timeout></commit-configuration>"
+	rpcCommitFull         = "<commit-configuration><full/></commit-configuration>"
 	rpcFactsRE            = "<get-route-engine-information/>"
 	rpcFactsChassis       = "<get-chassis-inventory/>"
 	rpcConfigFileSet      = "<load-configuration action=\"set\" format=\"text\"><configuration-set>%s</configuration-set></load-configuration>"
@@ -720,4 +721,35 @@ func (j *Junos) Files(path string) (*FileList, error) {
 	}
 
 	return &files, nil
+}
+
+// CommitFull does a full commit on the configuration, which requires all daemons to
+// check and evaluate the new configuration. Useful for when you get an error with
+// a commit or when you've changed the configuration significantly.
+func (j *Junos) CommitFull() error {
+	var errs commitResults
+	reply, err := j.Session.Exec(netconf.RawRPC(rpcCommitFull))
+	if err != nil {
+		return err
+	}
+
+	if reply.Errors != nil {
+		for _, m := range reply.Errors {
+			return errors.New(m.Message)
+		}
+	}
+
+	err = xml.Unmarshal([]byte(reply.Data), &errs)
+	if err != nil {
+		return err
+	}
+
+	if errs.Errors != nil {
+		for _, m := range errs.Errors {
+			message := fmt.Sprintf("[%s]\n    %s\nError: %s", strings.Trim(m.Path, "[\r\n]"), strings.Trim(m.Element, "[\r\n]"), strings.Trim(m.Message, "[\r\n]"))
+			return errors.New(message)
+		}
+	}
+
+	return nil
 }
