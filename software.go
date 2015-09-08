@@ -69,7 +69,7 @@ var stageXML = `
 `
 
 // getSoftwareID returns the ID of the software package.
-func (s *JunosSpace) getSoftwareID(image string) (int, error) {
+func (s *Space) getSoftwareID(image string) (int, error) {
 	var err error
 	var softwareID int
 	images, err := s.Software()
@@ -88,7 +88,7 @@ func (s *JunosSpace) getSoftwareID(image string) (int, error) {
 
 // DeploySoftware starts the upgrade process on the device, using the given image along
 // with the options specified.
-func (s *JunosSpace) DeploySoftware(device, image string, options *SoftwareUpgrade) (int, error) {
+func (s *Space) DeploySoftware(device, image string, options *SoftwareUpgrade) (int, error) {
 	var job jobID
 	deviceID, _ := s.getDeviceID(device)
 	softwareID, _ := s.getSoftwareID(image)
@@ -113,7 +113,7 @@ func (s *JunosSpace) DeploySoftware(device, image string, options *SoftwareUpgra
 }
 
 // RemoveStagedSoftware will delete the staged software image on the device.
-func (s *JunosSpace) RemoveStagedSoftware(device, image string) (int, error) {
+func (s *Space) RemoveStagedSoftware(device, image string) (int, error) {
 	var job jobID
 	deviceID, _ := s.getDeviceID(device)
 	softwareID, _ := s.getSoftwareID(image)
@@ -139,7 +139,7 @@ func (s *JunosSpace) RemoveStagedSoftware(device, image string) (int, error) {
 
 // Software queries the Junos Space server and returns all of the information
 // about each software image that Space manages.
-func (s *JunosSpace) Software() (*SoftwarePackages, error) {
+func (s *Space) Software() (*SoftwarePackages, error) {
 	var software SoftwarePackages
 	req := &APIRequest{
 		Method: "get",
@@ -160,7 +160,7 @@ func (s *JunosSpace) Software() (*SoftwarePackages, error) {
 
 // StageSoftware loads the given software image onto the device but does not
 // upgrade it. The package is placed in the /var/tmp directory.
-func (s *JunosSpace) StageSoftware(device, image string, cleanup bool) (int, error) {
+func (s *Space) StageSoftware(device, image string, cleanup bool) (int, error) {
 	var job jobID
 	deviceID, _ := s.getDeviceID(device)
 	softwareID, _ := s.getSoftwareID(image)

@@ -91,7 +91,7 @@ type Variable struct {
 // VariableManagement contains our session state when updating a polymorphic (variable) object.
 type VariableManagement struct {
 	Devices []SecurityDevice
-	Space   *JunosSpace
+	Space   *Space
 }
 
 // existingVariable contains all of our information in regards to said polymorphic (variable) object.
@@ -278,7 +278,7 @@ var modifyVariableXML = `
 `
 
 // getDeviceID returns the ID of a managed device.
-func (s *JunosSpace) getSDDeviceID(device interface{}) (int, error) {
+func (s *Space) getSDDeviceID(device interface{}) (int, error) {
 	var err error
 	var deviceID int
 	ipRegex := regexp.MustCompile(`(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})`)
@@ -309,7 +309,7 @@ func (s *JunosSpace) getSDDeviceID(device interface{}) (int, error) {
 }
 
 // getObjectID returns the ID of the address or service object.
-func (s *JunosSpace) getObjectID(object interface{}, otype string) (int, error) {
+func (s *Space) getObjectID(object interface{}, otype string) (int, error) {
 	var err error
 	var objectID int
 	var services *Services
@@ -351,7 +351,7 @@ func (s *JunosSpace) getObjectID(object interface{}, otype string) (int, error) 
 }
 
 // getPolicyID returns the ID of a firewall policy.
-func (s *JunosSpace) getPolicyID(object string) (int, error) {
+func (s *Space) getPolicyID(object string) (int, error) {
 	var err error
 	var objectID int
 	objects, err := s.Policies()
@@ -369,7 +369,7 @@ func (s *JunosSpace) getPolicyID(object string) (int, error) {
 }
 
 // getVariableID returns the ID of a polymorphic (variable) object.
-func (s *JunosSpace) getVariableID(variable string) (int, error) {
+func (s *Space) getVariableID(variable string) (int, error) {
 	var err error
 	var variableID int
 	vars, err := s.Variables()
@@ -387,7 +387,7 @@ func (s *JunosSpace) getVariableID(variable string) (int, error) {
 }
 
 // getAddrTypeIP returns the address type and IP address of the given <address> object.
-func (s *JunosSpace) getAddrTypeIP(address string) []string {
+func (s *Space) getAddrTypeIP(address string) []string {
 	var addrType string
 	var ipaddr string
 	r := regexp.MustCompile(`(\d+\.\d+\.\d+\.\d+)(\/\d+)?`)
@@ -406,7 +406,7 @@ func (s *JunosSpace) getAddrTypeIP(address string) []string {
 }
 
 // modifyVariableContent creates the XML we use when modifying an existing polymorphic (variable) object.
-func (s *JunosSpace) modifyVariableContent(data *existingVariable, moid, firewall, address string, vid int) string {
+func (s *Space) modifyVariableContent(data *existingVariable, moid, firewall, address string, vid int) string {
 	var varValuesList string
 	for _, d := range data.VariableValuesList {
 		varValuesList += fmt.Sprintf("<variable-values><device><moid>%s</moid><name>%s</name></device>", d.DeviceMOID, d.DeviceName)
@@ -420,7 +420,7 @@ func (s *JunosSpace) modifyVariableContent(data *existingVariable, moid, firewal
 
 // Addresses queries the Junos Space server and returns all of the information
 // about each address that is managed by Space.
-func (s *JunosSpace) Addresses(filter string) (*Addresses, error) {
+func (s *Space) Addresses(filter string) (*Addresses, error) {
 	var addresses Addresses
 	p := url.Values{}
 	p.Set("filter", "(global eq '')")
@@ -449,7 +449,7 @@ func (s *JunosSpace) Addresses(filter string) (*Addresses, error) {
 // AddAddress creates a new address object in Junos Space.
 //
 // Options are: <name>, <ip>, <description> (optional).
-func (s *JunosSpace) AddAddress(options ...string) error {
+func (s *Space) AddAddress(options ...string) error {
 	nargs := len(options)
 
 	if nargs < 2 {
@@ -481,7 +481,7 @@ func (s *JunosSpace) AddAddress(options ...string) error {
 }
 
 // ModifyAddress changes the IP/Network of the given address object <name>.
-func (s *JunosSpace) ModifyAddress(name, newip string) error {
+func (s *Space) ModifyAddress(name, newip string) error {
 	var existing existingAddress
 	addrInfo := s.getAddrTypeIP(newip)
 
@@ -526,7 +526,7 @@ func (s *JunosSpace) ModifyAddress(name, newip string) error {
 // a single port/service, then enter in the same port/service number in both the
 // <low> and <high> parameters. For a range of ports, enter the starting port in
 // <low> and the uppper limit in <high>.
-func (s *JunosSpace) AddService(proto, name string, low, high int, desc string, timeout int) error {
+func (s *Space) AddService(proto, name string, low, high int, desc string, timeout int) error {
 	var port string
 	var protoNumber int
 	var inactivity string
@@ -567,7 +567,7 @@ func (s *JunosSpace) AddService(proto, name string, low, high int, desc string, 
 }
 
 // AddGroup creates a new address or service group in Junos Space.
-func (s *JunosSpace) AddGroup(otype string, options ...string) error {
+func (s *Space) AddGroup(otype string, options ...string) error {
 	nargs := len(options)
 
 	if nargs < 1 {
@@ -616,7 +616,7 @@ func (s *JunosSpace) AddGroup(otype string, options ...string) error {
 // ModifyObject("address", "rename", "Old_Group_Name", "New_Group_Name")
 //
 // ModifyObject("address", "delete", "Group_to_Delete")
-func (s *JunosSpace) ModifyObject(otype string, actions ...interface{}) error {
+func (s *Space) ModifyObject(otype string, actions ...interface{}) error {
 	var err error
 	var uri string
 	var content string
@@ -678,7 +678,7 @@ func (s *JunosSpace) ModifyObject(otype string, actions ...interface{}) error {
 
 // Services queries the Junos Space server and returns all of the information
 // about each service that is managed by Space.
-func (s *JunosSpace) Services(filter string) (*Services, error) {
+func (s *Space) Services(filter string) (*Services, error) {
 	var services Services
 	p := url.Values{}
 	p.Set("filter", "(global eq '')")
@@ -707,7 +707,7 @@ func (s *JunosSpace) Services(filter string) (*Services, error) {
 // GroupMembers lists all of the address or service objects within the
 // given group. <otype> is either "address" or "service", and <name> is
 // the name of the group you wish to view members for.
-func (s *JunosSpace) GroupMembers(otype, name string) (*GroupMembers, error) {
+func (s *Space) GroupMembers(otype, name string) (*GroupMembers, error) {
 	var members GroupMembers
 	objectID, err := s.getObjectID(name, otype)
 	url := fmt.Sprintf("/api/juniper/sd/address-management/addresses/%d", objectID)
@@ -735,7 +735,7 @@ func (s *JunosSpace) GroupMembers(otype, name string) (*GroupMembers, error) {
 
 // SecurityDevices queries the Junos Space server and returns all of the information
 // about each security device that is managed by Space.
-func (s *JunosSpace) SecurityDevices() (*SecurityDevices, error) {
+func (s *Space) SecurityDevices() (*SecurityDevices, error) {
 	var devices SecurityDevices
 	req := &APIRequest{
 		Method: "get",
@@ -755,7 +755,7 @@ func (s *JunosSpace) SecurityDevices() (*SecurityDevices, error) {
 }
 
 // Policies returns a list of all firewall policies managed by Junos Space.
-func (s *JunosSpace) Policies() (*Policies, error) {
+func (s *Space) Policies() (*Policies, error) {
 	var policies Policies
 	req := &APIRequest{
 		Method: "get",
@@ -776,7 +776,7 @@ func (s *JunosSpace) Policies() (*Policies, error) {
 
 // PublishPolicy publishes a changed firewall policy. If "true" is specified for
 // <update>, then Junos Space will also update the device.
-func (s *JunosSpace) PublishPolicy(object interface{}, update bool) (int, error) {
+func (s *Space) PublishPolicy(object interface{}, update bool) (int, error) {
 	var err error
 	var job jobID
 	var id int
@@ -821,7 +821,7 @@ func (s *JunosSpace) PublishPolicy(object interface{}, update bool) (int, error)
 
 // UpdateDevice will update a changed security device, synchronizing it with
 // Junos Space.
-func (s *JunosSpace) UpdateDevice(device interface{}) (int, error) {
+func (s *Space) UpdateDevice(device interface{}) (int, error) {
 	var job jobID
 	deviceID, err := s.getDeviceID(device)
 	if err != nil {
@@ -849,7 +849,7 @@ func (s *JunosSpace) UpdateDevice(device interface{}) (int, error) {
 }
 
 // Variables returns a listing of all polymorphic (variable) objects.
-func (s *JunosSpace) Variables() (*Variables, error) {
+func (s *Space) Variables() (*Variables, error) {
 	var vars Variables
 	req := &APIRequest{
 		Method: "get",
@@ -874,7 +874,7 @@ func (s *JunosSpace) Variables() (*Variables, error) {
 //
 // The <address> option is a default address object that will be used. This address object must
 // already exist on the server.
-func (s *JunosSpace) AddVariable(options ...string) error {
+func (s *Space) AddVariable(options ...string) error {
 	nargs := len(options)
 	name := options[0]
 	address := options[1]
@@ -906,7 +906,7 @@ func (s *JunosSpace) AddVariable(options ...string) error {
 // DeleteVariable removes the polymorphic (variable) object from Junos Space.
 // If the variable object is in use by a policy, then it will not be deleted
 // until you remove it from the policy.
-func (s *JunosSpace) DeleteVariable(name string) error {
+func (s *Space) DeleteVariable(name string) error {
 	var req *APIRequest
 	varID, err := s.getVariableID(name)
 	if err != nil {
@@ -931,7 +931,7 @@ func (s *JunosSpace) DeleteVariable(name string) error {
 // a polymorphic (variable) object. We do this to only get the list of
 // security devices (SecurityDevices()) once, instead of call the function
 // each time we want to modify a variable.
-func (s *JunosSpace) ModifyVariable() (*VariableManagement, error) {
+func (s *Space) ModifyVariable() (*VariableManagement, error) {
 	devices, err := s.SecurityDevices()
 	if err != nil {
 		return nil, err

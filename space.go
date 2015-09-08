@@ -25,8 +25,8 @@ var (
 	contentResync          = "application/vnd.net.juniper.space.device-management.exec-resync+xml;version=1"
 )
 
-// JunosSpace contains our session state.
-type JunosSpace struct {
+// Space contains our session state.
+type Space struct {
 	Host      string
 	User      string
 	Password  string
@@ -54,8 +54,8 @@ type jobDetail struct {
 }
 
 // NewServer sets up our connection to the Junos Space server.
-func NewServer(host, user, passwd string) *JunosSpace {
-	return &JunosSpace{
+func NewServer(host, user, passwd string) *Space {
+	return &Space{
 		Host:     host,
 		User:     user,
 		Password: passwd,
@@ -68,7 +68,7 @@ func NewServer(host, user, passwd string) *JunosSpace {
 }
 
 // APICall is used to query the Junos Space server API.
-func (s *JunosSpace) APICall(options *APIRequest) ([]byte, error) {
+func (s *Space) APICall(options *APIRequest) ([]byte, error) {
 	var req *http.Request
 	client := &http.Client{Transport: s.Transport}
 	url := fmt.Sprintf("https://%s%s", s.Host, options.URL)

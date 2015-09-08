@@ -56,7 +56,7 @@ var addDeviceHostXML = `
 `
 
 // getDeviceID returns the ID of a managed device.
-func (s *JunosSpace) getDeviceID(device interface{}) (int, error) {
+func (s *Space) getDeviceID(device interface{}) (int, error) {
 	var err error
 	var deviceID int
 	ipRegex := regexp.MustCompile(`(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})`)
@@ -87,7 +87,7 @@ func (s *JunosSpace) getDeviceID(device interface{}) (int, error) {
 }
 
 // AddDevice adds a new managed device to Junos Space, and returns the Job ID.
-func (s *JunosSpace) AddDevice(host, user, password string) (int, error) {
+func (s *Space) AddDevice(host, user, password string) (int, error) {
 	var job jobID
 	var addDevice string
 	ipRegex := regexp.MustCompile(`(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})`)
@@ -119,7 +119,7 @@ func (s *JunosSpace) AddDevice(host, user, password string) (int, error) {
 
 // Devices queries the Junos Space server and returns all of the information
 // about each device that is managed by Space.
-func (s *JunosSpace) Devices() (*Devices, error) {
+func (s *Space) Devices() (*Devices, error) {
 	var devices Devices
 	req := &APIRequest{
 		Method: "get",
@@ -140,7 +140,7 @@ func (s *JunosSpace) Devices() (*Devices, error) {
 
 // RemoveDevice removes a device from Junos Space. You can specify the device ID, name
 // or IP address.
-func (s *JunosSpace) RemoveDevice(device interface{}) error {
+func (s *Space) RemoveDevice(device interface{}) error {
 	var err error
 	deviceID, err := s.getDeviceID(device)
 	if err != nil {
@@ -163,7 +163,7 @@ func (s *JunosSpace) RemoveDevice(device interface{}) error {
 
 // Resync synchronizes the device with Junos Space. Good to use if you make a lot of
 // changes outside of Junos Space such as adding interfaces, zones, etc.
-func (s *JunosSpace) Resync(device interface{}) (int, error) {
+func (s *Space) Resync(device interface{}) (int, error) {
 	var job jobID
 	deviceID, err := s.getDeviceID(device)
 	if err != nil {
