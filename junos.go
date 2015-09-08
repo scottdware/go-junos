@@ -593,7 +593,8 @@ func NewSession(host, user, password string) (*Junos, error) {
 		return nil, err
 	}
 
-	res := make([]RoutingEngine, 0)
+	// res := make([]RoutingEngine, 0)
+	var res []RoutingEngine
 	hostname := facts.Hostname
 	version := rex.FindStringSubmatch(facts.PackageInfo[0].SoftwareVersion[0])
 	model := strings.ToUpper(facts.Platform)
@@ -717,7 +718,7 @@ func (j *Junos) Files(path string) (*FileList, error) {
 	}
 
 	if len(files.Error) > 0 {
-		return nil, errors.New(fmt.Sprintf("%s: No such file or directory", path))
+		return nil, fmt.Errorf("%s: No such file or directory", path)
 	}
 
 	return &files, nil
