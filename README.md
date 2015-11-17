@@ -8,6 +8,9 @@ A Go package that interacts with Junos devices, as well as Junos Space, and allo
 * Compare the active configuration to a given rollback config.
 * Rollback the configuration to a given state or a "rescue" config.
 * Configure devices by uploading a local file or from an FTP/HTTP server.
+* List files on devices.
+* [SRX] Create a policy to be deployed.
+* [SRX] Convert from a zone-based address book to a global one.
 
 Junos Space
 
