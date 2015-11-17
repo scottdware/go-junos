@@ -33,7 +33,7 @@ type ExistingAddresses struct {
 	ExistingAddressSets []ExistingAddressSet `xml:"security>address-book>address-set"`
 }
 
-// Address contains information about each individual address-book entry.
+// ExistingAddress contains information about each individual address-book entry.
 type ExistingAddress struct {
 	Name     string `xml:"name"`
 	IP       string `xml:"ip-prefix,omitempty"`
@@ -41,7 +41,7 @@ type ExistingAddress struct {
 	Wildcard string `xml:"wildcard-address>name,omitempty"`
 }
 
-// AddressSet contains all of the address-sets (groups) in the address-book.
+// ExistingAddressSet contains all of the address-sets (groups) in the address-book.
 type ExistingAddressSet struct {
 	Name              string            `xml:"name"`
 	ExistingAddresses []ExistingAddress `xml:"address"`
@@ -54,12 +54,12 @@ type ExistingApplications struct {
 	ExistingApplicationSets []ExistingApplicationSet `xml:"applications>application-set"`
 }
 
-// Application contains information about each individual application entry.
+// ExistingApplication contains information about each individual application entry.
 type ExistingApplication struct {
 	Name string `xml:"name"`
 }
 
-// ApplicationSet contains all of the application-sets (service groups) in the SRX.
+// ExistingApplicationSet contains all of the application-sets (service groups) in the SRX.
 type ExistingApplicationSet struct {
 	Name                 string                `xml:"name"`
 	ExistingApplications []ExistingApplication `xml:"application-set>application"`
@@ -93,7 +93,7 @@ type AddressSet struct {
 	AddressEntries []AddressEntry `xml:"address"`
 }
 
-// Interface contains a list of all interfaces that belong to the zone.
+// ZoneInterface contains a list of all interfaces that belong to the zone.
 type ZoneInterface struct {
 	Name string `xml:"name"`
 }
