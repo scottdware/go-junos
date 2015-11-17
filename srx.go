@@ -345,7 +345,8 @@ func (p *FirewallPolicy) CreateApplication(name, protocol, dstport string) {
 	p.AppConfig = append(p.AppConfig, fmt.Sprintf("set applications application %s protocol %s destination-port %s\n", name, protocol, dstport))
 }
 
-// AddRule creates a single rule and adds it to the policy.
+// AddRule creates a single rule and adds it to the policy. For services/applications, you MUST
+// provide an already existing application. If you wish to create one, use CreateApplication().
 func (p *FirewallPolicy) AddRule(name interface{}, srczone, src, dstzone, dst, application, action string) {
 	srcAddrs := strings.Split(src, ",")
 	dstAddrs := strings.Split(dst, ",")
