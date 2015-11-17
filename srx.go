@@ -3,6 +3,9 @@ package junos
 import (
 	"encoding/xml"
 	"fmt"
+	"os"
+	"regexp"
+	"strconv"
 	"strings"
 )
 
@@ -405,6 +408,25 @@ func (p *FirewallPolicy) BuildPolicy() []string {
 // ConvertAddressBook will generate the configuration needed to migrate from a zone-based address
 // book to a global one. You can then use Config() to apply the changes if necessary.
 func (j *Junos) ConvertAddressBook() []string {
+	vrx := regexp.MustCompile(`(\d+)\.(\d+)([RBISX]{1})(\d+)(\.(\d+))?`)
+
+	for _, d := range j.Platform {
+		if !strings.Contains(d.Model, "SRX") {
+			fmt.Printf("This device doesn't look to be an SRX (%s). You can only run this script against an SRX.\n", d.Model)
+			os.Exit(0)
+		}
+		versionBreak := vrx.FindStringSubmatch(d.Version)
+		maj, _ := strconv.Atoi(versionBreak[1])
+		min, _ := strconv.Atoi(versionBreak[2])
+		// rel := versionBreak[3]
+		// build, _ := strconv.Atoi(versionBreak[4])
+
+		if maj <= 11 && min < 2 {
+			fmt.Println("You must be running JUNOS version 11.2 or above in order to use this conversion tool.")
+			os.Exit(0)
+		}
+	}
+
 	var seczones SecurityZones
 	globalAddressBook := []string{}
 
