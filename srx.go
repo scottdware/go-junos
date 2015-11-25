@@ -411,7 +411,11 @@ func (j *Junos) ConvertAddressBook() []string {
 	vrx := regexp.MustCompile(`(\d+)\.(\d+)([RBISX]{1})(\d+)(\.(\d+))?`)
 
 	for _, d := range j.Platform {
-		if !strings.Contains(d.Model, "FIREFLY") || !strings.Contains(d.Model, "SRX") {
+		if strings.Contains(d.Model, "FIREFLY") {
+			continue
+		}
+
+		if !strings.Contains(d.Model, "SRX") {
 			fmt.Printf("This device doesn't look to be an SRX (%s). You can only run this script against an SRX.\n", d.Model)
 			os.Exit(0)
 		}
