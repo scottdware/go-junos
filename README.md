@@ -28,7 +28,11 @@ Junos Space
 Visit the [GoDoc][godoc-go-junos] page for package documentation and examples.
 
 > **Note:** This package makes all of it's calls over [Netconf][netconf-rfc] using the [go-netconf][go-netconf] package from
- [Juniper Networks][juniper]
+ [Juniper Networks][juniper]. Please make sure you allow Netconf communication to your devices:
+```
+set system services netconf ssh
+set security zones security-zone <xxx> interfaces <xxx> host-inbound-traffic system-services netconf
+```
 
 [netconf-rfc]: https://tools.ietf.org/html/rfc6241
 [go-netconf]: https://github.com/Juniper/go-netconf
