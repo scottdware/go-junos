@@ -468,3 +468,21 @@ func (j *Junos) ConvertAddressBook() []string {
 
 	return globalAddressBook
 }
+
+// TrafficSelector creates the security-association (SA) configuration needed when building an
+// IPsec VPN tunnel.
+func (j *Junos) TrafficSelector(vpn string, local, remote []string) []string {
+	count := 1
+	ts := []string{}
+
+	for _, l := range local {
+		for _, r := range remote {
+			tsCfg := fmt.Sprintf("set security ipsec vpn %s traffic-selector ts%d local-ip %s remote-ip %s", vpn, count, l, r)
+			ts = append(ts, tsCfg)
+
+			count++
+		}
+	}
+
+	return ts
+}
