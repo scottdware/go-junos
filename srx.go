@@ -469,8 +469,8 @@ func (j *Junos) ConvertAddressBook() []string {
 	return globalAddressBook
 }
 
-// TrafficSelector creates the security-association (SA) configuration needed when building an
-// IPsec VPN tunnel.
+// TrafficSelector creates the security-association (SA) configuration needed for the given <vpn>
+// when building an IPsec VPN tunnel. <local> and <remote> are a []string of IP addresses.
 func (j *Junos) TrafficSelector(vpn string, local, remote []string) []string {
 	count := 1
 	ts := []string{}
