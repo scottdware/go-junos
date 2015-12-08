@@ -11,6 +11,7 @@ A Go package that interacts with Junos devices, as well as Junos Space, and allo
 * List files on devices.
 * [SRX] Create a policy to be deployed.
 * [SRX] Convert from a zone-based address book to a global one.
+* [SRX] Create traffic-selectors for an IPsec VPN.
 
 Junos Space
 
