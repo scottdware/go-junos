@@ -109,9 +109,32 @@ type IPsecVPN struct {
 	ExternalInt      string
 	St0              string
 	Zone             string
-	P1               []string
-	P2               []string
+	PSK              string
+	Mode             string
+	PFS              int
+	Traffic          bool
+	Gateway          []string
+	P1Proposals      []P1
+	P2Proposals      []P2
 	TrafficSelectors []string
+}
+
+// P1 contains any IKE phase 1 proposal information.
+type P1 struct {
+	P1Name           string
+	P1DiffeHellman   int
+	P1Authentication string
+	P1Encryption     string
+	P1Seconds        int
+}
+
+// P2 contains any IKE phase 2 proposal information.
+type P2 struct {
+	P2Name           string
+	P2Authentication string
+	P2Encryption     string
+	P2Seconds        int
+	P2Protocol       string
 }
 
 // st0Interface holds all of the current st0 interfaces on the SRX.
@@ -512,6 +535,8 @@ func (j *Junos) ConvertAddressBook() []string {
 // NewIPsecVPN creates the initial template needed to bulid a new site-to-site VPN. Options are
 // as follows:
 //
+// <name> - Name of the VPN.
+//
 // <local> - the public IP address of the SRX terminating the VPN.
 //
 // <peer> - the remote devices' IP address.
@@ -519,8 +544,17 @@ func (j *Junos) ConvertAddressBook() []string {
 // <iface> - the external interface of the SRX (typically where the <local> IP is tied to).
 //
 // <zone> - the security-zone where the routed st0.<unit> interfaces reside.
-func (j *Junos) NewIPsecVPN(name, local, peer, iface, zone string) *IPsecVPN {
+//
+// <pfs> - 1, 2, 5, 14, 19, 20, 24; use -1 to disable.
+//
+// <ontraffic> - true or false; whether or not to establish the tunnel on-traffic or immediately.
+//
+// <mode> - "main" or "aggressive."
+//
+// <psk> - Pre-shared key.
+func (j *Junos) NewIPsecVPN(name, local, peer, iface, zone string, pfs int, ontraffic bool, mode, psk string) *IPsecVPN {
 	var ints st0Interface
+	gateway := []string{}
 	st0, _ := j.RunCommand("show interfaces st0", "xml")
 
 	if err := xml.Unmarshal([]byte(st0), &ints); err != nil {
@@ -538,6 +572,11 @@ func (j *Junos) NewIPsecVPN(name, local, peer, iface, zone string) *IPsecVPN {
 	total := len(stInts)
 	newst0 := fmt.Sprintf("st0.%d", stInts[total-1]+1)
 
+	gateway = append(gateway, fmt.Sprintf("set security ike gateway %s address %s\n", name, peer))
+	gateway = append(gateway, fmt.Sprintf("set security ike gateway %s external-interface %s\n", name, iface))
+	gateway = append(gateway, fmt.Sprintf("set security ike gateway %s ike-policy %s\n", name, name))
+	gateway = append(gateway, fmt.Sprintf("set security ike gateway %s local-address %s\n", name, local))
+
 	return &IPsecVPN{
 		Name:        name,
 		Local:       local,
@@ -545,79 +584,68 @@ func (j *Junos) NewIPsecVPN(name, local, peer, iface, zone string) *IPsecVPN {
 		ExternalInt: iface,
 		St0:         newst0,
 		Zone:        zone,
+		PFS:         pfs,
+		Traffic:     ontraffic,
+		Mode:        mode,
+		PSK:         psk,
+		Gateway:     gateway,
 	}
 }
 
 // Phase1 creates the IKE proposal to use for the site-to-site VPN. Options are as follows:
 //
-// dh - 1, 2, 5, 14, 19, 20, 24
+// <name> - Name of the proposal.
 //
-// auth - "md5" or "sha1"
+// <dh> - 1, 2, 5, 14, 19, 20, 24
 //
-// encryption - "3des", "aes-128", "aes-192", "aes-256", "des"
+// <auth> - "md5" or "sha1"
 //
-// mode - "main" or "aggressive"
-func (i *IPsecVPN) Phase1(dh int, auth, encryption string, lifetime int, mode, psk string) {
-	p1 := []string{}
+// <encryption> - "3des", "aes-128", "aes-192", "aes-256", "des"
+//
+// <lifetime> - Lifetime in seconds.
+func (i *IPsecVPN) Phase1(name string, dh int, auth, encryption string, lifetime int) {
 	authAlgorithm := map[string]string{
 		"md5":  "md5",
 		"sha1": "sha1",
 	}
 
-	p1 = append(p1, fmt.Sprintf("set security ike proposal %s authentication-method pre-shared-keys\n", i.Name))
-	p1 = append(p1, fmt.Sprintf("set security ike proposal %s dh-group %s\n", i.Name, groups[dh]))
-	p1 = append(p1, fmt.Sprintf("set security ike proposal %s authentication-algorithm %s\n", i.Name, authAlgorithm[auth]))
-	p1 = append(p1, fmt.Sprintf("set security ike proposal %s encryption-algorithm %s\n", i.Name, encrAlgorithm[encryption]))
-	p1 = append(p1, fmt.Sprintf("set security ike proposal %s lifetime-seconds %d\n", i.Name, lifetime))
-	p1 = append(p1, fmt.Sprintf("set security ike policy %s mode %s\n", i.Name, mode))
-	p1 = append(p1, fmt.Sprintf("set security ike policy %s proposals %s\n", i.Name, i.Name))
-	p1 = append(p1, fmt.Sprintf("set security ike policy %s pre-shared-key ascii-text \"%s\"\n", i.Name, psk))
-	p1 = append(p1, fmt.Sprintf("set security ike gateway %s address %s\n", i.Name, i.Peer))
-	p1 = append(p1, fmt.Sprintf("set security ike gateway %s external-interface %s\n", i.Name, i.ExternalInt))
-	p1 = append(p1, fmt.Sprintf("set security ike gateway %s ike-policy %s\n", i.Name, i.Name))
-	p1 = append(p1, fmt.Sprintf("set security ike gateway %s local-address %s\n", i.Name, i.Local))
+	p1 := P1{
+		P1Name:           name,
+		P1DiffeHellman:   dh,
+		P1Authentication: authAlgorithm[auth],
+		P1Encryption:     encrAlgorithm[encryption],
+		P1Seconds:        lifetime,
+	}
 
-	i.P1 = p1
+	i.P1Proposals = append(i.P1Proposals, p1)
 }
 
 // Phase2 creates the IPsec proposal to use for the site-to-site VPN. Options are as follows:
 //
-// pfs - 1, 2, 5, 14, 19, 20, 24; use -1 to disable.
+// <name> - Name of the proposal.
 //
-// auth - "md5" or "sha1"
+// <auth> - "md5" or "sha1"
 //
-// encryption - "3des", "aes-128", "aes-192", "aes-256", "des"
+// <encryption> - "3des", "aes-128", "aes-192", "aes-256", "des"
 //
-// protocol - "ah" or "esp"
+// <lifetime> - Lifetime in seconds.
 //
-// ontraffic - true or false; whether or not to establish the tunnel on-traffic or immediately.
-func (i *IPsecVPN) Phase2(pfs int, auth, encryption string, lifetime int, protocol string, ontraffic bool) {
-	p2 := []string{}
+// <protocol> - "ah" or "esp"
+func (i *IPsecVPN) Phase2(name string, auth, encryption string, lifetime int, protocol string) {
 	authAlgorithm := map[string]string{
 		"md5":  "hmac-md5-96",
 		"sha1": "hmac-sha1-96",
 	}
 
-	p2 = append(p2, fmt.Sprintf("set security ipsec proposal %s protocol %s\n", i.Name, protocol))
-	p2 = append(p2, fmt.Sprintf("set security ipsec proposal %s authentication-algorithm %s\n", i.Name, authAlgorithm[auth]))
-	p2 = append(p2, fmt.Sprintf("set security ipsec proposal %s encryption-algorithm %s\n", i.Name, encrAlgorithm[encryption]))
-	p2 = append(p2, fmt.Sprintf("set security ipsec proposal %s lifetime-seconds %d\n", i.Name, lifetime))
-	p2 = append(p2, fmt.Sprintf("set security ipsec policy %s proposals %s\n", i.Name, i.Name))
-	if pfs != -1 {
-		p2 = append(p2, fmt.Sprintf("set security ipsec policy %s perfect-forward-secrecy keys %s\n", i.Name, groups[pfs]))
-	}
-	p2 = append(p2, fmt.Sprintf("set security ipsec vpn %s bind-interface %s\n", i.Name, i.St0))
-	p2 = append(p2, fmt.Sprintf("set security ipsec vpn %s ike gateway %s\n", i.Name, i.Name))
-	p2 = append(p2, fmt.Sprintf("set security ipsec vpn %s ike idle-time 60\n", i.Name))
-	p2 = append(p2, fmt.Sprintf("set security ipsec vpn %s ike ipsec-policy %s\n", i.Name, i.Name))
-	switch ontraffic {
-	case true:
-		p2 = append(p2, fmt.Sprintf("set security ipsec vpn %s establish-tunnels on-traffic\n", i.Name))
-	case false:
-		p2 = append(p2, fmt.Sprintf("set security ipsec vpn %s establish-tunnels immediately\n", i.Name))
+	p2 := P2{
+		P2Name:           name,
+		P2Authentication: authAlgorithm[auth],
+		P2Encryption:     encrAlgorithm[encryption],
+		P2Seconds:        lifetime,
+		P2Protocol:       protocol,
 	}
 
-	i.P2 = p2
+	i.P2Proposals = append(i.P2Proposals, p2)
 }
 
 // TrafficSelector creates the security-association (SA) configuration needed when building
@@ -644,12 +672,62 @@ func (i *IPsecVPN) BuildIPsecVPN() []string {
 
 	config = append(config, fmt.Sprintf("set interfaces %s family inet\n", i.St0))
 	config = append(config, fmt.Sprintf("set security zones security-zone %s interfaces %s\n", i.Zone, i.St0))
-	for _, p1 := range i.P1 {
-		config = append(config, p1)
+
+	for _, p1 := range i.P1Proposals {
+		phase1 := []string{}
+		phase1 = append(phase1, fmt.Sprintf("set security ike proposal %s authentication-method pre-shared-keys\n", p1.P1Name))
+		phase1 = append(phase1, fmt.Sprintf("set security ike proposal %s dh-group %s\n", p1.P1Name, groups[p1.P1DiffeHellman]))
+		phase1 = append(phase1, fmt.Sprintf("set security ike proposal %s authentication-algorithm %s\n", p1.P1Name, p1.P1Authentication))
+		phase1 = append(phase1, fmt.Sprintf("set security ike proposal %s encryption-algorithm %s\n", p1.P1Name, p1.P1Encryption))
+		phase1 = append(phase1, fmt.Sprintf("set security ike proposal %s lifetime-seconds %d\n", p1.P1Name, p1.P1Seconds))
+
+		for _, p := range phase1 {
+			config = append(config, p)
+		}
 	}
-	for _, p2 := range i.P2 {
-		config = append(config, p2)
+
+	config = append(config, fmt.Sprintf("set security ike policy %s mode %s\n", i.Name, i.Mode))
+	config = append(config, fmt.Sprintf("set security ike policy %s pre-shared-key ascii-text \"%s\"\n", i.Name, i.PSK))
+
+	for _, p1props := range i.P1Proposals {
+		config = append(config, fmt.Sprintf("set security ike policy %s proposals %s\n", i.Name, p1props.P1Name))
 	}
+
+	for _, g := range i.Gateway {
+		config = append(config, g)
+	}
+
+	for _, p2 := range i.P2Proposals {
+		phase2 := []string{}
+		phase2 = append(phase2, fmt.Sprintf("set security ipsec proposal %s protocol %s\n", p2.P2Name, p2.P2Protocol))
+		phase2 = append(phase2, fmt.Sprintf("set security ipsec proposal %s authentication-algorithm %s\n", p2.P2Name, p2.P2Authentication))
+		phase2 = append(phase2, fmt.Sprintf("set security ipsec proposal %s encryption-algorithm %s\n", p2.P2Name, p2.P2Encryption))
+		phase2 = append(phase2, fmt.Sprintf("set security ipsec proposal %s lifetime-seconds %d\n", p2.P2Name, p2.P2Seconds))
+
+		for _, p := range phase2 {
+			config = append(config, p)
+		}
+	}
+
+	for _, p2props := range i.P2Proposals {
+		config = append(config, fmt.Sprintf("set security ipsec policy %s proposals %s\n", i.Name, p2props.P2Name))
+	}
+
+	if i.PFS != -1 {
+		config = append(config, fmt.Sprintf("set security ipsec policy %s perfect-forward-secrecy keys %s\n", i.Name, groups[i.PFS]))
+	}
+
+	config = append(config, fmt.Sprintf("set security ipsec vpn %s bind-interface %s\n", i.Name, i.St0))
+	config = append(config, fmt.Sprintf("set security ipsec vpn %s ike gateway %s\n", i.Name, i.Name))
+	config = append(config, fmt.Sprintf("set security ipsec vpn %s ike idle-time 60\n", i.Name))
+	config = append(config, fmt.Sprintf("set security ipsec vpn %s ike ipsec-policy %s\n", i.Name, i.Name))
+	switch i.Traffic {
+	case true:
+		config = append(config, fmt.Sprintf("set security ipsec vpn %s establish-tunnels on-traffic\n", i.Name))
+	case false:
+		config = append(config, fmt.Sprintf("set security ipsec vpn %s establish-tunnels immediately\n", i.Name))
+	}
+
 	for _, ts := range i.TrafficSelectors {
 		config = append(config, ts)
 	}
