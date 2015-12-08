@@ -180,7 +180,39 @@ func main() {
 	}
 	// Output: Model: SRX240H2, Version: 12.1X47-D10.4
 
+	// If you have an SRX that uses zone-based address books, you can easily convert it to
+	// a global one.
+	z2g := jnpr.ConvertAddressBook()
+
+	// Now commit the configuration:
+	err = jnpr.Config(z2g, "set", true)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	// When building an IPsec VPN, you need to configure traffic-selectors (or SA's, if you will) for
+	// all interesting traffic. This can be a pain if you have lots of local and remote IP's, subnets.
+	// Use TrafficSelector() to create the necessary configuration:
+	local := []string{
+		"10.0.0.0/8",
+		"172.20.0.0/16",
+		"192.168.30.5/32",
+	}
+	remote := []string{
+		"192.168.100.0/24",
+		"192.168.101.0/24",
+	}
+	tsConfig := jnpr.TrafficSelector("Some-VPN-Name", local, remote)
+
+	// tsConfig will generate the following config (you can use Config() to commit it):
 	//
+	// set security ipsec vpn Some-VPN-Name traffic-selector ts1 local-ip 10.0.0.0/8 remote-ip 192.168.100.0/24
+	// set security ipsec vpn Some-VPN-Name traffic-selector ts2 local-ip 10.0.0.0/8 remote-ip 192.168.101.0/24
+	// set security ipsec vpn Some-VPN-Name traffic-selector ts3 local-ip 172.20.0.0/16 remote-ip 192.168.100.0/24
+	// set security ipsec vpn Some-VPN-Name traffic-selector ts4 local-ip 172.20.0.0/16 remote-ip 192.168.101.0/24
+	// set security ipsec vpn Some-VPN-Name traffic-selector ts5 local-ip 192.168.30.5/32 remote-ip 192.168.100.0/24
+	// set security ipsec vpn Some-VPN-Name traffic-selector ts6 local-ip 192.168.30.5/32 remote-ip 192.168.101.0/24
+
 	// ** Junos Space Examples **
 	//
 
