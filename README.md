@@ -9,9 +9,9 @@ A Go package that interacts with Junos devices, as well as Junos Space, and allo
 * Rollback the configuration to a given state or a "rescue" config.
 * Configure devices by uploading a local file or from an FTP/HTTP server.
 * List files on devices.
-* [SRX] Create a policy to be deployed.
+* [SRX] Create a security policy.
 * [SRX] Convert from a zone-based address book to a global one.
-* [SRX] Create traffic-selectors for an IPsec VPN.
+* [SRX] Create a site-to-site IPsec VPN.
 
 Junos Space
 
