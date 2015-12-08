@@ -513,8 +513,11 @@ func (j *Junos) ConvertAddressBook() []string {
 // as follows:
 //
 // <local> - the public IP address of the SRX terminating the VPN.
+//
 // <peer> - the remote devices' IP address.
+//
 // <iface> - the external interface of the SRX (typically where the <local> IP is tied to).
+//
 // <zone> - the security-zone where the routed st0.<unit> interfaces reside.
 func (j *Junos) NewIPsecVPN(name, local, peer, iface, zone string) *IPsecVPN {
 	var ints st0Interface
@@ -548,8 +551,11 @@ func (j *Junos) NewIPsecVPN(name, local, peer, iface, zone string) *IPsecVPN {
 // Phase1 creates the IKE proposal to use for the site-to-site VPN. Options are as follows:
 //
 // dh - 1, 2, 5, 14, 19, 20, 24
+//
 // auth - "md5" or "sha1"
+//
 // encryption - "3des", "aes-128", "aes-192", "aes-256", "des"
+//
 // mode - "main" or "aggressive"
 func (i *IPsecVPN) Phase1(dh int, auth, encryption string, lifetime int, mode, psk string) {
 	p1 := []string{}
@@ -577,9 +583,13 @@ func (i *IPsecVPN) Phase1(dh int, auth, encryption string, lifetime int, mode, p
 // Phase2 creates the IPsec proposal to use for the site-to-site VPN. Options are as follows:
 //
 // pfs - 1, 2, 5, 14, 19, 20, 24; use -1 to disable.
+//
 // auth - "md5" or "sha1"
+//
 // encryption - "3des", "aes-128", "aes-192", "aes-256", "des"
+//
 // protocol - "ah" or "esp"
+//
 // ontraffic - true or false; whether or not to establish the tunnel on-traffic or immediately.
 func (i *IPsecVPN) Phase2(pfs int, auth, encryption string, lifetime int, protocol string, ontraffic bool) {
 	p2 := []string{}
