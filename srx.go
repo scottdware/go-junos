@@ -338,8 +338,8 @@ var (
 	}
 )
 
-// CreatePolicy establishes a blank policy that will hold any newly created rules.
-func (j *Junos) CreatePolicy() *FirewallPolicy {
+// NewPolicy establishes a blank security policy that will hold any newly created rules.
+func (j *Junos) NewPolicy() *FirewallPolicy {
 	var addrs ExistingAddresses
 	var apps ExistingApplications
 	addresses := []string{}
