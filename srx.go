@@ -103,20 +103,20 @@ type ZoneInterface struct {
 
 // IPsecVPN contains the necessary information when creating a new site-to-site VPN.
 type IPsecVPN struct {
-	Name             string
-	Local            string
-	Peer             string
-	ExternalInt      string
-	St0              string
-	Zone             string
-	PSK              string
-	Mode             string
-	PFS              int
-	Traffic          bool
-	Gateway          []string
-	P1Proposals      []P1
-	P2Proposals      []P2
-	TrafficSelectors []string
+	Name              string
+	Local             string
+	Peer              string
+	ExternalInterface string
+	Zone              string
+	Mode              string
+	PSK               string
+	PFS               int
+	Establish         string
+	St0               string
+	Gateway           []string
+	P1Proposals       []P1
+	P2Proposals       []P2
+	TrafficSelectors  []string
 }
 
 // P1 contains any IKE phase 1 proposal information.
@@ -545,16 +545,20 @@ func (j *Junos) ConvertAddressBook() []string {
 //
 // <zone> - the security-zone where the routed st0.<unit> interfaces reside.
 //
-// <pfs> - 1, 2, 5, 14, 19, 20, 24; use -1 to disable.
+// <pfs> - 1, 2, 5, 14, 19, 20, 24; use 0 to disable.
 //
-// <ontraffic> - true or false; whether or not to establish the tunnel on-traffic or immediately.
+// <establish> - "traffic" or "immediately"; whether or not to establish the tunnel on-traffic or immediately.
 //
 // <mode> - "main" or "aggressive."
 //
 // <psk> - Pre-shared key.
-func (j *Junos) NewIPsecVPN(name, local, peer, iface, zone string, pfs int, ontraffic bool, mode, psk string) *IPsecVPN {
+func (j *Junos) NewIPsecVPN(name, local, peer, iface, zone string, pfs int, establish string, mode, psk string) *IPsecVPN {
 	var ints st0Interface
 	gateway := []string{}
+	ontraffic := map[string]string{
+		"traffic":     "on-traffic",
+		"immediately": "immediately",
+	}
 	st0, _ := j.RunCommand("show interfaces st0", "xml")
 
 	if err := xml.Unmarshal([]byte(st0), &ints); err != nil {
@@ -578,17 +582,17 @@ func (j *Junos) NewIPsecVPN(name, local, peer, iface, zone string, pfs int, ontr
 	gateway = append(gateway, fmt.Sprintf("set security ike gateway %s local-address %s\n", name, local))
 
 	return &IPsecVPN{
-		Name:        name,
-		Local:       local,
-		Peer:        peer,
-		ExternalInt: iface,
-		St0:         newst0,
-		Zone:        zone,
-		PFS:         pfs,
-		Traffic:     ontraffic,
-		Mode:        mode,
-		PSK:         psk,
-		Gateway:     gateway,
+		Name:              name,
+		Local:             local,
+		Peer:              peer,
+		ExternalInterface: iface,
+		St0:               newst0,
+		Zone:              zone,
+		PFS:               pfs,
+		Establish:         ontraffic[establish],
+		Mode:              mode,
+		PSK:               psk,
+		Gateway:           gateway,
 	}
 }
 
@@ -713,7 +717,7 @@ func (i *IPsecVPN) BuildIPsecVPN() []string {
 		config = append(config, fmt.Sprintf("set security ipsec policy %s proposals %s\n", i.Name, p2props.P2Name))
 	}
 
-	if i.PFS != -1 {
+	if i.PFS != 0 {
 		config = append(config, fmt.Sprintf("set security ipsec policy %s perfect-forward-secrecy keys %s\n", i.Name, groups[i.PFS]))
 	}
 
@@ -721,12 +725,7 @@ func (i *IPsecVPN) BuildIPsecVPN() []string {
 	config = append(config, fmt.Sprintf("set security ipsec vpn %s ike gateway %s\n", i.Name, i.Name))
 	config = append(config, fmt.Sprintf("set security ipsec vpn %s ike idle-time 60\n", i.Name))
 	config = append(config, fmt.Sprintf("set security ipsec vpn %s ike ipsec-policy %s\n", i.Name, i.Name))
-	switch i.Traffic {
-	case true:
-		config = append(config, fmt.Sprintf("set security ipsec vpn %s establish-tunnels on-traffic\n", i.Name))
-	case false:
-		config = append(config, fmt.Sprintf("set security ipsec vpn %s establish-tunnels immediately\n", i.Name))
-	}
+	config = append(config, fmt.Sprintf("set security ipsec vpn %s establish-tunnels %s\n", i.Name, i.Establish))
 
 	for _, ts := range i.TrafficSelectors {
 		config = append(config, ts)
