@@ -421,7 +421,15 @@ func (s *Space) getAddrTypeIP(address string) []string {
 	var addrType string
 	var ipaddr string
 	r := regexp.MustCompile(`(\d+\.\d+\.\d+\.\d+)(\/\d+)?`)
+	rDNS := regexp.MustCompile(`[-\w\.]*\.(com|net|org|us)$`)
 	match := r.FindStringSubmatch(address)
+
+	if rDNS.MatchString(address) {
+		addrType = "DNS"
+		ipaddr = address
+
+		return []string{addrType, ipaddr}
+	}
 
 	switch match[2] {
 	case "", "/32":
@@ -499,7 +507,7 @@ func (s *Space) AddAddress(options ...string) error {
 	address := fmt.Sprintf(addressesXML, name, addrInfo[0], addrInfo[1], desc)
 
 	if re.MatchString(ip) {
-		address = fmt.Sprintf(dnsXML, name, "DNS", options[1], desc)
+		address = fmt.Sprintf(dnsXML, name, addrInfo[0], addrInfo[1], desc)
 	}
 
 	req := &APIRequest{
