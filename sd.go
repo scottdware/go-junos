@@ -499,7 +499,7 @@ func (s *Space) AddAddress(options ...string) error {
 	address := fmt.Sprintf(addressesXML, name, addrInfo[0], addrInfo[1], desc)
 
 	if re.MatchString(ip) {
-		address := fmt.Sprintf(dnsXML, name, "DNS", options[1], desc)
+		address = fmt.Sprintf(dnsXML, name, "DNS", options[1], desc)
 	}
 
 	req := &APIRequest{
