@@ -22,6 +22,7 @@ type Address struct {
 	AddressType string `xml:"address-type"`
 	Description string `xml:"description"`
 	IPAddress   string `xml:"ip-address"`
+	Hostname    string `xml:"host-name"`
 }
 
 // GroupMembers contains a list of all the members within a address or service
@@ -137,6 +138,21 @@ var addressesXML = `
 </address>
 `
 
+// XML for creating a dns-host address object.
+var dnsXML = `
+<address>
+    <name>%s</name>
+    <address-type>%s</address-type>
+    <host-name>%s</host-name>
+    <edit-version/>
+    <members/>
+    <address-version>IPV4</address-version>
+    <definition-type>CUSTOM</definition-type>
+    <ip-address/>
+    <description>%s</description>
+</address>
+`
+
 var modifyAddressXML = `
 <address>
     <name>%s</name>
@@ -147,6 +163,20 @@ var modifyAddressXML = `
     <address-version>IPV4</address-version>
     <definition-type>CUSTOM</definition-type>
     <ip-address>%s</ip-address>
+    <description>%s</description>
+</address>
+`
+
+var modifyDnsXML = `
+<address>
+    <name>%s</name>
+    <address-type>%s</address-type>
+    <host-name>%s</host-name>
+    <edit-version>%d</edit-version>
+    <members/>
+    <address-version>IPV4</address-version>
+    <definition-type>CUSTOM</definition-type>
+    <ip-address/>
     <description>%s</description>
 </address>
 `
@@ -450,10 +480,11 @@ func (s *Space) Addresses(filter string) (*Addresses, error) {
 //
 // Options are: <name>, <ip>, <description> (optional).
 func (s *Space) AddAddress(options ...string) error {
+	re := regexp.MustCompile(`[-\w\.]*\.(com|net|org|us)$`)
 	nargs := len(options)
 
 	if nargs < 2 {
-		return errors.New("too few arguments: you must define a name and IP/subnet")
+		return errors.New("too few arguments: you must define a name and IP/subnet/DNS host")
 	}
 
 	name := options[0]
@@ -466,6 +497,11 @@ func (s *Space) AddAddress(options ...string) error {
 	}
 
 	address := fmt.Sprintf(addressesXML, name, addrInfo[0], addrInfo[1], desc)
+
+	if re.MatchString(ip) {
+		address := fmt.Sprintf(dnsXML, name, "DNS", options[1], desc)
+	}
+
 	req := &APIRequest{
 		Method:      "post",
 		URL:         "/api/juniper/sd/address-management/addresses",
