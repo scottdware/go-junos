@@ -528,6 +528,7 @@ func (s *Space) AddAddress(options ...string) error {
 func (s *Space) ModifyAddress(name, newip string) error {
 	var existing existingAddress
 	addrInfo := s.getAddrTypeIP(newip)
+	re := regexp.MustCompile(`[-\w\.]*\.(com|net|org|us)$`)
 
 	objectID, err := s.getObjectID(name, "address")
 	if err != nil {
@@ -551,6 +552,11 @@ func (s *Space) ModifyAddress(name, newip string) error {
 	}
 
 	updateContent := fmt.Sprintf(modifyAddressXML, existing.Name, addrInfo[0], existing.EditVersion, addrInfo[1], existing.Description)
+
+	if re.MatchString(name) {
+		updateContent = fmt.Sprintf(modifyDnsXML, existing.Name, addrInfo[0], existing.EditVersion, addrInfo[1], existing.Description)
+	}
+
 	modifyReq := &APIRequest{
 		Method:      "put",
 		URL:         fmt.Sprintf("/api/juniper/sd/address-management/addresses/%d", objectID),
