@@ -340,10 +340,10 @@ func main() {
 	// first parameter is whether the object is an address group (true) or a service group (false).
 
 	// Add a service to a group
-	space.EditObject("service", "add", "service-name", "service-group")
+	space.EditGroup("service", "add", "service-name", "service-group")
 
 	// Remove an address object from a group
-	space.EditObject("address", "remove", "bad-ip", "Whitelisted-Addresses")
+	space.EditGroup("address", "remove", "bad-ip", "Whitelisted-Addresses")
 
 	// Rename an object
 	space.RenameObject("service", "Web-Services", "Web-Ports")
