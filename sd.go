@@ -167,7 +167,7 @@ var modifyAddressXML = `
 </address>
 `
 
-var modifyDnsXML = `
+var modifyDNSXML = `
 <address>
     <name>%s</name>
     <address-type>%s</address-type>
