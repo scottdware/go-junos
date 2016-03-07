@@ -6,11 +6,12 @@ import (
 	"encoding/xml"
 	"errors"
 	"fmt"
-	"github.com/scottdware/go-netconf/netconf"
 	"io/ioutil"
 	"log"
 	"regexp"
 	"strings"
+
+	"github.com/scottdware/go-netconf/netconf"
 )
 
 // All of our RPC calls we use.
@@ -161,7 +162,7 @@ func (j *Junos) Close() {
 func (j *Junos) RunCommand(cmd, format string) (string, error) {
 	var command string
 	command = fmt.Sprintf(rpcCommand, cmd)
-	errMessage := "No output available. Please check the syntax of your command."
+	errMessage := "no output available - please check the syntax of your command"
 
 	if format == "xml" {
 		command = fmt.Sprintf(rpcCommandXML, cmd)
@@ -388,9 +389,9 @@ func (j *Junos) PrintFacts() {
 	fmt.Println(str)
 }
 
-// GetConfig returns the full configuration, or configuration starting at <section>.
-// <format> can be one of "text" or "xml." You can do sub-sections by separating the
-// <section> path with a ">" symbol, i.e. "system>login" or "protocols>ospf>area".
+// GetConfig returns the full configuration, or configuration starting at the given section.
+// Format must be "text" or "xml." You can do sub-sections by separating the
+// section path with a ">" symbol, i.e. "system>login" or "protocols>ospf>area".
 func (j *Junos) GetConfig(section, format string) (string, error) {
 	secs := strings.Split(section, ">")
 	nSecs := len(secs) - 1
@@ -437,8 +438,8 @@ func (j *Junos) GetConfig(section, format string) (string, error) {
 
 // Config loads a given configuration file from your local machine,
 // a remote (FTP or HTTP server) location, or via configuration statements
-// from variables (type string or []string) within your script. Format can be one of
-// "set" "text" or "xml."
+// from variables (type string or []string) within your script. Format must be
+// "set", "text" or "xml".
 func (j *Junos) Config(path interface{}, format string, commit bool) error {
 	var command string
 	switch format {
@@ -630,7 +631,7 @@ func (j *Junos) Rescue(action string) error {
 	return nil
 }
 
-// RollbackConfig loads and commits the configuration of a given rollback or rescue state.
+// RollbackConfig loads and commits the configuration of a given rollback number or rescue state.
 func (j *Junos) RollbackConfig(option interface{}) error {
 	var command = fmt.Sprintf(rpcRollbackConfig, option)
 
@@ -689,7 +690,7 @@ func (j *Junos) Reboot() error {
 	return nil
 }
 
-// Files will list all of the file and directory information in the given <path>.
+// Files will list all of the file and directory information in the given path.
 func (j *Junos) Files(path string) (*FileList, error) {
 	dir := strings.TrimRight(path, "/")
 	var files FileList
