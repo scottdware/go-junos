@@ -277,7 +277,7 @@ func main() {
 	//If you leave the parameter blank (e.g. ""), or specify "all", then every object is returned.
 
 	// Address objects
-	addresses, err := space.Addresses("all")
+	addresses, err := space.Addresses()
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -287,7 +287,7 @@ func main() {
 	}
 
 	// Service objects
-	services, err := space.Services("all")
+	services, err := space.Services()
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -327,43 +327,43 @@ func main() {
 	// Add a network
 	space.AddAddress("corporate-users", "192.168.1.0/24", "People on campus")
 
-	// Modify an existing address object (i.e. change the IP address).
-	space.ModifyAddress("my-laptop", "2.2.2.4")
+	// Edit an existing address object (i.e. change the IP address).
+	space.EditAddress("my-laptop", "2.2.2.4")
 
 	// Add a service object with an 1800 second inactivity timeout (using "0" disables this feature)
-	space.AddService("udp", "udp-5000", 5000, 5000, "UDP port 5000", 1800)
+	space.AddService("udp", "udp-5000", 5000, "UDP port 5000", 1800)
 
 	// Add a service object with a port range
-	space.AddService("tcp", "high-port-range", 40000, 65000, "TCP high ports", 0)
+	space.AddService("tcp", "high-port-range", "40000-65000", "TCP high ports", 0)
 
 	// If you want to modify an existing object group, you do this with the ModifyObject() function. The
 	// first parameter is whether the object is an address group (true) or a service group (false).
 
 	// Add a service to a group
-	space.ModifyObject("service", "add", "service-group", "service-name")
+	space.EditObject("service", "add", "service-name", "service-group")
 
 	// Remove an address object from a group
-	space.ModifyObject("address", "remove", "Whitelisted-Addresses", "bad-ip")
+	space.EditObject("address", "remove", "bad-ip", "Whitelisted-Addresses")
 
 	// Rename an object
-	space.ModifyObject("service", "rename", "Web-Services", "Web-Ports")
+	space.RenameObject("service", "Web-Services", "Web-Ports")
 
 	// Delete an object
-	space.ModifyObject("address", "delete", "my-laptop")
+	space.DeleteObject("address", "my-laptop")
 
 	// Add a variable
-	// The parameters are as follows: variable-name, description, default-value
-	space.AddVariable("test-variable", "Our test variable", "default-object")
+	// The parameters are as follows: variable-name, default-value, description
+	space.AddVariable("test-variable", "default-object", "Our test variable")
 
 	// Create our session state for modifying variables
-	v, err := space.ModifyVariable()
+	v, err := space.EditVariable()
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	// Adding objects to the variable
-	v.Add("test-variable", "srx-1", "user-pc")
-	v.Add("test-variable", "corp-firewall", "db-server")
+	v.Add("user-pc", "test-variable", "srx-1")
+	v.Add("db-server", "test-variable", "corp-firewall")
 
 	// Delete a variable
 	space.DeleteVariable("test-variable")
