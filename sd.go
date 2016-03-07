@@ -416,7 +416,7 @@ func (s *Space) getVariableID(variable string) (int, error) {
 	return variableID, nil
 }
 
-// getAddrTypeIP returns the address type and IP address of the given <address> object.
+// getAddrTypeIP returns the address type and IP address of the given address object.
 func (s *Space) getAddrTypeIP(address string) []string {
 	var addrType string
 	var ipaddr string
@@ -457,14 +457,15 @@ func (s *Space) modifyVariableContent(data *existingVariable, moid, firewall, ad
 }
 
 // Addresses queries the Junos Space server and returns all of the information
-// about each address that is managed by Space.
-func (s *Space) Addresses(filter string) (*Addresses, error) {
+// about each address that is managed by Space. Filter is optional, but if specified
+// can help reduce the amount of objects returned.
+func (s *Space) Addresses(filter ...string) (*Addresses, error) {
 	var addresses Addresses
 	p := url.Values{}
 	p.Set("filter", "(global eq '')")
 
-	if filter != "all" {
-		p.Set("filter", fmt.Sprintf("(global eq '%s')", filter))
+	if len(filter) > 0 {
+		p.Set("filter", fmt.Sprintf("(global eq '%s')", filter[0]))
 	}
 
 	req := &APIRequest{
@@ -484,24 +485,14 @@ func (s *Space) Addresses(filter string) (*Addresses, error) {
 	return &addresses, nil
 }
 
-// AddAddress creates a new address object in Junos Space.
-//
-// Options are: <name>, <ip>, <description> (optional).
-func (s *Space) AddAddress(options ...string) error {
-	re := regexp.MustCompile(`[-\w\.]*\.(com|net|org|us)$`)
-	nargs := len(options)
-
-	if nargs < 2 {
-		return errors.New("too few arguments: you must define a name and IP/subnet/DNS host")
-	}
-
-	name := options[0]
-	ip := options[1]
+// AddAddress creates a new address object in Junos Space. Description is optional.
+func (s *Space) AddAddress(name, ip string, description ...string) error {
 	desc := ""
+	re := regexp.MustCompile(`[-\w\.]*\.(com|net|org|us)$`)
 	addrInfo := s.getAddrTypeIP(ip)
 
-	if nargs > 2 {
-		desc = options[2]
+	if len(description) > 0 {
+		desc = description[0]
 	}
 
 	address := fmt.Sprintf(addressesXML, name, addrInfo[0], addrInfo[1], desc)
@@ -524,8 +515,8 @@ func (s *Space) AddAddress(options ...string) error {
 	return nil
 }
 
-// ModifyAddress changes the IP/Network of the given address object <name>.
-func (s *Space) ModifyAddress(name, newip string) error {
+// EditAddress changes the IP/Network/FQDN of the given address object name.
+func (s *Space) EditAddress(name, newip string) error {
 	var existing existingAddress
 	addrInfo := s.getAddrTypeIP(newip)
 	re := regexp.MustCompile(`[-\w\.]*\.(com|net|org|us)$`)
@@ -572,26 +563,27 @@ func (s *Space) ModifyAddress(name, newip string) error {
 	return nil
 }
 
-// AddService creates a new service object to Junos Space. If adding just
-// a single port/service, then enter in the same port/service number in both the
-// <low> and <high> parameters. For a range of ports, enter the starting port in
-// <low> and the uppper limit in <high>.
-func (s *Space) AddService(proto, name string, low, high int, desc string, timeout int) error {
+// AddService creates a new service object to Junos Space. For a single port, just enter in
+// the number. For a range of ports, enter the low-high range in quotes like so: "10000-10002".
+func (s *Space) AddService(protocol, name string, ports interface{}, description string, timeout int) error {
 	var port string
 	var protoNumber int
 	var inactivity string
 	var secs string
-	ptype := fmt.Sprintf("PROTOCOL_%s", strings.ToUpper(proto))
-	protocol := strings.ToUpper(proto)
+	ptype := fmt.Sprintf("PROTOCOL_%s", strings.ToUpper(protocol))
+	protocol = strings.ToUpper(protocol)
 
 	protoNumber = 6
-	if proto == "udp" {
+	if protocol == "UDP" {
 		protoNumber = 17
 	}
 
-	port = strconv.Itoa(low)
-	if low < high {
-		port = fmt.Sprintf("%s-%s", strconv.Itoa(low), strconv.Itoa(high))
+	switch ports.(type) {
+	case int:
+		port = strconv.Itoa(ports.(int))
+	case string:
+		p := strings.Split(ports.(string), "-")
+		port = fmt.Sprintf("%s-%s", p[0], p[1])
 	}
 
 	inactivity = "false"
@@ -601,7 +593,7 @@ func (s *Space) AddService(proto, name string, low, high int, desc string, timeo
 		secs = "<inactivity-timeout/>"
 	}
 
-	service := fmt.Sprintf(serviceXML, name, desc, name, port, protocol, protocol, protoNumber, ptype, inactivity, secs)
+	service := fmt.Sprintf(serviceXML, name, description, name, port, protocol, protocol, protoNumber, ptype, inactivity, secs)
 	req := &APIRequest{
 		Method:      "post",
 		URL:         "/api/juniper/sd/service-management/services",
@@ -616,25 +608,18 @@ func (s *Space) AddService(proto, name string, low, high int, desc string, timeo
 	return nil
 }
 
-// AddGroup creates a new address or service group in Junos Space.
-func (s *Space) AddGroup(otype string, options ...string) error {
-	nargs := len(options)
-
-	if nargs < 1 {
-		return errors.New("too few arguments: you must define a name")
-	}
-
+// AddGroup creates a new address or service group in Junos Space. Objecttype must be "address" or "service".
+func (s *Space) AddGroup(grouptype, name string, description ...string) error {
+	desc := ""
 	uri := "/api/juniper/sd/address-management/addresses"
 	addGroupXML := addressGroupXML
 	content := contentAddress
-	name := options[0]
-	desc := ""
 
-	if nargs > 1 {
-		desc = options[1]
+	if len(description) > 0 {
+		desc = description[0]
 	}
 
-	if otype == "service" {
+	if grouptype == "service" {
 		uri = "/api/juniper/sd/service-management/services"
 		addGroupXML = serviceGroupXML
 		content = contentService
@@ -656,22 +641,14 @@ func (s *Space) AddGroup(otype string, options ...string) error {
 	return nil
 }
 
-// ModifyObject modifies an existing address, service or group. <otype> is either
-// "address" or "service."
-//
-// ModifyObject("address", "add", "Some_Group_Name", "object-to-add")
-//
-// ModifyObject("address", "remove", "Some_Group_Name", "object-to-remove")
-//
-// ModifyObject("address", "rename", "Old_Group_Name", "New_Group_Name")
-//
-// ModifyObject("address", "delete", "Group_to_Delete")
-func (s *Space) ModifyObject(otype string, actions ...interface{}) error {
+// EditGroup adds or removes objects to/from an existing address or service group. Grouptype must be
+// "address" or "service." Action must be add or remove.
+func (s *Space) EditGroup(grouptype, action, object, name string) error {
 	var err error
 	var uri string
 	var content string
 	var rel string
-	objectID, err := s.getObjectID(actions[1], otype)
+	objectID, err := s.getObjectID(name, grouptype)
 	if err != nil {
 		return err
 	}
@@ -682,39 +659,99 @@ func (s *Space) ModifyObject(otype string, actions ...interface{}) error {
 		content = contentAddressPatch
 		rel = "address"
 
-		if otype == "service" {
+		if grouptype == "service" {
 			uri = fmt.Sprintf("/api/juniper/sd/service-management/services/%d", objectID)
 			content = contentServicePatch
 			rel = "service"
 		}
 
-		switch actions[0] {
+		switch action {
 		case "add":
 			req = &APIRequest{
 				Method:      "patch",
 				URL:         uri,
-				Body:        fmt.Sprintf(addGroupMemberXML, rel, actions[2]),
+				Body:        fmt.Sprintf(addGroupMemberXML, rel, object),
 				ContentType: content,
 			}
 		case "remove":
 			req = &APIRequest{
 				Method:      "patch",
 				URL:         uri,
-				Body:        fmt.Sprintf(removeXML, rel, actions[2]),
+				Body:        fmt.Sprintf(removeXML, rel, object),
 				ContentType: content,
 			}
-		case "rename":
-			req = &APIRequest{
-				Method:      "patch",
-				URL:         uri,
-				Body:        fmt.Sprintf(renameXML, rel, actions[2]),
-				ContentType: content,
-			}
-		case "delete":
-			req = &APIRequest{
-				Method: "delete",
-				URL:    uri,
-			}
+		}
+
+		_, err = s.APICall(req)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// RenameObject renames an address or service object to the given new name. Grouptype
+// must be "address" or "service"
+func (s *Space) RenameObject(grouptype, name, newname string) error {
+	var err error
+	var uri string
+	var content string
+	var rel string
+	objectID, err := s.getObjectID(name, grouptype)
+	if err != nil {
+		return err
+	}
+
+	if objectID != 0 {
+		var req *APIRequest
+		uri = fmt.Sprintf("/api/juniper/sd/address-management/addresses/%d", objectID)
+		content = contentAddressPatch
+		rel = "address"
+
+		if grouptype == "service" {
+			uri = fmt.Sprintf("/api/juniper/sd/service-management/services/%d", objectID)
+			content = contentServicePatch
+			rel = "service"
+		}
+
+		req = &APIRequest{
+			Method:      "patch",
+			URL:         uri,
+			Body:        fmt.Sprintf(renameXML, rel, newname),
+			ContentType: content,
+		}
+
+		_, err = s.APICall(req)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// DeleteObject removes an address or service object from Junos Space. Grouptype
+// must be "address" or "service"
+func (s *Space) DeleteObject(grouptype, name string) error {
+	var err error
+	var uri string
+	objectID, err := s.getObjectID(name, grouptype)
+	if err != nil {
+		return err
+	}
+
+	if objectID != 0 {
+		var req *APIRequest
+		uri = fmt.Sprintf("/api/juniper/sd/address-management/addresses/%d", objectID)
+
+		if grouptype == "service" {
+			uri = fmt.Sprintf("/api/juniper/sd/service-management/services/%d", objectID)
+		}
+
+		req = &APIRequest{
+			Method: "delete",
+			URL:    uri,
 		}
 
 		_, err = s.APICall(req)
@@ -728,13 +765,13 @@ func (s *Space) ModifyObject(otype string, actions ...interface{}) error {
 
 // Services queries the Junos Space server and returns all of the information
 // about each service that is managed by Space.
-func (s *Space) Services(filter string) (*Services, error) {
+func (s *Space) Services(filter ...string) (*Services, error) {
 	var services Services
 	p := url.Values{}
 	p.Set("filter", "(global eq '')")
 
-	if filter != "all" {
-		p.Set("filter", fmt.Sprintf("(global eq '%s')", filter))
+	if len(filter) > 0 {
+		p.Set("filter", fmt.Sprintf("(global eq '%s')", filter[0]))
 	}
 
 	req := &APIRequest{
@@ -755,14 +792,13 @@ func (s *Space) Services(filter string) (*Services, error) {
 }
 
 // GroupMembers lists all of the address or service objects within the
-// given group. <otype> is either "address" or "service", and <name> is
-// the name of the group you wish to view members for.
-func (s *Space) GroupMembers(otype, name string) (*GroupMembers, error) {
+// given group. Grouptype must be "address" or "service".
+func (s *Space) GroupMembers(grouptype, name string) (*GroupMembers, error) {
 	var members GroupMembers
-	objectID, err := s.getObjectID(name, otype)
+	objectID, err := s.getObjectID(name, grouptype)
 	url := fmt.Sprintf("/api/juniper/sd/address-management/addresses/%d", objectID)
 
-	if otype == "service" {
+	if grouptype == "service" {
 		url = fmt.Sprintf("/api/juniper/sd/service-management/services/%d", objectID)
 	}
 
@@ -825,7 +861,7 @@ func (s *Space) Policies() (*Policies, error) {
 }
 
 // PublishPolicy publishes a changed firewall policy. If "true" is specified for
-// <update>, then Junos Space will also update the device.
+// update, then Junos Space will also update the device.
 func (s *Space) PublishPolicy(object interface{}, update bool) (int, error) {
 	var err error
 	var job jobID
@@ -919,23 +955,17 @@ func (s *Space) Variables() (*Variables, error) {
 }
 
 // AddVariable creates a new polymorphic object (variable) on the Junos Space server.
-//
-// Options are: <name>, <address>, and <description> (optional).
-//
-// The <address> option is a default address object that will be used. This address object must
+// The address option is a default address object that will be used. This address object must
 // already exist on the server.
-func (s *Space) AddVariable(options ...string) error {
-	nargs := len(options)
-	name := options[0]
-	address := options[1]
+func (s *Space) AddVariable(name, address string, description ...string) error {
 	desc := ""
 	objectID, err := s.getObjectID(address, "address")
 	if err != nil {
 		return err
 	}
 
-	if nargs > 2 {
-		desc = options[2]
+	if len(description) > 0 {
+		desc = description[0]
 	}
 
 	varBody := fmt.Sprintf(createVariableXML, name, "ADDRESS", desc, address, objectID)
@@ -977,11 +1007,11 @@ func (s *Space) DeleteVariable(name string) error {
 	return nil
 }
 
-// ModifyVariable creates a new state when adding/removing addresses to
+// EditVariable creates a new state when adding/removing addresses to
 // a polymorphic (variable) object. We do this to only get the list of
 // security devices (SecurityDevices()) once, instead of call the function
 // each time we want to modify a variable.
-func (s *Space) ModifyVariable() (*VariableManagement, error) {
+func (s *Space) EditVariable() (*VariableManagement, error) {
 	devices, err := s.SecurityDevices()
 	if err != nil {
 		return nil, err
@@ -994,10 +1024,10 @@ func (s *Space) ModifyVariable() (*VariableManagement, error) {
 }
 
 // Add appends an address object to the given polymorphic (variable) object.
-//
-// <name> is the variable object, <firewall> is the name of the device you
-// want to associate the variable to, and <object> is the address object.
-func (v *VariableManagement) Add(name, firewall, object string) error {
+// Address is the address object you want to add, and name needs to be the variable
+// object you wish to add the object to. You also must specify the device (firewall) that you
+// want to associate the variable object to.
+func (v *VariableManagement) Add(address, name, firewall string) error {
 	var req *APIRequest
 	var varData existingVariable
 	var deviceID int
@@ -1014,7 +1044,7 @@ func (v *VariableManagement) Add(name, firewall, object string) error {
 	}
 	moid := fmt.Sprintf("net.juniper.jnap.sm.om.jpa.SecurityDeviceEntity:%d", deviceID)
 
-	vid, err := v.Space.getObjectID(object, "address")
+	vid, err := v.Space.getObjectID(address, "address")
 	if err != nil {
 		return err
 	}
@@ -1033,7 +1063,7 @@ func (v *VariableManagement) Add(name, firewall, object string) error {
 		return err
 	}
 
-	varContent := v.Space.modifyVariableContent(&varData, moid, firewall, object, vid)
+	varContent := v.Space.modifyVariableContent(&varData, moid, firewall, address, vid)
 	modifyVariable := fmt.Sprintf(modifyVariableXML, varData.Name, varData.Type, varData.Description, varData.Version, varData.DefaultName, varData.DefaultValue, varContent)
 
 	req = &APIRequest{
