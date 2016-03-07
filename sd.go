@@ -545,7 +545,7 @@ func (s *Space) EditAddress(name, newip string) error {
 	updateContent := fmt.Sprintf(modifyAddressXML, existing.Name, addrInfo[0], existing.EditVersion, addrInfo[1], existing.Description)
 
 	if re.MatchString(name) {
-		updateContent = fmt.Sprintf(modifyDnsXML, existing.Name, addrInfo[0], existing.EditVersion, addrInfo[1], existing.Description)
+		updateContent = fmt.Sprintf(modifyDNSXML, existing.Name, addrInfo[0], existing.EditVersion, addrInfo[1], existing.Description)
 	}
 
 	modifyReq := &APIRequest{
