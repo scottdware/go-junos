@@ -533,26 +533,12 @@ func (j *Junos) ConvertAddressBook() []string {
 }
 
 // NewIPsecVPN creates the initial template needed to bulid a new site-to-site VPN. Options are
-// as follows:
-//
-// <name> - Name of the VPN.
-//
-// <local> - the public IP address of the SRX terminating the VPN.
-//
-// <peer> - the remote devices' IP address.
-//
-// <iface> - the external interface of the SRX (typically where the <local> IP is tied to).
-//
-// <zone> - the security-zone where the routed st0.<unit> interfaces reside.
-//
-// <pfs> - 1, 2, 5, 14, 19, 20, 24; use 0 to disable.
-//
-// <establish> - "traffic" or "immediately"; whether or not to establish the tunnel on-traffic or immediately.
-//
-// <mode> - "main" or "aggressive."
-//
-// <psk> - Pre-shared key.
-func (j *Junos) NewIPsecVPN(name, local, peer, iface, zone string, pfs int, establish string, mode, psk string) *IPsecVPN {
+// as follows: name (name for the VPN), localip (public IP of the SRX terminating the VPN), peerip
+// (the remote endpoint's public IP), extinterface (external interface of the SRX), zone (security-zone
+// where the VPN will reside), pfs (Perfect-Forward Secrecy group. Must be 1, 2, 5, 14, 19, 20, or 24. Use 0 to disable),
+// establish (when to establish the tunnel; must be "traffic" or "immediately"), mode ("main" or "aggressive"), psk (
+// pre-shared key).
+func (j *Junos) NewIPsecVPN(name, localip, peerip, extinterface, zone string, pfs int, establish string, mode, psk string) *IPsecVPN {
 	var ints st0Interface
 	gateway := []string{}
 	ontraffic := map[string]string{
@@ -576,16 +562,16 @@ func (j *Junos) NewIPsecVPN(name, local, peer, iface, zone string, pfs int, esta
 	total := len(stInts)
 	newst0 := fmt.Sprintf("st0.%d", stInts[total-1]+1)
 
-	gateway = append(gateway, fmt.Sprintf("set security ike gateway %s address %s\n", name, peer))
-	gateway = append(gateway, fmt.Sprintf("set security ike gateway %s external-interface %s\n", name, iface))
+	gateway = append(gateway, fmt.Sprintf("set security ike gateway %s address %s\n", name, peerip))
+	gateway = append(gateway, fmt.Sprintf("set security ike gateway %s external-interface %s\n", name, extinterface))
 	gateway = append(gateway, fmt.Sprintf("set security ike gateway %s ike-policy %s\n", name, name))
-	gateway = append(gateway, fmt.Sprintf("set security ike gateway %s local-address %s\n", name, local))
+	gateway = append(gateway, fmt.Sprintf("set security ike gateway %s local-address %s\n", name, localip))
 
 	return &IPsecVPN{
 		Name:              name,
-		Local:             local,
-		Peer:              peer,
-		ExternalInterface: iface,
+		Local:             localip,
+		Peer:              peerip,
+		ExternalInterface: extinterface,
 		St0:               newst0,
 		Zone:              zone,
 		PFS:               pfs,
@@ -597,16 +583,9 @@ func (j *Junos) NewIPsecVPN(name, local, peer, iface, zone string, pfs int, esta
 }
 
 // Phase1 creates the IKE proposal to use for the site-to-site VPN. Options are as follows:
-//
-// <name> - Name of the proposal.
-//
-// <dh> - 1, 2, 5, 14, 19, 20, 24
-//
-// <auth> - "md5" or "sha1"
-//
-// <encryption> - "3des", "aes-128", "aes-192", "aes-256", "des"
-//
-// <lifetime> - Lifetime in seconds.
+// name (name of the proposal), dh (Diffe-Hellman group. Must be 1, 2, 5, 14, 19, 20 or 24), auth (
+// must be "md5" or "sha1"), encryption (must be "3des", "aes-128", "aes-192", "aes-256" or "des"),
+// lifetime (lifetime in seconds).
 func (i *IPsecVPN) Phase1(name string, dh int, auth, encryption string, lifetime int) {
 	authAlgorithm := map[string]string{
 		"md5":  "md5",
@@ -625,16 +604,8 @@ func (i *IPsecVPN) Phase1(name string, dh int, auth, encryption string, lifetime
 }
 
 // Phase2 creates the IPsec proposal to use for the site-to-site VPN. Options are as follows:
-//
-// <name> - Name of the proposal.
-//
-// <auth> - "md5" or "sha1"
-//
-// <encryption> - "3des", "aes-128", "aes-192", "aes-256", "des"
-//
-// <lifetime> - Lifetime in seconds.
-//
-// <protocol> - "ah" or "esp"
+// name (name of the proposal), auth (must be "md5" or "sha1"), encryption (must be "3des", "aes-128", "aes-192", "aes-256" or "des"),
+// lifetime (lifetime in seconds), protocol ("ah" or "esp").
 func (i *IPsecVPN) Phase2(name string, auth, encryption string, lifetime int, protocol string) {
 	authAlgorithm := map[string]string{
 		"md5":  "hmac-md5-96",
