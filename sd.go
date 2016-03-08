@@ -421,7 +421,7 @@ func (s *Space) getVariableID(variable string) (int, error) {
 func (s *Space) getAddrTypeIP(address string) []string {
 	var addrType, ipaddr string
 	r := regexp.MustCompile(`(\d+\.\d+\.\d+\.\d+)(\/\d+)?`)
-	rDNS := regexp.MustCompile(`[-\w\.]*\.(com|net|org|us)$`)
+	rDNS := regexp.MustCompile(`[-\w\.]*\.(com|net|org|us|gov)$`)
 	match := r.FindStringSubmatch(address)
 
 	if rDNS.MatchString(address) {
@@ -492,7 +492,7 @@ func (s *Space) AddAddress(name, ip string, description ...string) error {
 	r.BasicAuth(s.User, s.Password)
 	headers := map[string]string{}
 	desc := ""
-	re := regexp.MustCompile(`[-\w\.]*\.(com|net|org|us)$`)
+	re := regexp.MustCompile(`[-\w\.]*\.(com|net|org|us|gov)$`)
 	addrInfo := s.getAddrTypeIP(ip)
 
 	if len(description) > 0 {
@@ -523,7 +523,7 @@ func (s *Space) EditAddress(name, newip string) error {
 	headers := map[string]string{}
 	var existing existingAddress
 	addrInfo := s.getAddrTypeIP(newip)
-	re := regexp.MustCompile(`[-\w\.]*\.(com|net|org|us)$`)
+	re := regexp.MustCompile(`[-\w\.]*\.(com|net|org|us|gov)$`)
 
 	objectID, err := s.getObjectID(name, "address")
 	if err != nil {
