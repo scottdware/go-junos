@@ -4,6 +4,8 @@ import (
 	"encoding/xml"
 	"fmt"
 	"regexp"
+
+	"github.com/scottdware/go-rested"
 )
 
 // Devices contains a list of managed devices.
@@ -88,8 +90,13 @@ func (s *Space) getDeviceID(device interface{}) (int, error) {
 
 // AddDevice adds a new managed device to Junos Space, and returns the Job ID.
 func (s *Space) AddDevice(host, user, password string) (int, error) {
+	r := rested.NewRequest()
+	r.BasicAuth(s.User, s.Password)
+	headers := map[string]string{
+		"Content-Type": contentDiscoverDevices,
+	}
 	var job jobID
-	var addDevice string
+	var addDevice, xmlBody string
 	ipRegex := regexp.MustCompile(`(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})`)
 
 	if ipRegex.MatchString(host) {
@@ -98,18 +105,15 @@ func (s *Space) AddDevice(host, user, password string) (int, error) {
 
 	addDevice = addDeviceHostXML
 
-	req := &APIRequest{
-		Method:      "post",
-		URL:         "/api/space/device-management/discover-devices",
-		Body:        fmt.Sprintf(addDevice, host, user, password),
-		ContentType: contentDiscoverDevices,
-	}
-	data, err := s.APICall(req)
-	if err != nil {
-		return 0, err
+	uri := fmt.Sprintf("https://%s/api/space/device-management/discover-devices", s.Host)
+	xmlBody = fmt.Sprintf(addDevice, host, user, password)
+
+	resp := r.Send("post", uri, []byte(xmlBody), headers, nil)
+	if resp.Error != nil {
+		return 0, resp.Error
 	}
 
-	err = xml.Unmarshal(data, &job)
+	err := xml.Unmarshal(resp.Body, &job)
 	if err != nil {
 		return 0, err
 	}
@@ -120,17 +124,17 @@ func (s *Space) AddDevice(host, user, password string) (int, error) {
 // Devices queries the Junos Space server and returns all of the information
 // about each device that is managed by Space.
 func (s *Space) Devices() (*Devices, error) {
+	r := rested.NewRequest()
+	r.BasicAuth(s.User, s.Password)
 	var devices Devices
-	req := &APIRequest{
-		Method: "get",
-		URL:    "/api/space/device-management/devices",
-	}
-	data, err := s.APICall(req)
-	if err != nil {
-		return nil, err
+	uri := fmt.Sprintf("https://%s/api/space/device-management/devices", s.Host)
+
+	resp := r.Send("get", uri, nil, nil, nil)
+	if resp.Error != nil {
+		return nil, resp.Error
 	}
 
-	err = xml.Unmarshal(data, &devices)
+	err := xml.Unmarshal(resp.Body, &devices)
 	if err != nil {
 		return nil, err
 	}
@@ -141,6 +145,8 @@ func (s *Space) Devices() (*Devices, error) {
 // RemoveDevice removes a device from Junos Space. You can specify the device ID, name
 // or IP address.
 func (s *Space) RemoveDevice(device interface{}) error {
+	r := rested.NewRequest()
+	r.BasicAuth(s.User, s.Password)
 	var err error
 	deviceID, err := s.getDeviceID(device)
 	if err != nil {
@@ -148,13 +154,11 @@ func (s *Space) RemoveDevice(device interface{}) error {
 	}
 
 	if deviceID != 0 {
-		req := &APIRequest{
-			Method: "delete",
-			URL:    fmt.Sprintf("/api/space/device-management/devices/%d", deviceID),
-		}
-		_, err = s.APICall(req)
-		if err != nil {
-			return err
+		uri := fmt.Sprintf("https://%s/api/space/device-management/devices/%d", s.Host, deviceID)
+
+		resp := r.Send("delete", uri, nil, nil, nil)
+		if resp.Error != nil {
+			return resp.Error
 		}
 	}
 
@@ -164,23 +168,25 @@ func (s *Space) RemoveDevice(device interface{}) error {
 // Resync synchronizes the device with Junos Space. Good to use if you make a lot of
 // changes outside of Junos Space such as adding interfaces, zones, etc.
 func (s *Space) Resync(device interface{}) (int, error) {
+	r := rested.NewRequest()
+	r.BasicAuth(s.User, s.Password)
+	headers := map[string]string{
+		"Content-Type": contentResync,
+	}
 	var job jobID
 	deviceID, err := s.getDeviceID(device)
 	if err != nil {
 		return 0, err
 	}
 
-	req := &APIRequest{
-		Method:      "post",
-		URL:         fmt.Sprintf("/api/space/device-management/devices/%d/exec-resync", deviceID),
-		ContentType: contentResync,
-	}
-	data, err := s.APICall(req)
-	if err != nil {
-		return 0, err
+	uri := fmt.Sprintf("https://%s/api/space/device-management/devices/%d/exec-resync", s.Host, deviceID)
+
+	resp := r.Send("post", uri, nil, headers, nil)
+	if resp.Error != nil {
+		return 0, resp.Error
 	}
 
-	err = xml.Unmarshal(data, &job)
+	err = xml.Unmarshal(resp.Body, &job)
 	if err != nil {
 		return 0, err
 	}

@@ -4,10 +4,11 @@ import (
 	"encoding/xml"
 	"errors"
 	"fmt"
-	"net/url"
 	"regexp"
 	"strconv"
 	"strings"
+
+	"github.com/scottdware/go-rested"
 )
 
 // Addresses contains a list of address objects.
@@ -418,8 +419,7 @@ func (s *Space) getVariableID(variable string) (int, error) {
 
 // getAddrTypeIP returns the address type and IP address of the given address object.
 func (s *Space) getAddrTypeIP(address string) []string {
-	var addrType string
-	var ipaddr string
+	var addrType, ipaddr string
 	r := regexp.MustCompile(`(\d+\.\d+\.\d+\.\d+)(\/\d+)?`)
 	rDNS := regexp.MustCompile(`[-\w\.]*\.(com|net|org|us)$`)
 	match := r.FindStringSubmatch(address)
@@ -460,24 +460,25 @@ func (s *Space) modifyVariableContent(data *existingVariable, moid, firewall, ad
 // about each address that is managed by Space. Filter is optional, but if specified
 // can help reduce the amount of objects returned.
 func (s *Space) Addresses(filter ...string) (*Addresses, error) {
+	r := rested.NewRequest()
+	r.BasicAuth(s.User, s.Password)
 	var addresses Addresses
-	p := url.Values{}
-	p.Set("filter", "(global eq '')")
+
+	query := map[string]string{
+		"filter": "(global eq '')",
+	}
 
 	if len(filter) > 0 {
-		p.Set("filter", fmt.Sprintf("(global eq '%s')", filter[0]))
+		query["filter"] = fmt.Sprintf("(global eq '%s')", filter[0])
 	}
 
-	req := &APIRequest{
-		Method: "get",
-		URL:    fmt.Sprintf("/api/juniper/sd/address-management/addresses?%s", p.Encode()),
-	}
-	data, err := s.APICall(req)
-	if err != nil {
-		return nil, err
+	uri := fmt.Sprintf("https://%s/api/juniper/sd/address-management/addresses", s.Host)
+	resp := r.Send("get", uri, nil, nil, query)
+	if resp.Error != nil {
+		return nil, resp.Error
 	}
 
-	err = xml.Unmarshal(data, &addresses)
+	err := xml.Unmarshal(resp.Body, &addresses)
 	if err != nil {
 		return nil, err
 	}
@@ -487,6 +488,9 @@ func (s *Space) Addresses(filter ...string) (*Addresses, error) {
 
 // AddAddress creates a new address object in Junos Space. Description is optional.
 func (s *Space) AddAddress(name, ip string, description ...string) error {
+	r := rested.NewRequest()
+	r.BasicAuth(s.User, s.Password)
+	headers := map[string]string{}
 	desc := ""
 	re := regexp.MustCompile(`[-\w\.]*\.(com|net|org|us)$`)
 	addrInfo := s.getAddrTypeIP(ip)
@@ -501,15 +505,12 @@ func (s *Space) AddAddress(name, ip string, description ...string) error {
 		address = fmt.Sprintf(dnsXML, name, addrInfo[0], addrInfo[1], desc)
 	}
 
-	req := &APIRequest{
-		Method:      "post",
-		URL:         "/api/juniper/sd/address-management/addresses",
-		Body:        address,
-		ContentType: contentAddress,
-	}
-	_, err := s.APICall(req)
-	if err != nil {
-		return err
+	uri := fmt.Sprintf("https://%s/api/juniper/sd/address-management/addresses", s.Host)
+	headers["Content-Type"] = contentAddress
+
+	resp := r.Send("post", uri, []byte(address), headers, nil)
+	if resp.Error != nil {
+		return resp.Error
 	}
 
 	return nil
@@ -517,6 +518,9 @@ func (s *Space) AddAddress(name, ip string, description ...string) error {
 
 // EditAddress changes the IP/Network/FQDN of the given address object name.
 func (s *Space) EditAddress(name, newip string) error {
+	r := rested.NewRequest()
+	r.BasicAuth(s.User, s.Password)
+	headers := map[string]string{}
 	var existing existingAddress
 	addrInfo := s.getAddrTypeIP(newip)
 	re := regexp.MustCompile(`[-\w\.]*\.(com|net|org|us)$`)
@@ -526,18 +530,15 @@ func (s *Space) EditAddress(name, newip string) error {
 		return err
 	}
 
-	req := &APIRequest{
-		URL:         fmt.Sprintf("/api/juniper/sd/address-management/addresses/%d", objectID),
-		Method:      "get",
-		ContentType: contentAddress,
+	uri := fmt.Sprintf("https://%s/api/juniper/sd/address-management/addresses/%d", s.Host, objectID)
+	headers["Content-Type"] = contentAddress
+
+	exResp := r.Send("get", uri, nil, headers, nil)
+	if exResp.Error != nil {
+		return exResp.Error
 	}
 
-	data, err := s.APICall(req)
-	if err != nil {
-		return err
-	}
-
-	err = xml.Unmarshal(data, &existing)
+	err = xml.Unmarshal(exResp.Body, &existing)
 	if err != nil {
 		return err
 	}
@@ -548,16 +549,9 @@ func (s *Space) EditAddress(name, newip string) error {
 		updateContent = fmt.Sprintf(modifyDNSXML, existing.Name, addrInfo[0], existing.EditVersion, addrInfo[1], existing.Description)
 	}
 
-	modifyReq := &APIRequest{
-		Method:      "put",
-		URL:         fmt.Sprintf("/api/juniper/sd/address-management/addresses/%d", objectID),
-		Body:        updateContent,
-		ContentType: contentAddress,
-	}
-
-	_, err = s.APICall(modifyReq)
-	if err != nil {
-		return err
+	resp := r.Send("put", uri, []byte(updateContent), headers, nil)
+	if resp.Error != nil {
+		return resp.Error
 	}
 
 	return nil
@@ -566,10 +560,11 @@ func (s *Space) EditAddress(name, newip string) error {
 // AddService creates a new service object to Junos Space. For a single port, just enter in
 // the number. For a range of ports, enter the low-high range in quotes like so: "10000-10002".
 func (s *Space) AddService(protocol, name string, ports interface{}, description string, timeout int) error {
-	var port string
+	r := rested.NewRequest()
+	r.BasicAuth(s.User, s.Password)
+	headers := map[string]string{}
 	var protoNumber int
-	var inactivity string
-	var secs string
+	var port, inactivity, secs string
 	ptype := fmt.Sprintf("PROTOCOL_%s", strings.ToUpper(protocol))
 	protocol = strings.ToUpper(protocol)
 
@@ -594,15 +589,12 @@ func (s *Space) AddService(protocol, name string, ports interface{}, description
 	}
 
 	service := fmt.Sprintf(serviceXML, name, description, name, port, protocol, protocol, protoNumber, ptype, inactivity, secs)
-	req := &APIRequest{
-		Method:      "post",
-		URL:         "/api/juniper/sd/service-management/services",
-		Body:        service,
-		ContentType: contentService,
-	}
-	_, err := s.APICall(req)
-	if err != nil {
-		return err
+	headers["Content-Type"] = contentService
+	uri := fmt.Sprintf("https://%s/api/juniper/sd/service-management/services", s.Host)
+
+	resp := r.Send("post", uri, []byte(service), headers, nil)
+	if resp.Error != nil {
+		return resp.Error
 	}
 
 	return nil
@@ -610,8 +602,11 @@ func (s *Space) AddService(protocol, name string, ports interface{}, description
 
 // AddGroup creates a new address or service group in Junos Space. Objecttype must be "address" or "service".
 func (s *Space) AddGroup(grouptype, name string, description ...string) error {
+	r := rested.NewRequest()
+	r.BasicAuth(s.User, s.Password)
+	headers := map[string]string{}
 	desc := ""
-	uri := "/api/juniper/sd/address-management/addresses"
+	uri := fmt.Sprintf("https://%s/api/juniper/sd/address-management/addresses", s.Host)
 	addGroupXML := addressGroupXML
 	content := contentAddress
 
@@ -620,22 +615,17 @@ func (s *Space) AddGroup(grouptype, name string, description ...string) error {
 	}
 
 	if grouptype == "service" {
-		uri = "/api/juniper/sd/service-management/services"
+		uri = fmt.Sprintf("https://%s/api/juniper/sd/service-management/services", s.Host)
 		addGroupXML = serviceGroupXML
 		content = contentService
 	}
 
 	groupXML := fmt.Sprintf(addGroupXML, name, desc)
-	req := &APIRequest{
-		Method:      "post",
-		URL:         uri,
-		Body:        groupXML,
-		ContentType: content,
-	}
-	_, err := s.APICall(req)
+	headers["Content-Type"] = content
 
-	if err != nil {
-		return err
+	resp := r.Send("post", uri, []byte(groupXML), headers, nil)
+	if resp.Error != nil {
+		return resp.Error
 	}
 
 	return nil
@@ -644,47 +634,39 @@ func (s *Space) AddGroup(grouptype, name string, description ...string) error {
 // EditGroup adds or removes objects to/from an existing address or service group. Grouptype must be
 // "address" or "service." Action must be add or remove.
 func (s *Space) EditGroup(grouptype, action, object, name string) error {
+	r := rested.NewRequest()
+	r.BasicAuth(s.User, s.Password)
+	headers := map[string]string{}
 	var err error
-	var uri string
-	var content string
-	var rel string
+	var uri, content, rel, xmlBody string
 	objectID, err := s.getObjectID(name, grouptype)
 	if err != nil {
 		return err
 	}
 
 	if objectID != 0 {
-		var req *APIRequest
-		uri = fmt.Sprintf("/api/juniper/sd/address-management/addresses/%d", objectID)
+		uri = fmt.Sprintf("https://%s/api/juniper/sd/address-management/addresses/%d", s.Host, objectID)
 		content = contentAddressPatch
 		rel = "address"
 
 		if grouptype == "service" {
-			uri = fmt.Sprintf("/api/juniper/sd/service-management/services/%d", objectID)
+			uri = fmt.Sprintf("https://%s/api/juniper/sd/service-management/services/%d", s.Host, objectID)
 			content = contentServicePatch
 			rel = "service"
 		}
 
 		switch action {
 		case "add":
-			req = &APIRequest{
-				Method:      "patch",
-				URL:         uri,
-				Body:        fmt.Sprintf(addGroupMemberXML, rel, object),
-				ContentType: content,
-			}
+			xmlBody = fmt.Sprintf(addGroupMemberXML, rel, object)
+			headers["Content-Type"] = content
 		case "remove":
-			req = &APIRequest{
-				Method:      "patch",
-				URL:         uri,
-				Body:        fmt.Sprintf(removeXML, rel, object),
-				ContentType: content,
-			}
+			xmlBody = fmt.Sprintf(removeXML, rel, object)
+			headers["Content-Type"] = content
 		}
 
-		_, err = s.APICall(req)
-		if err != nil {
-			return err
+		resp := r.Send("patch", uri, []byte(xmlBody), headers, nil)
+		if resp.Error != nil {
+			return resp.Error
 		}
 	}
 
@@ -694,37 +676,33 @@ func (s *Space) EditGroup(grouptype, action, object, name string) error {
 // RenameObject renames an address or service object to the given new name. Grouptype
 // must be "address" or "service"
 func (s *Space) RenameObject(grouptype, name, newname string) error {
+	r := rested.NewRequest()
+	r.BasicAuth(s.User, s.Password)
+	headers := map[string]string{}
 	var err error
-	var uri string
-	var content string
-	var rel string
+	var uri, content, rel, xmlBody string
 	objectID, err := s.getObjectID(name, grouptype)
 	if err != nil {
 		return err
 	}
 
 	if objectID != 0 {
-		var req *APIRequest
-		uri = fmt.Sprintf("/api/juniper/sd/address-management/addresses/%d", objectID)
+		uri = fmt.Sprintf("https://%s/api/juniper/sd/address-management/addresses/%d", s.Host, objectID)
 		content = contentAddressPatch
 		rel = "address"
 
 		if grouptype == "service" {
-			uri = fmt.Sprintf("/api/juniper/sd/service-management/services/%d", objectID)
+			uri = fmt.Sprintf("https://%s/api/juniper/sd/service-management/services/%d", s.Host, objectID)
 			content = contentServicePatch
 			rel = "service"
 		}
 
-		req = &APIRequest{
-			Method:      "patch",
-			URL:         uri,
-			Body:        fmt.Sprintf(renameXML, rel, newname),
-			ContentType: content,
-		}
+		xmlBody = fmt.Sprintf(renameXML, rel, newname)
+		headers["Content-Type"] = content
 
-		_, err = s.APICall(req)
-		if err != nil {
-			return err
+		resp := r.Send("patch", uri, []byte(xmlBody), headers, nil)
+		if resp.Error != nil {
+			return resp.Error
 		}
 	}
 
@@ -734,6 +712,8 @@ func (s *Space) RenameObject(grouptype, name, newname string) error {
 // DeleteObject removes an address or service object from Junos Space. Grouptype
 // must be "address" or "service"
 func (s *Space) DeleteObject(grouptype, name string) error {
+	r := rested.NewRequest()
+	r.BasicAuth(s.User, s.Password)
 	var err error
 	var uri string
 	objectID, err := s.getObjectID(name, grouptype)
@@ -742,21 +722,15 @@ func (s *Space) DeleteObject(grouptype, name string) error {
 	}
 
 	if objectID != 0 {
-		var req *APIRequest
-		uri = fmt.Sprintf("/api/juniper/sd/address-management/addresses/%d", objectID)
+		uri = fmt.Sprintf("https://%s/api/juniper/sd/address-management/addresses/%d", s.Host, objectID)
 
 		if grouptype == "service" {
-			uri = fmt.Sprintf("/api/juniper/sd/service-management/services/%d", objectID)
+			uri = fmt.Sprintf("https://%s/api/juniper/sd/service-management/services/%d", s.Host, objectID)
 		}
 
-		req = &APIRequest{
-			Method: "delete",
-			URL:    uri,
-		}
-
-		_, err = s.APICall(req)
-		if err != nil {
-			return err
+		resp := r.Send("delete", uri, nil, nil, nil)
+		if resp.Error != nil {
+			return resp.Error
 		}
 	}
 
@@ -766,24 +740,26 @@ func (s *Space) DeleteObject(grouptype, name string) error {
 // Services queries the Junos Space server and returns all of the information
 // about each service that is managed by Space.
 func (s *Space) Services(filter ...string) (*Services, error) {
+	r := rested.NewRequest()
+	r.BasicAuth(s.User, s.Password)
 	var services Services
-	p := url.Values{}
-	p.Set("filter", "(global eq '')")
+
+	query := map[string]string{
+		"filter": "(global eq '')",
+	}
 
 	if len(filter) > 0 {
-		p.Set("filter", fmt.Sprintf("(global eq '%s')", filter[0]))
+		query["filter"] = fmt.Sprintf("(global eq '%s')", filter[0])
 	}
 
-	req := &APIRequest{
-		Method: "get",
-		URL:    fmt.Sprintf("/api/juniper/sd/service-management/services?%s", p.Encode()),
-	}
-	data, err := s.APICall(req)
-	if err != nil {
-		return nil, err
+	uri := fmt.Sprintf("https://%s/api/juniper/sd/service-management/services", s.Host)
+
+	resp := r.Send("get", uri, nil, nil, query)
+	if resp.Error != nil {
+		return nil, resp.Error
 	}
 
-	err = xml.Unmarshal(data, &services)
+	err := xml.Unmarshal(resp.Body, &services)
 	if err != nil {
 		return nil, err
 	}
@@ -794,24 +770,22 @@ func (s *Space) Services(filter ...string) (*Services, error) {
 // GroupMembers lists all of the address or service objects within the
 // given group. Grouptype must be "address" or "service".
 func (s *Space) GroupMembers(grouptype, name string) (*GroupMembers, error) {
+	r := rested.NewRequest()
+	r.BasicAuth(s.User, s.Password)
 	var members GroupMembers
 	objectID, err := s.getObjectID(name, grouptype)
-	url := fmt.Sprintf("/api/juniper/sd/address-management/addresses/%d", objectID)
+	uri := fmt.Sprintf("https://%s/api/juniper/sd/address-management/addresses/%d", s.Host, objectID)
 
 	if grouptype == "service" {
-		url = fmt.Sprintf("/api/juniper/sd/service-management/services/%d", objectID)
+		uri = fmt.Sprintf("https://%s/api/juniper/sd/service-management/services/%d", s.Host, objectID)
 	}
 
-	req := &APIRequest{
-		Method: "get",
-		URL:    url,
-	}
-	data, err := s.APICall(req)
-	if err != nil {
-		return nil, err
+	resp := r.Send("get", uri, nil, nil, nil)
+	if resp.Error != nil {
+		return nil, resp.Error
 	}
 
-	err = xml.Unmarshal(data, &members)
+	err = xml.Unmarshal(resp.Body, &members)
 	if err != nil {
 		return nil, err
 	}
@@ -822,17 +796,17 @@ func (s *Space) GroupMembers(grouptype, name string) (*GroupMembers, error) {
 // SecurityDevices queries the Junos Space server and returns all of the information
 // about each security device that is managed by Space.
 func (s *Space) SecurityDevices() (*SecurityDevices, error) {
+	r := rested.NewRequest()
+	r.BasicAuth(s.User, s.Password)
 	var devices SecurityDevices
-	req := &APIRequest{
-		Method: "get",
-		URL:    "/api/juniper/sd/device-management/devices",
-	}
-	data, err := s.APICall(req)
-	if err != nil {
-		return nil, err
+	uri := fmt.Sprintf("https://%s/api/juniper/sd/device-management/devices", s.Host)
+
+	resp := r.Send("get", uri, nil, nil, nil)
+	if resp.Error != nil {
+		return nil, resp.Error
 	}
 
-	err = xml.Unmarshal(data, &devices)
+	err := xml.Unmarshal(resp.Body, &devices)
 	if err != nil {
 		return nil, err
 	}
@@ -842,17 +816,17 @@ func (s *Space) SecurityDevices() (*SecurityDevices, error) {
 
 // Policies returns a list of all firewall policies managed by Junos Space.
 func (s *Space) Policies() (*Policies, error) {
+	r := rested.NewRequest()
+	r.BasicAuth(s.User, s.Password)
 	var policies Policies
-	req := &APIRequest{
-		Method: "get",
-		URL:    "/api/juniper/sd/fwpolicy-management/firewall-policies",
-	}
-	data, err := s.APICall(req)
-	if err != nil {
-		return nil, err
+	uri := fmt.Sprintf("https://%s/api/juniper/sd/fwpolicy-management/firewall-policies", s.Host)
+
+	resp := r.Send("get", uri, nil, nil, nil)
+	if resp.Error != nil {
+		return nil, resp.Error
 	}
 
-	err = xml.Unmarshal(data, &policies)
+	err := xml.Unmarshal(resp.Body, &policies)
 	if err != nil {
 		return nil, err
 	}
@@ -863,10 +837,15 @@ func (s *Space) Policies() (*Policies, error) {
 // PublishPolicy publishes a changed firewall policy. If "true" is specified for
 // update, then Junos Space will also update the device.
 func (s *Space) PublishPolicy(object interface{}, update bool) (int, error) {
+	r := rested.NewRequest()
+	r.BasicAuth(s.User, s.Password)
+	headers := map[string]string{
+		"Content-Type": contentPublish,
+	}
 	var err error
 	var job jobID
 	var id int
-	var uri = "/api/juniper/sd/fwpolicy-management/publish"
+	var uri = fmt.Sprintf("https://%s/api/juniper/sd/fwpolicy-management/publish", s.Host)
 
 	switch object.(type) {
 	case int:
@@ -883,21 +862,15 @@ func (s *Space) PublishPolicy(object interface{}, update bool) (int, error) {
 	publish := fmt.Sprintf(publishPolicyXML, id)
 
 	if update {
-		uri = "/api/juniper/sd/fwpolicy-management/publish?update=true"
+		uri = fmt.Sprintf("https://%s/api/juniper/sd/fwpolicy-management/publish?update=true", s.Host)
 	}
 
-	req := &APIRequest{
-		Method:      "post",
-		URL:         uri,
-		Body:        publish,
-		ContentType: contentPublish,
-	}
-	data, err := s.APICall(req)
-	if err != nil {
-		return 0, err
+	resp := r.Send("post", uri, []byte(publish), headers, nil)
+	if resp.Error != nil {
+		return 0, resp.Error
 	}
 
-	err = xml.Unmarshal(data, &job)
+	err = xml.Unmarshal(resp.Body, &job)
 	if err != nil {
 		return 0, errors.New("no policy changes to publish")
 	}
@@ -908,6 +881,12 @@ func (s *Space) PublishPolicy(object interface{}, update bool) (int, error) {
 // UpdateDevice will update a changed security device, synchronizing it with
 // Junos Space.
 func (s *Space) UpdateDevice(device interface{}) (int, error) {
+	r := rested.NewRequest()
+	r.BasicAuth(s.User, s.Password)
+	headers := map[string]string{
+		"Content-Type": contentUpdateDevices,
+	}
+	uri := fmt.Sprintf("https://%s/api/juniper/sd/device-management/update-devices", s.Host)
 	var job jobID
 	deviceID, err := s.getDeviceID(device)
 	if err != nil {
@@ -915,18 +894,13 @@ func (s *Space) UpdateDevice(device interface{}) (int, error) {
 	}
 
 	update := fmt.Sprintf(updateDeviceXML, deviceID)
-	req := &APIRequest{
-		Method:      "post",
-		URL:         "/api/juniper/sd/device-management/update-devices",
-		Body:        update,
-		ContentType: contentUpdateDevices,
-	}
-	data, err := s.APICall(req)
-	if err != nil {
-		return 0, err
+
+	resp := r.Send("post", uri, []byte(update), headers, nil)
+	if resp.Error != nil {
+		return 0, resp.Error
 	}
 
-	err = xml.Unmarshal(data, &job)
+	err = xml.Unmarshal(resp.Body, &job)
 	if err != nil {
 		return 0, err
 	}
@@ -936,17 +910,17 @@ func (s *Space) UpdateDevice(device interface{}) (int, error) {
 
 // Variables returns a listing of all polymorphic (variable) objects.
 func (s *Space) Variables() (*Variables, error) {
+	r := rested.NewRequest()
+	r.BasicAuth(s.User, s.Password)
 	var vars Variables
-	req := &APIRequest{
-		Method: "get",
-		URL:    "/api/juniper/sd/variable-management/variable-definitions",
-	}
-	data, err := s.APICall(req)
-	if err != nil {
-		return nil, err
+	uri := fmt.Sprintf("https://%s/api/juniper/sd/variable-management/variable-definitions", s.Host)
+
+	resp := r.Send("get", uri, nil, nil, nil)
+	if resp.Error != nil {
+		return nil, resp.Error
 	}
 
-	err = xml.Unmarshal(data, &vars)
+	err := xml.Unmarshal(resp.Body, &vars)
 	if err != nil {
 		return nil, err
 	}
@@ -958,6 +932,11 @@ func (s *Space) Variables() (*Variables, error) {
 // The address option is a default address object that will be used. This address object must
 // already exist on the server.
 func (s *Space) AddVariable(name, address string, description ...string) error {
+	r := rested.NewRequest()
+	r.BasicAuth(s.User, s.Password)
+	headers := map[string]string{
+		"Content-Type": contentVariable,
+	}
 	desc := ""
 	objectID, err := s.getObjectID(address, "address")
 	if err != nil {
@@ -969,15 +948,11 @@ func (s *Space) AddVariable(name, address string, description ...string) error {
 	}
 
 	varBody := fmt.Sprintf(createVariableXML, name, "ADDRESS", desc, address, objectID)
-	req := &APIRequest{
-		Method:      "post",
-		URL:         "/api/juniper/sd/variable-management/variable-definitions",
-		Body:        varBody,
-		ContentType: contentVariable,
-	}
-	_, err = s.APICall(req)
-	if err != nil {
-		return err
+	uri := fmt.Sprintf("https://%s/api/juniper/sd/variable-management/variable-definitions", s.Host)
+
+	resp := r.Send("post", uri, []byte(varBody), headers, nil)
+	if resp.Error != nil {
+		return resp.Error
 	}
 
 	return nil
@@ -987,21 +962,21 @@ func (s *Space) AddVariable(name, address string, description ...string) error {
 // If the variable object is in use by a policy, then it will not be deleted
 // until you remove it from the policy.
 func (s *Space) DeleteVariable(name string) error {
-	var req *APIRequest
+	r := rested.NewRequest()
+	r.BasicAuth(s.User, s.Password)
+	headers := map[string]string{
+		"Content-Type": contentVariable,
+	}
 	varID, err := s.getVariableID(name)
 	if err != nil {
 		return err
 	}
 
-	req = &APIRequest{
-		Method:      "delete",
-		URL:         fmt.Sprintf("/api/juniper/sd/variable-management/variable-definitions/%d", varID),
-		ContentType: contentVariable,
-	}
+	uri := fmt.Sprintf("https://%s/api/juniper/sd/variable-management/variable-definitions/%d", s.Host, varID)
 
-	_, err = s.APICall(req)
-	if err != nil {
-		return err
+	resp := r.Send("delete", uri, nil, headers, nil)
+	if resp.Error != nil {
+		return resp.Error
 	}
 
 	return nil
@@ -1028,7 +1003,11 @@ func (s *Space) EditVariable() (*VariableManagement, error) {
 // object you wish to add the object to. You also must specify the device (firewall) that you
 // want to associate the variable object to.
 func (v *VariableManagement) Add(address, name, firewall string) error {
-	var req *APIRequest
+	r := rested.NewRequest()
+	r.BasicAuth(v.Space.User, v.Space.Password)
+	headers := map[string]string{
+		"Content-Type": contentVariable,
+	}
 	var varData existingVariable
 	var deviceID int
 
@@ -1049,16 +1028,13 @@ func (v *VariableManagement) Add(address, name, firewall string) error {
 		return err
 	}
 
-	existing := &APIRequest{
-		Method: "get",
-		URL:    fmt.Sprintf("/api/juniper/sd/variable-management/variable-definitions/%d", varID),
-	}
-	data, err := v.Space.APICall(existing)
-	if err != nil {
-		return err
+	uri := fmt.Sprintf("https://%s/api/juniper/sd/variable-management/variable-definitions/%d", v.Space.Host, varID)
+	existing := r.Send("get", uri, nil, nil, nil)
+	if existing.Error != nil {
+		return existing.Error
 	}
 
-	err = xml.Unmarshal(data, &varData)
+	err = xml.Unmarshal(existing.Body, &varData)
 	if err != nil {
 		return err
 	}
@@ -1066,16 +1042,9 @@ func (v *VariableManagement) Add(address, name, firewall string) error {
 	varContent := v.Space.modifyVariableContent(&varData, moid, firewall, address, vid)
 	modifyVariable := fmt.Sprintf(modifyVariableXML, varData.Name, varData.Type, varData.Description, varData.Version, varData.DefaultName, varData.DefaultValue, varContent)
 
-	req = &APIRequest{
-		Method:      "put",
-		URL:         fmt.Sprintf("/api/juniper/sd/variable-management/variable-definitions/%d", varID),
-		Body:        modifyVariable,
-		ContentType: contentVariable,
-	}
-
-	_, err = v.Space.APICall(req)
-	if err != nil {
-		return err
+	resp := r.Send("put", uri, []byte(modifyVariable), headers, nil)
+	if resp.Error != nil {
+		return resp.Error
 	}
 
 	return nil
