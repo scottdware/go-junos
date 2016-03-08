@@ -1,14 +1,5 @@
 package junos
 
-import (
-	"bytes"
-	"crypto/tls"
-	"fmt"
-	"io/ioutil"
-	"net/http"
-	"strings"
-)
-
 // All of our HTTP Content-Types we use.
 var (
 	contentDiscoverDevices = "application/vnd.net.juniper.space.device-management.discover-devices+xml;version=2;charset=UTF-8"
@@ -27,10 +18,9 @@ var (
 
 // Space contains our session state.
 type Space struct {
-	Host      string
-	User      string
-	Password  string
-	Transport *http.Transport
+	Host     string
+	User     string
+	Password string
 }
 
 // APIRequest builds our request before sending it to the server.
@@ -59,35 +49,5 @@ func NewServer(host, user, passwd string) *Space {
 		Host:     host,
 		User:     user,
 		Password: passwd,
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: true,
-			},
-		},
 	}
-}
-
-// APICall is used to query the Junos Space server API.
-func (s *Space) APICall(options *APIRequest) ([]byte, error) {
-	var req *http.Request
-	client := &http.Client{Transport: s.Transport}
-	url := fmt.Sprintf("https://%s%s", s.Host, options.URL)
-	body := bytes.NewReader([]byte(options.Body))
-	req, _ = http.NewRequest(strings.ToUpper(options.Method), url, body)
-	req.SetBasicAuth(s.User, s.Password)
-
-	if len(options.ContentType) > 0 {
-		req.Header.Set("Content-Type", options.ContentType)
-	}
-
-	res, err := client.Do(req)
-	defer res.Body.Close()
-
-	if err != nil {
-		return nil, err
-	}
-
-	data, _ := ioutil.ReadAll(res.Body)
-
-	return data, nil
 }
