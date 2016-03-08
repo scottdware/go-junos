@@ -836,7 +836,7 @@ func (s *Space) Policies() (*Policies, error) {
 
 // PublishPolicy publishes a changed firewall policy. If "true" is specified for
 // update, then Junos Space will also update the device.
-func (s *Space) PublishPolicy(object interface{}, update bool) (int, error) {
+func (s *Space) PublishPolicy(policy interface{}, update bool) (int, error) {
 	r := rested.NewRequest()
 	r.BasicAuth(s.User, s.Password)
 	headers := map[string]string{
@@ -847,11 +847,11 @@ func (s *Space) PublishPolicy(object interface{}, update bool) (int, error) {
 	var id int
 	var uri = fmt.Sprintf("https://%s/api/juniper/sd/fwpolicy-management/publish", s.Host)
 
-	switch object.(type) {
+	switch policy.(type) {
 	case int:
-		id = object.(int)
+		id = policy.(int)
 	case string:
-		id, err = s.getPolicyID(object.(string))
+		id, err = s.getPolicyID(policy.(string))
 		if err != nil {
 			return 0, err
 		}
