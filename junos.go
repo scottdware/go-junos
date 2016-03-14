@@ -157,14 +157,14 @@ func (j *Junos) Close() {
 	j.Session.Transport.Close()
 }
 
-// RunCommand executes any operational mode command, such as "show" or "request."
-// <format> can be one of "text" or "xml."
-func (j *Junos) RunCommand(cmd, format string) (string, error) {
+// RunCommand executes any operational mode command, such as "show" or "request." If you wish to return the results
+// of the command, specify the format, which must be "text" or "xml" as the second parameter.
+func (j *Junos) RunCommand(cmd string, format ...string) (string, error) {
 	var command string
 	command = fmt.Sprintf(rpcCommand, cmd)
 	errMessage := "no output available - please check the syntax of your command"
 
-	if format == "xml" {
+	if len(format) > 0 && format[0] == "xml" {
 		command = fmt.Sprintf(rpcCommandXML, cmd)
 	}
 
@@ -183,7 +183,7 @@ func (j *Junos) RunCommand(cmd, format string) (string, error) {
 		return errMessage, nil
 	}
 
-	if format == "text" {
+	if len(format) > 0 && format[0] == "text" {
 		var output commandXML
 		err = xml.Unmarshal([]byte(reply.Data), &output)
 		if err != nil {
