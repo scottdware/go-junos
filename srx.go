@@ -624,7 +624,7 @@ func (i *IPsecVPN) Phase2(name string, auth, encryption string, lifetime int, pr
 }
 
 // TrafficSelector creates the security-association (SA) configuration needed when building
-// a site-to-site VPN. <local> and <remote> are a []string of IP addresses.
+// a site-to-site VPN. The local and remote IP addresses must be in a []string of IP addresses.
 func (i *IPsecVPN) TrafficSelector(local, remote []string) {
 	count := 1
 	ts := []string{}
