@@ -368,8 +368,8 @@ func (j *Junos) NewPolicy() *FirewallPolicy {
 	addresses := []string{}
 	applications := []string{}
 	appConfig := []string{}
-	getAddresses, _ := j.GetConfig("security>address-book", "xml")
-	getApplications, _ := j.GetConfig("applications", "xml")
+	getAddresses, _ := j.GetConfig("xml", "security>address-book")
+	getApplications, _ := j.GetConfig("xml", "applications")
 
 	if err := xml.Unmarshal([]byte(getAddresses), &addrs); err != nil {
 		fmt.Println(err)
@@ -497,7 +497,7 @@ func (j *Junos) ConvertAddressBook() []string {
 	var seczones SecurityZones
 	globalAddressBook := []string{}
 
-	zoneConfig, _ := j.GetConfig("security>zones", "xml")
+	zoneConfig, _ := j.GetConfig("xml", "security>zones")
 	if err := xml.Unmarshal([]byte(zoneConfig), &seczones); err != nil {
 		fmt.Println(err)
 	}
