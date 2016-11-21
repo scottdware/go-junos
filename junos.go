@@ -711,7 +711,6 @@ func (j *Junos) RollbackConfig(option interface{}) error {
 // Unlock unlocks the candidate configuration.
 func (j *Junos) Unlock() error {
 	reply, err := j.Session.Exec(netconf.RawRPC(rpcUnlock))
-	fmt.Println(reply)
 	if err != nil {
 		return err
 	}
