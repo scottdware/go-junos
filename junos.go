@@ -16,41 +16,42 @@ import (
 
 // All of our RPC calls we use.
 var (
-	rpcCommand            = "<command format=\"text\">%s</command>"
-	rpcCommandXML         = "<command format=\"xml\">%s</command>"
-	rpcCommit             = "<commit-configuration/>"
-	rpcCommitAt           = "<commit-configuration><at-time>%s</at-time></commit-configuration>"
-	rpcCommitAtLog        = "<commit-configuration><at-time>%s</at-time><log>%s</log></commit-configuration>"
-	rpcCommitCheck        = "<commit-configuration><check/></commit-configuration>"
-	rpcCommitConfirm      = "<commit-configuration><confirmed/><confirm-timeout>%d</confirm-timeout></commit-configuration>"
-	rpcCommitFull         = "<commit-configuration><full/></commit-configuration>"
-	rpcFactsRE            = "<get-route-engine-information/>"
-	rpcFactsChassis       = "<get-chassis-inventory/>"
-	rpcConfigFileSet      = "<load-configuration action=\"set\" format=\"text\"><configuration-set>%s</configuration-set></load-configuration>"
-	rpcConfigFileText     = "<load-configuration format=\"text\"><configuration-text>%s</configuration-text></load-configuration>"
-	rpcConfigFileXML      = "<load-configuration format=\"xml\"><configuration>%s</configuration></load-configuration>"
-	rpcConfigURLSet       = "<load-configuration action=\"set\" format=\"text\" url=\"%s\"/>"
-	rpcConfigURLText      = "<load-configuration format=\"text\" url=\"%s\"/>"
-	rpcConfigURLXML       = "<load-configuration format=\"xml\" url=\"%s\"/>"
-	rpcConfigStringSet    = "<load-configuration action=\"set\" format=\"text\"><configuration-set>%s</configuration-set></load-configuration>"
-	rpcConfigStringText   = "<load-configuration format=\"text\"><configuration-text>%s</configuration-text></load-configuration>"
-	rpcConfigStringXML    = "<load-configuration format=\"xml\"><configuration>%s</configuration></load-configuration>"
-	rpcGetRescue          = "<get-rescue-information><format>text</format></get-rescue-information>"
-	rpcGetRollback        = "<get-rollback-information><rollback>%d</rollback><format>text</format></get-rollback-information>"
-	rpcGetRollbackCompare = "<get-rollback-information><rollback>0</rollback><compare>%d</compare><format>text</format></get-rollback-information>"
-	rpcHardware           = "<get-chassis-inventory/>"
-	rpcLock               = "<lock-configuration/>"
-	rpcRescueConfig       = "<load-configuration rescue=\"rescue\"/>"
-	rpcRescueDelete       = "<request-delete-rescue-configuration/>"
-	rpcRescueSave         = "<request-save-rescue-configuration/>"
-	rpcRollbackConfig     = "<load-configuration rollback=\"%d\"/>"
-	rpcRoute              = "<get-route-engine-information/>"
-	rpcSoftware           = "<get-software-information/>"
-	rpcUnlock             = "<unlock-configuration/>"
-	rpcVersion            = "<get-software-information/>"
-	rpcReboot             = "<request-reboot/>"
-	rpcCommitHistory      = "<get-commit-information/>"
-	rpcFileList           = "<file-list><detail/><path>%s</path></file-list>"
+	rpcCommand             = "<command format=\"text\">%s</command>"
+	rpcCommandXML          = "<command format=\"xml\">%s</command>"
+	rpcCommit              = "<commit-configuration/>"
+	rpcCommitAt            = "<commit-configuration><at-time>%s</at-time></commit-configuration>"
+	rpcCommitAtLog         = "<commit-configuration><at-time>%s</at-time><log>%s</log></commit-configuration>"
+	rpcCommitCheck         = "<commit-configuration><check/></commit-configuration>"
+	rpcCommitConfirm       = "<commit-configuration><confirmed/><confirm-timeout>%d</confirm-timeout></commit-configuration>"
+	rpcCommitFull          = "<commit-configuration><full/></commit-configuration>"
+	rpcFactsRE             = "<get-route-engine-information/>"
+	rpcFactsChassis        = "<get-chassis-inventory/>"
+	rpcConfigFileSet       = "<load-configuration action=\"set\" format=\"text\"><configuration-set>%s</configuration-set></load-configuration>"
+	rpcConfigFileText      = "<load-configuration format=\"text\"><configuration-text>%s</configuration-text></load-configuration>"
+	rpcConfigFileXML       = "<load-configuration format=\"xml\"><configuration>%s</configuration></load-configuration>"
+	rpcConfigURLSet        = "<load-configuration action=\"set\" format=\"text\" url=\"%s\"/>"
+	rpcConfigURLText       = "<load-configuration format=\"text\" url=\"%s\"/>"
+	rpcConfigURLXML        = "<load-configuration format=\"xml\" url=\"%s\"/>"
+	rpcConfigStringSet     = "<load-configuration action=\"set\" format=\"text\"><configuration-set>%s</configuration-set></load-configuration>"
+	rpcConfigStringText    = "<load-configuration format=\"text\"><configuration-text>%s</configuration-text></load-configuration>"
+	rpcConfigStringXML     = "<load-configuration format=\"xml\"><configuration>%s</configuration></load-configuration>"
+	rpcGetRescue           = "<get-rescue-information><format>text</format></get-rescue-information>"
+	rpcGetRollback         = "<get-rollback-information><rollback>%d</rollback><format>text</format></get-rollback-information>"
+	rpcGetRollbackCompare  = "<get-rollback-information><rollback>0</rollback><compare>%d</compare><format>text</format></get-rollback-information>"
+	rpcGetCandidateCompare = "<get-configuration compare=\"rollback\" rollback=\"%d\" format=\"text\"/>"
+	rpcHardware            = "<get-chassis-inventory/>"
+	rpcLock                = "<lock-configuration/>"
+	rpcRescueConfig        = "<load-configuration rescue=\"rescue\"/>"
+	rpcRescueDelete        = "<request-delete-rescue-configuration/>"
+	rpcRescueSave          = "<request-save-rescue-configuration/>"
+	rpcRollbackConfig      = "<load-configuration rollback=\"%d\"/>"
+	rpcRoute               = "<get-route-engine-information/>"
+	rpcSoftware            = "<get-software-information/>"
+	rpcUnlock              = "<unlock-configuration/>"
+	rpcVersion             = "<get-software-information/>"
+	rpcReboot              = "<request-reboot/>"
+	rpcCommitHistory       = "<get-commit-information/>"
+	rpcFileList            = "<file-list><detail/><path>%s</path></file-list>"
 )
 
 // Junos contains our session state.
@@ -101,6 +102,13 @@ type diffXML struct {
 	XMLName xml.Name `xml:"rollback-information"`
 	Error   string   `xml:"rpc-error>error-message"`
 	Config  string   `xml:"configuration-information>configuration-output"`
+}
+
+// cdiffXML - candidate config diff XML
+type cdiffXML struct {
+	XMLName xml.Name `xml:"configuration-information"`
+	Error   string   `xml:"rpc-error>error-message"`
+	Config  string   `xml:"configuration-output"`
 }
 
 type hardwareRouteEngines struct {
@@ -411,6 +419,38 @@ func (j *Junos) CommitConfirm(delay int) error {
 	}
 
 	return nil
+}
+
+// Diff compares candidate config to current (rollback 0) or previous rollback
+// this is equivalent to 'show | compare' or 'show | compare rollback X' when
+// in configuration mode
+// RPC: <get-configuration compare="rollback" rollback="[0-49]" format="text"/>
+// https://goo.gl/wFRMX9 (juniper.net)
+func (j *Junos) Diff(rollback int) (string, error) {
+	var cd cdiffXML
+	command := fmt.Sprintf(rpcGetCandidateCompare, rollback)
+	reply, err := j.Session.Exec(netconf.RawRPC(command))
+	if err != nil {
+		return "", err
+	}
+
+	if reply.Errors != nil {
+		for _, m := range reply.Errors {
+			return "", errors.New(m.Message)
+		}
+	}
+
+	err = xml.Unmarshal([]byte(reply.Data), &cd)
+	if err != nil {
+		return "", err
+	}
+
+	if cd.Error != "" {
+		errMessage := strings.Trim(cd.Error, "\r\n")
+		return "", errors.New(errMessage)
+	}
+
+	return cd.Config, nil
 }
 
 // ConfigDiff compares the current active configuration to a given rollback (number) configuration.
