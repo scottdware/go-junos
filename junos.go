@@ -166,9 +166,18 @@ type File struct {
 
 // NewSession establishes a new connection to a Junos device that we will use
 // to run our commands against. NewSession also gathers software information
-// about the device.
-func NewSession(host, user, password string) (*Junos, error) {
+// about the device.  logger is optional for additonal NETCONF logging
+// logger is any logger that implements the netconf.Logger interface (ex: logrus)
+func NewSession(host, user, password string, logger ...interface{}) (*Junos, error) {
 	rex := regexp.MustCompile(`^.*\[(.*)\]`)
+
+	if logger != nil {
+		l, ok := logger[0].(netconf.Logger)
+		if ok {
+			netconf.SetLog(l)
+		}
+	}
+
 	s, err := netconf.DialSSH(host, netconf.SSHConfigPassword(user, password))
 	if err != nil {
 		log.Fatal(err)
