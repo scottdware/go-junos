@@ -11,7 +11,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/scottdware/go-netconf/netconf"
+	"github.com/Juniper/go-netconf/netconf"
 )
 
 // All of our RPC calls we use.
@@ -183,7 +183,7 @@ func NewSession(host, user, password string, logger ...interface{}) (*Junos, err
 		log.Fatal(err)
 	}
 
-	reply, err := s.Exec(netconf.RawRPC(rpcVersion))
+	reply, err := s.Exec(netconf.RawMethod(rpcVersion))
 	if err != nil {
 		return nil, err
 	}
@@ -255,7 +255,7 @@ func (j *Junos) RunCommand(cmd string, format ...string) (string, error) {
 		command = fmt.Sprintf(rpcCommandXML, cmd)
 	}
 
-	reply, err := j.Session.Exec(netconf.RawRPC(command))
+	reply, err := j.Session.Exec(netconf.RawMethod(command))
 	if err != nil {
 		return "", err
 	}
@@ -286,7 +286,7 @@ func (j *Junos) RunCommand(cmd string, format ...string) (string, error) {
 // CommitHistory gathers all the information about the previous 5 commits.
 func (j *Junos) CommitHistory() (*CommitHistory, error) {
 	var history CommitHistory
-	reply, err := j.Session.Exec(netconf.RawRPC(rpcCommitHistory))
+	reply, err := j.Session.Exec(netconf.RawMethod(rpcCommitHistory))
 	if err != nil {
 		return nil, err
 	}
@@ -312,7 +312,7 @@ func (j *Junos) CommitHistory() (*CommitHistory, error) {
 // Commit commits the configuration.
 func (j *Junos) Commit() error {
 	var errs commitResults
-	reply, err := j.Session.Exec(netconf.RawRPC(rpcCommit))
+	reply, err := j.Session.Exec(netconf.RawMethod(rpcCommit))
 	if err != nil {
 		return err
 	}
@@ -347,7 +347,7 @@ func (j *Junos) CommitAt(time string, message ...string) error {
 		command = fmt.Sprintf(rpcCommitAtLog, time)
 	}
 
-	reply, err := j.Session.Exec(netconf.RawRPC(command))
+	reply, err := j.Session.Exec(netconf.RawMethod(command))
 	if err != nil {
 		return err
 	}
@@ -375,7 +375,7 @@ func (j *Junos) CommitAt(time string, message ...string) error {
 // CommitCheck checks the configuration for syntax errors, but does not commit any changes.
 func (j *Junos) CommitCheck() error {
 	var errs commitResults
-	reply, err := j.Session.Exec(netconf.RawRPC(rpcCommitCheck))
+	reply, err := j.Session.Exec(netconf.RawMethod(rpcCommitCheck))
 	if err != nil {
 		return err
 	}
@@ -404,7 +404,7 @@ func (j *Junos) CommitCheck() error {
 func (j *Junos) CommitConfirm(delay int) error {
 	var errs commitResults
 	command := fmt.Sprintf(rpcCommitConfirm, delay)
-	reply, err := j.Session.Exec(netconf.RawRPC(command))
+	reply, err := j.Session.Exec(netconf.RawMethod(command))
 	if err != nil {
 		return err
 	}
@@ -438,7 +438,7 @@ func (j *Junos) CommitConfirm(delay int) error {
 func (j *Junos) Diff(rollback int) (string, error) {
 	var cd cdiffXML
 	command := fmt.Sprintf(rpcGetCandidateCompare, rollback)
-	reply, err := j.Session.Exec(netconf.RawRPC(command))
+	reply, err := j.Session.Exec(netconf.RawMethod(command))
 	if err != nil {
 		return "", err
 	}
@@ -466,7 +466,7 @@ func (j *Junos) Diff(rollback int) (string, error) {
 func (j *Junos) ConfigDiff(rollback int) (string, error) {
 	var rb diffXML
 	command := fmt.Sprintf(rpcGetRollbackCompare, rollback)
-	reply, err := j.Session.Exec(netconf.RawRPC(command))
+	reply, err := j.Session.Exec(netconf.RawMethod(command))
 	if err != nil {
 		return "", err
 	}
@@ -517,7 +517,7 @@ func (j *Junos) GetConfig(format string, section ...string) (string, error) {
 		command += "</configuration></get-configuration>"
 	}
 
-	reply, err := j.Session.Exec(netconf.RawRPC(command))
+	reply, err := j.Session.Exec(netconf.RawMethod(command))
 	if err != nil {
 		return "", err
 	}
@@ -618,7 +618,7 @@ func (j *Junos) Config(path interface{}, format string, commit bool) error {
 		}
 	}
 
-	reply, err := j.Session.Exec(netconf.RawRPC(command))
+	reply, err := j.Session.Exec(netconf.RawMethod(command))
 	if err != nil {
 		return err
 	}
@@ -641,7 +641,7 @@ func (j *Junos) Config(path interface{}, format string, commit bool) error {
 
 // Lock locks the candidate configuration.
 func (j *Junos) Lock() error {
-	reply, err := j.Session.Exec(netconf.RawRPC(rpcLock))
+	reply, err := j.Session.Exec(netconf.RawMethod(rpcLock))
 	if err != nil {
 		return err
 	}
@@ -667,7 +667,7 @@ func (j *Junos) Rescue(action string) error {
 		command = fmt.Sprintf(rpcRescueDelete)
 	}
 
-	reply, err := j.Session.Exec(netconf.RawRPC(command))
+	reply, err := j.Session.Exec(netconf.RawMethod(command))
 	if err != nil {
 		return err
 	}
@@ -689,7 +689,7 @@ func (j *Junos) RollbackConfig(option interface{}) error {
 		command = fmt.Sprintf(rpcRescueConfig)
 	}
 
-	reply, err := j.Session.Exec(netconf.RawRPC(command))
+	reply, err := j.Session.Exec(netconf.RawMethod(command))
 	if err != nil {
 		return err
 	}
@@ -710,7 +710,7 @@ func (j *Junos) RollbackConfig(option interface{}) error {
 
 // Unlock unlocks the candidate configuration.
 func (j *Junos) Unlock() error {
-	reply, err := j.Session.Exec(netconf.RawRPC(rpcUnlock))
+	reply, err := j.Session.Exec(netconf.RawMethod(rpcUnlock))
 	if err != nil {
 		return err
 	}
@@ -726,7 +726,7 @@ func (j *Junos) Unlock() error {
 
 // Reboot will reboot the device.
 func (j *Junos) Reboot() error {
-	reply, err := j.Session.Exec(netconf.RawRPC(rpcReboot))
+	reply, err := j.Session.Exec(netconf.RawMethod(rpcReboot))
 	if err != nil {
 		return err
 	}
@@ -746,7 +746,7 @@ func (j *Junos) Files(path string) (*FileList, error) {
 	var files FileList
 	var command = fmt.Sprintf(rpcFileList, dir+"/")
 
-	reply, err := j.Session.Exec(netconf.RawRPC(command))
+	reply, err := j.Session.Exec(netconf.RawMethod(command))
 	if err != nil {
 		return nil, err
 	}
@@ -775,7 +775,7 @@ func (j *Junos) Files(path string) (*FileList, error) {
 // check and evaluate the new configuration. Useful for when you get an error with
 // a commit or when you've changed the configuration significantly.
 func (j *Junos) CommitFull() error {
-	reply, err := j.Session.Exec(netconf.RawRPC(rpcCommitFull))
+	reply, err := j.Session.Exec(netconf.RawMethod(rpcCommitFull))
 	if err != nil {
 		return err
 	}
