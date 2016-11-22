@@ -5,12 +5,11 @@
 A Go package that interacts with Junos devices, as well as Junos Space, and allows you to do the following:
 
 * Run operational mode commands, such as `show`, `request`, etc..
-* Compare the active configuration to a rollback configuration.
+* Compare the active configuration to a rollback configuration (diff).
 * Rollback the configuration to a given state or a "rescue" config.
 * Configure devices by submitting commands, uploading a local file or from a remote FTP/HTTP server.
 * List files on devices.
 * Commit operations: lock, unlock, commit, commit-at, commit-confirmed, etc.
-* [SRX] Create a security policy.
 * [SRX] Convert from a zone-based address book to a global one.
 * [SRX] Create a site-to-site IPsec VPN.
 
