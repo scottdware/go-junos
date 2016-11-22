@@ -10,24 +10,24 @@ import (
 )
 
 // FirewallPolicy contains all of the rules that will be created for the policy.
-type FirewallPolicy struct {
-	Addresses     []string
-	Applications  []string
-	JunosDefaults []string
-	Rules         []Rule
-	AppConfig     []string
-}
+// type FirewallPolicy struct {
+// 	Addresses     []string
+// 	Applications  []string
+// 	JunosDefaults []string
+// 	Rules         []Rule
+// 	AppConfig     []string
+// }
 
 // Rule contains information about a single firewall/policy rule.
-type Rule struct {
-	Name          interface{}
-	SourceZone    string
-	SourceAddress []string
-	DestZone      string
-	DestAddress   []string
-	Application   []string
-	Action        string
-}
+// type Rule struct {
+// 	Name          interface{}
+// 	SourceZone    string
+// 	SourceAddress []string
+// 	DestZone      string
+// 	DestAddress   []string
+// 	Application   []string
+// 	Action        string
+// }
 
 // ExistingAddresses contains information about every global address-book entry.
 type ExistingAddresses struct {
@@ -51,22 +51,22 @@ type ExistingAddressSet struct {
 }
 
 // ExistingApplications contains information about every application entry.
-type ExistingApplications struct {
-	XMLName                 xml.Name                 `xml:"configuration"`
-	ExistingApplications    []ExistingApplication    `xml:"applications>application"`
-	ExistingApplicationSets []ExistingApplicationSet `xml:"applications>application-set"`
-}
+// type ExistingApplications struct {
+// 	XMLName                 xml.Name                 `xml:"configuration"`
+// 	ExistingApplications    []ExistingApplication    `xml:"applications>application"`
+// 	ExistingApplicationSets []ExistingApplicationSet `xml:"applications>application-set"`
+// }
 
 // ExistingApplication contains information about each individual application entry.
-type ExistingApplication struct {
-	Name string `xml:"name"`
-}
+// type ExistingApplication struct {
+// 	Name string `xml:"name"`
+// }
 
 // ExistingApplicationSet contains all of the application-sets (service groups) in the SRX.
-type ExistingApplicationSet struct {
-	Name                 string                `xml:"name"`
-	ExistingApplications []ExistingApplication `xml:"application-set>application"`
-}
+// type ExistingApplicationSet struct {
+// 	Name                 string                `xml:"name"`
+// 	ExistingApplications []ExistingApplication `xml:"application-set>application"`
+// }
 
 // SecurityZones contains all of our security-zone information.
 type SecurityZones struct {
@@ -112,7 +112,7 @@ type IPsecVPN struct {
 	PSK               string
 	PFS               int
 	Establish         string
-	St0               string
+	TunnelInterface   string
 	Gateway           []string
 	P1Proposals       []P1
 	P2Proposals       []P2
@@ -138,7 +138,7 @@ type P2 struct {
 }
 
 // st0Interface holds all of the current st0 interfaces on the SRX.
-type st0Interface struct {
+type tunnelInterface struct {
 	XMLName xml.Name `xml:"interface-information"`
 	Units   []unit   `xml:"physical-interface>logical-interface"`
 }
@@ -150,199 +150,199 @@ type unit struct {
 
 var (
 	// These are the Junos default applications in an SRX
-	junosDefaultApps = []string{
-		"junos-aol",
-		"junos-bgp",
-		"junos-biff",
-		"junos-bootpc",
-		"junos-bootps",
-		"junos-chargen",
-		"junos-cifs",
-		"junos-cvspserver",
-		"junos-dhcp-client",
-		"junos-dhcp-relay",
-		"junos-dhcp-server",
-		"junos-discard",
-		"junos-dns-tcp",
-		"junos-dns-udp",
-		"junos-echo",
-		"junos-finger",
-		"junos-ftp",
-		"junos-gnutella",
-		"junos-gopher",
-		"junos-gre",
-		"junos-gtp",
-		"junos-h323",
-		"junos-http",
-		"junos-http-ext",
-		"junos-https",
-		"junos-icmp-all",
-		"junos-icmp-ping",
-		"junos-icmp6-all",
-		"junos-icmp6-dst-unreach-addr",
-		"junos-icmp6-dst-unreach-admin",
-		"junos-icmp6-dst-unreach-beyond",
-		"junos-icmp6-dst-unreach-port",
-		"junos-icmp6-dst-unreach-route",
-		"junos-icmp6-echo-reply",
-		"junos-icmp6-echo-request",
-		"junos-icmp6-packet-too-big",
-		"junos-icmp6-param-prob-header",
-		"junos-icmp6-param-prob-nexthdr",
-		"junos-icmp6-param-prob-option",
-		"junos-icmp6-time-exceed-reassembly",
-		"junos-icmp6-time-exceed-transit",
-		"junos-ident",
-		"junos-ike",
-		"junos-ike-nat",
-		"junos-imap",
-		"junos-imaps",
-		"junos-internet-locator-service",
-		"junos-irc",
-		"junos-l2tp",
-		"junos-ldap",
-		"junos-ldp-tcp",
-		"junos-ldp-udp",
-		"junos-lpr",
-		"junos-mail",
-		"junos-mgcp",
-		"junos-mgcp-ca",
-		"junos-mgcp-ua",
-		"junos-ms-rpc",
-		"junos-ms-rpc-any",
-		"junos-ms-rpc-epm",
-		"junos-ms-rpc-iis-com",
-		"junos-ms-rpc-iis-com-1",
-		"junos-ms-rpc-iis-com-adminbase",
-		"junos-ms-rpc-msexchange",
-		"junos-ms-rpc-msexchange-directory-nsp",
-		"junos-ms-rpc-msexchange-directory-rfr",
-		"junos-ms-rpc-msexchange-info-store",
-		"junos-ms-rpc-tcp",
-		"junos-ms-rpc-udp",
-		"junos-ms-rpc-uuid-any-tcp",
-		"junos-ms-rpc-uuid-any-udp",
-		"junos-ms-rpc-wmic",
-		"junos-ms-rpc-wmic-admin",
-		"junos-ms-rpc-wmic-admin2",
-		"junos-ms-rpc-wmic-mgmt",
-		"junos-ms-rpc-wmic-webm-callresult",
-		"junos-ms-rpc-wmic-webm-classobject",
-		"junos-ms-rpc-wmic-webm-level1login",
-		"junos-ms-rpc-wmic-webm-login-clientid",
-		"junos-ms-rpc-wmic-webm-login-helper",
-		"junos-ms-rpc-wmic-webm-objectsink",
-		"junos-ms-rpc-wmic-webm-refreshing-services",
-		"junos-ms-rpc-wmic-webm-remote-refresher",
-		"junos-ms-rpc-wmic-webm-services",
-		"junos-ms-rpc-wmic-webm-shutdown",
-		"junos-ms-sql",
-		"junos-msn",
-		"junos-nbds",
-		"junos-nbname",
-		"junos-netbios-session",
-		"junos-nfs",
-		"junos-nfsd-tcp",
-		"junos-nfsd-udp",
-		"junos-nntp",
-		"junos-ns-global",
-		"junos-ns-global-pro",
-		"junos-nsm",
-		"junos-ntalk",
-		"junos-ntp",
-		"junos-ospf",
-		"junos-pc-anywhere",
-		"junos-persistent-nat",
-		"junos-ping",
-		"junos-pingv6",
-		"junos-pop3",
-		"junos-pptp",
-		"junos-printer",
-		"junos-r2cp",
-		"junos-radacct",
-		"junos-radius",
-		"junos-realaudio",
-		"junos-rip",
-		"junos-routing-inbound",
-		"junos-rsh",
-		"junos-rtsp",
-		"junos-sccp",
-		"junos-sctp-any",
-		"junos-sip",
-		"junos-smb",
-		"junos-smb-session",
-		"junos-smtp",
-		"junos-snmp-agentx",
-		"junos-snpp",
-		"junos-sql-monitor",
-		"junos-sqlnet-v1",
-		"junos-sqlnet-v2",
-		"junos-ssh",
-		"junos-stun",
-		"junos-sun-rpc",
-		"junos-sun-rpc-any",
-		"junos-sun-rpc-any-tcp",
-		"junos-sun-rpc-any-udp",
-		"junos-sun-rpc-mountd",
-		"junos-sun-rpc-mountd-tcp",
-		"junos-sun-rpc-mountd-udp",
-		"junos-sun-rpc-nfs",
-		"junos-sun-rpc-nfs-access",
-		"junos-sun-rpc-nfs-tcp",
-		"junos-sun-rpc-nfs-udp",
-		"junos-sun-rpc-nlockmgr",
-		"junos-sun-rpc-nlockmgr-tcp",
-		"junos-sun-rpc-nlockmgr-udp",
-		"junos-sun-rpc-portmap",
-		"junos-sun-rpc-portmap-tcp",
-		"junos-sun-rpc-portmap-udp",
-		"junos-sun-rpc-rquotad",
-		"junos-sun-rpc-rquotad-tcp",
-		"junos-sun-rpc-rquotad-udp",
-		"junos-sun-rpc-ruserd",
-		"junos-sun-rpc-ruserd-tcp",
-		"junos-sun-rpc-ruserd-udp",
-		"junos-sun-rpc-sadmind",
-		"junos-sun-rpc-sadmind-tcp",
-		"junos-sun-rpc-sadmind-udp",
-		"junos-sun-rpc-sprayd",
-		"junos-sun-rpc-sprayd-tcp",
-		"junos-sun-rpc-sprayd-udp",
-		"junos-sun-rpc-status",
-		"junos-sun-rpc-status-tcp",
-		"junos-sun-rpc-status-udp",
-		"junos-sun-rpc-tcp",
-		"junos-sun-rpc-udp",
-		"junos-sun-rpc-walld",
-		"junos-sun-rpc-walld-tcp",
-		"junos-sun-rpc-walld-udp",
-		"junos-sun-rpc-ypbind",
-		"junos-sun-rpc-ypbind-tcp",
-		"junos-sun-rpc-ypbind-udp",
-		"junos-sun-rpc-ypserv",
-		"junos-sun-rpc-ypserv-tcp",
-		"junos-sun-rpc-ypserv-udp",
-		"junos-syslog",
-		"junos-tacacs",
-		"junos-tacacs-ds",
-		"junos-talk",
-		"junos-tcp-any",
-		"junos-telnet",
-		"junos-tftp",
-		"junos-udp-any",
-		"junos-uucp",
-		"junos-vdo-live",
-		"junos-vnc",
-		"junos-wais",
-		"junos-who",
-		"junos-whois",
-		"junos-winframe",
-		"junos-wxcontrol",
-		"junos-x-windows",
-		"junos-xnm-clear-text",
-		"junos-xnm-ssl",
-		"junos-ymsg",
-	}
+	// junosDefaultApps = []string{
+	// 	"junos-aol",
+	// 	"junos-bgp",
+	// 	"junos-biff",
+	// 	"junos-bootpc",
+	// 	"junos-bootps",
+	// 	"junos-chargen",
+	// 	"junos-cifs",
+	// 	"junos-cvspserver",
+	// 	"junos-dhcp-client",
+	// 	"junos-dhcp-relay",
+	// 	"junos-dhcp-server",
+	// 	"junos-discard",
+	// 	"junos-dns-tcp",
+	// 	"junos-dns-udp",
+	// 	"junos-echo",
+	// 	"junos-finger",
+	// 	"junos-ftp",
+	// 	"junos-gnutella",
+	// 	"junos-gopher",
+	// 	"junos-gre",
+	// 	"junos-gtp",
+	// 	"junos-h323",
+	// 	"junos-http",
+	// 	"junos-http-ext",
+	// 	"junos-https",
+	// 	"junos-icmp-all",
+	// 	"junos-icmp-ping",
+	// 	"junos-icmp6-all",
+	// 	"junos-icmp6-dst-unreach-addr",
+	// 	"junos-icmp6-dst-unreach-admin",
+	// 	"junos-icmp6-dst-unreach-beyond",
+	// 	"junos-icmp6-dst-unreach-port",
+	// 	"junos-icmp6-dst-unreach-route",
+	// 	"junos-icmp6-echo-reply",
+	// 	"junos-icmp6-echo-request",
+	// 	"junos-icmp6-packet-too-big",
+	// 	"junos-icmp6-param-prob-header",
+	// 	"junos-icmp6-param-prob-nexthdr",
+	// 	"junos-icmp6-param-prob-option",
+	// 	"junos-icmp6-time-exceed-reassembly",
+	// 	"junos-icmp6-time-exceed-transit",
+	// 	"junos-ident",
+	// 	"junos-ike",
+	// 	"junos-ike-nat",
+	// 	"junos-imap",
+	// 	"junos-imaps",
+	// 	"junos-internet-locator-service",
+	// 	"junos-irc",
+	// 	"junos-l2tp",
+	// 	"junos-ldap",
+	// 	"junos-ldp-tcp",
+	// 	"junos-ldp-udp",
+	// 	"junos-lpr",
+	// 	"junos-mail",
+	// 	"junos-mgcp",
+	// 	"junos-mgcp-ca",
+	// 	"junos-mgcp-ua",
+	// 	"junos-ms-rpc",
+	// 	"junos-ms-rpc-any",
+	// 	"junos-ms-rpc-epm",
+	// 	"junos-ms-rpc-iis-com",
+	// 	"junos-ms-rpc-iis-com-1",
+	// 	"junos-ms-rpc-iis-com-adminbase",
+	// 	"junos-ms-rpc-msexchange",
+	// 	"junos-ms-rpc-msexchange-directory-nsp",
+	// 	"junos-ms-rpc-msexchange-directory-rfr",
+	// 	"junos-ms-rpc-msexchange-info-store",
+	// 	"junos-ms-rpc-tcp",
+	// 	"junos-ms-rpc-udp",
+	// 	"junos-ms-rpc-uuid-any-tcp",
+	// 	"junos-ms-rpc-uuid-any-udp",
+	// 	"junos-ms-rpc-wmic",
+	// 	"junos-ms-rpc-wmic-admin",
+	// 	"junos-ms-rpc-wmic-admin2",
+	// 	"junos-ms-rpc-wmic-mgmt",
+	// 	"junos-ms-rpc-wmic-webm-callresult",
+	// 	"junos-ms-rpc-wmic-webm-classobject",
+	// 	"junos-ms-rpc-wmic-webm-level1login",
+	// 	"junos-ms-rpc-wmic-webm-login-clientid",
+	// 	"junos-ms-rpc-wmic-webm-login-helper",
+	// 	"junos-ms-rpc-wmic-webm-objectsink",
+	// 	"junos-ms-rpc-wmic-webm-refreshing-services",
+	// 	"junos-ms-rpc-wmic-webm-remote-refresher",
+	// 	"junos-ms-rpc-wmic-webm-services",
+	// 	"junos-ms-rpc-wmic-webm-shutdown",
+	// 	"junos-ms-sql",
+	// 	"junos-msn",
+	// 	"junos-nbds",
+	// 	"junos-nbname",
+	// 	"junos-netbios-session",
+	// 	"junos-nfs",
+	// 	"junos-nfsd-tcp",
+	// 	"junos-nfsd-udp",
+	// 	"junos-nntp",
+	// 	"junos-ns-global",
+	// 	"junos-ns-global-pro",
+	// 	"junos-nsm",
+	// 	"junos-ntalk",
+	// 	"junos-ntp",
+	// 	"junos-ospf",
+	// 	"junos-pc-anywhere",
+	// 	"junos-persistent-nat",
+	// 	"junos-ping",
+	// 	"junos-pingv6",
+	// 	"junos-pop3",
+	// 	"junos-pptp",
+	// 	"junos-printer",
+	// 	"junos-r2cp",
+	// 	"junos-radacct",
+	// 	"junos-radius",
+	// 	"junos-realaudio",
+	// 	"junos-rip",
+	// 	"junos-routing-inbound",
+	// 	"junos-rsh",
+	// 	"junos-rtsp",
+	// 	"junos-sccp",
+	// 	"junos-sctp-any",
+	// 	"junos-sip",
+	// 	"junos-smb",
+	// 	"junos-smb-session",
+	// 	"junos-smtp",
+	// 	"junos-snmp-agentx",
+	// 	"junos-snpp",
+	// 	"junos-sql-monitor",
+	// 	"junos-sqlnet-v1",
+	// 	"junos-sqlnet-v2",
+	// 	"junos-ssh",
+	// 	"junos-stun",
+	// 	"junos-sun-rpc",
+	// 	"junos-sun-rpc-any",
+	// 	"junos-sun-rpc-any-tcp",
+	// 	"junos-sun-rpc-any-udp",
+	// 	"junos-sun-rpc-mountd",
+	// 	"junos-sun-rpc-mountd-tcp",
+	// 	"junos-sun-rpc-mountd-udp",
+	// 	"junos-sun-rpc-nfs",
+	// 	"junos-sun-rpc-nfs-access",
+	// 	"junos-sun-rpc-nfs-tcp",
+	// 	"junos-sun-rpc-nfs-udp",
+	// 	"junos-sun-rpc-nlockmgr",
+	// 	"junos-sun-rpc-nlockmgr-tcp",
+	// 	"junos-sun-rpc-nlockmgr-udp",
+	// 	"junos-sun-rpc-portmap",
+	// 	"junos-sun-rpc-portmap-tcp",
+	// 	"junos-sun-rpc-portmap-udp",
+	// 	"junos-sun-rpc-rquotad",
+	// 	"junos-sun-rpc-rquotad-tcp",
+	// 	"junos-sun-rpc-rquotad-udp",
+	// 	"junos-sun-rpc-ruserd",
+	// 	"junos-sun-rpc-ruserd-tcp",
+	// 	"junos-sun-rpc-ruserd-udp",
+	// 	"junos-sun-rpc-sadmind",
+	// 	"junos-sun-rpc-sadmind-tcp",
+	// 	"junos-sun-rpc-sadmind-udp",
+	// 	"junos-sun-rpc-sprayd",
+	// 	"junos-sun-rpc-sprayd-tcp",
+	// 	"junos-sun-rpc-sprayd-udp",
+	// 	"junos-sun-rpc-status",
+	// 	"junos-sun-rpc-status-tcp",
+	// 	"junos-sun-rpc-status-udp",
+	// 	"junos-sun-rpc-tcp",
+	// 	"junos-sun-rpc-udp",
+	// 	"junos-sun-rpc-walld",
+	// 	"junos-sun-rpc-walld-tcp",
+	// 	"junos-sun-rpc-walld-udp",
+	// 	"junos-sun-rpc-ypbind",
+	// 	"junos-sun-rpc-ypbind-tcp",
+	// 	"junos-sun-rpc-ypbind-udp",
+	// 	"junos-sun-rpc-ypserv",
+	// 	"junos-sun-rpc-ypserv-tcp",
+	// 	"junos-sun-rpc-ypserv-udp",
+	// 	"junos-syslog",
+	// 	"junos-tacacs",
+	// 	"junos-tacacs-ds",
+	// 	"junos-talk",
+	// 	"junos-tcp-any",
+	// 	"junos-telnet",
+	// 	"junos-tftp",
+	// 	"junos-udp-any",
+	// 	"junos-uucp",
+	// 	"junos-vdo-live",
+	// 	"junos-vnc",
+	// 	"junos-wais",
+	// 	"junos-who",
+	// 	"junos-whois",
+	// 	"junos-winframe",
+	// 	"junos-wxcontrol",
+	// 	"junos-x-windows",
+	// 	"junos-xnm-clear-text",
+	// 	"junos-xnm-ssl",
+	// 	"junos-ymsg",
+	// }
 	groups = map[int]string{
 		1:  "group1",
 		2:  "group2",
@@ -362,111 +362,111 @@ var (
 )
 
 // NewPolicy establishes a blank security policy that will hold any newly created rules.
-func (j *Junos) NewPolicy() *FirewallPolicy {
-	var addrs ExistingAddresses
-	var apps ExistingApplications
-	addresses := []string{}
-	applications := []string{}
-	appConfig := []string{}
-	getAddresses, _ := j.GetConfig("xml", "security>address-book")
-	getApplications, _ := j.GetConfig("xml", "applications")
+// func (j *Junos) NewPolicy() *FirewallPolicy {
+// 	var addrs ExistingAddresses
+// 	var apps ExistingApplications
+// 	addresses := []string{}
+// 	applications := []string{}
+// 	appConfig := []string{}
+// 	getAddresses, _ := j.GetConfig("xml", "security>address-book")
+// 	getApplications, _ := j.GetConfig("xml", "applications")
 
-	if err := xml.Unmarshal([]byte(getAddresses), &addrs); err != nil {
-		fmt.Println(err)
-	}
+// 	if err := xml.Unmarshal([]byte(getAddresses), &addrs); err != nil {
+// 		fmt.Println(err)
+// 	}
 
-	if err := xml.Unmarshal([]byte(getApplications), &apps); err != nil {
-		fmt.Println(err)
-	}
+// 	if err := xml.Unmarshal([]byte(getApplications), &apps); err != nil {
+// 		fmt.Println(err)
+// 	}
 
-	for _, addr := range addrs.ExistingAddresses {
-		addresses = append(addresses, addr.Name)
-	}
+// 	for _, addr := range addrs.ExistingAddresses {
+// 		addresses = append(addresses, addr.Name)
+// 	}
 
-	for _, addrSet := range addrs.ExistingAddressSets {
-		addresses = append(addresses, addrSet.Name)
-	}
+// 	for _, addrSet := range addrs.ExistingAddressSets {
+// 		addresses = append(addresses, addrSet.Name)
+// 	}
 
-	for _, app := range apps.ExistingApplications {
-		applications = append(applications, app.Name)
-	}
+// 	for _, app := range apps.ExistingApplications {
+// 		applications = append(applications, app.Name)
+// 	}
 
-	for _, appSet := range apps.ExistingApplicationSets {
-		applications = append(applications, appSet.Name)
-	}
+// 	for _, appSet := range apps.ExistingApplicationSets {
+// 		applications = append(applications, appSet.Name)
+// 	}
 
-	for _, d := range junosDefaultApps {
-		applications = append(applications, d)
-	}
+// 	for _, d := range junosDefaultApps {
+// 		applications = append(applications, d)
+// 	}
 
-	return &FirewallPolicy{
-		Addresses:    addresses,
-		Applications: applications,
-		AppConfig:    appConfig,
-	}
-}
+// 	return &FirewallPolicy{
+// 		Addresses:    addresses,
+// 		Applications: applications,
+// 		AppConfig:    appConfig,
+// 	}
+// }
 
 // CreateApplication creates a TCP or UDP service that is previously not defined on the SRX.
-func (p *FirewallPolicy) CreateApplication(name, protocol, dstport string) {
-	p.AppConfig = append(p.AppConfig, fmt.Sprintf("set applications application %s protocol %s destination-port %s\n", name, protocol, dstport))
-}
+// func (p *FirewallPolicy) CreateApplication(name, protocol, dstport string) {
+// 	p.AppConfig = append(p.AppConfig, fmt.Sprintf("set applications application %s protocol %s destination-port %s\n", name, protocol, dstport))
+// }
 
 // AddRule creates a single rule and adds it to the policy. For services/applications, you MUST
 // provide an already existing application. If you wish to create one, use CreateApplication().
-func (p *FirewallPolicy) AddRule(name interface{}, srczone, src, dstzone, dst, application, action string) {
-	srcAddrs := strings.Split(src, ",")
-	dstAddrs := strings.Split(dst, ",")
-	apps := strings.Split(application, ",")
+// func (p *FirewallPolicy) AddRule(name interface{}, srczone, src, dstzone, dst, application, action string) {
+// 	srcAddrs := strings.Split(src, ",")
+// 	dstAddrs := strings.Split(dst, ",")
+// 	apps := strings.Split(application, ",")
 
-	rule := Rule{
-		Name:          name,
-		SourceZone:    srczone,
-		SourceAddress: srcAddrs,
-		DestZone:      dstzone,
-		DestAddress:   dstAddrs,
-		Application:   apps,
-		Action:        action,
-	}
+// 	rule := Rule{
+// 		Name:          name,
+// 		SourceZone:    srczone,
+// 		SourceAddress: srcAddrs,
+// 		DestZone:      dstzone,
+// 		DestAddress:   dstAddrs,
+// 		Application:   apps,
+// 		Action:        action,
+// 	}
 
-	p.Rules = append(p.Rules, rule)
-}
+// 	p.Rules = append(p.Rules, rule)
+// }
 
 // BuildPolicy creates our SRX security policy configuration. You can use Config() to apply the changes.
-func (p *FirewallPolicy) BuildPolicy() []string {
-	var policy []string
+// func (p *FirewallPolicy) BuildPolicy() []string {
+// 	var policy []string
 
-	for _, a := range p.AppConfig {
-		policy = append(policy, a)
-	}
+// 	for _, a := range p.AppConfig {
+// 		policy = append(policy, a)
+// 	}
 
-	for _, r := range p.Rules {
-		srcAddrs := "[ "
-		for _, s := range r.SourceAddress {
-			srcAddrs += fmt.Sprintf("%s ", strings.TrimSpace(s))
-		}
-		srcAddrs += "]"
+// 	for _, r := range p.Rules {
+// 		srcAddrs := "[ "
+// 		for _, s := range r.SourceAddress {
+// 			srcAddrs += fmt.Sprintf("%s ", strings.TrimSpace(s))
+// 		}
+// 		srcAddrs += "]"
 
-		dstAddrs := "[ "
-		for _, d := range r.DestAddress {
-			dstAddrs += fmt.Sprintf("%s ", strings.TrimSpace(d))
-		}
-		dstAddrs += "]"
+// 		dstAddrs := "[ "
+// 		for _, d := range r.DestAddress {
+// 			dstAddrs += fmt.Sprintf("%s ", strings.TrimSpace(d))
+// 		}
+// 		dstAddrs += "]"
 
-		apps := "[ "
-		for _, a := range r.Application {
-			apps += fmt.Sprintf("%s ", strings.TrimSpace(a))
-		}
-		apps += "]"
+// 		apps := "[ "
+// 		for _, a := range r.Application {
+// 			apps += fmt.Sprintf("%s ", strings.TrimSpace(a))
+// 		}
+// 		apps += "]"
 
-		rule := fmt.Sprintf("set security policies from-zone %s to-zone %s policy %v match source-address %s destination-address %s application %s\n", r.SourceZone, r.DestZone, r.Name, srcAddrs, dstAddrs, apps)
-		rule += fmt.Sprintf("set security policies from-zone %s to-zone %s policy %v then %s\n", r.SourceZone, r.DestZone, r.Name, r.Action)
-		rule += fmt.Sprintf("set security policies from-zone %s to-zone %s policy %v then log session-init session-close\n", r.SourceZone, r.DestZone, r.Name)
+// 		rule := fmt.Sprintf("set security policies from-zone %s to-zone %s policy %v match source-address %s destination-address %s application %s\n", r.SourceZone, r.DestZone, r.Name, srcAddrs, dstAddrs, apps)
+// 		rule += fmt.Sprintf("set security policies from-zone %s to-zone %s policy %v then %s\n", r.SourceZone, r.DestZone, r.Name, r.Action)
+// 		rule += fmt.Sprintf("set security policies from-zone %s to-zone %s policy %v then log session-init session-close\n", r.SourceZone, r.DestZone, r.Name)
 
-		policy = append(policy, rule)
-	}
+// 		policy = append(policy, rule)
+// 	}
 
-	return policy
-}
+// 	return policy
+// }
 
 // ConvertAddressBook will generate the configuration needed to migrate from a zone-based address
 // book to a global one. You can then use Config() to apply the changes if necessary.
@@ -539,7 +539,7 @@ func (j *Junos) ConvertAddressBook() []string {
 // establish (when to establish the tunnel; must be "traffic" or "immediately"), mode ("main" or "aggressive"), psk (
 // pre-shared key).
 func (j *Junos) NewIPsecVPN(name, localip, peerip, extinterface, zone string, pfs int, establish string, mode, psk string) *IPsecVPN {
-	var ints st0Interface
+	var ints tunnelInterface
 	gateway := []string{}
 	ontraffic := map[string]string{
 		"traffic":     "on-traffic",
@@ -551,28 +551,29 @@ func (j *Junos) NewIPsecVPN(name, localip, peerip, extinterface, zone string, pf
 		fmt.Println(err)
 	}
 
-	stInts := map[int]int{}
+	tunnelInts := map[int]int{}
 
 	for n, i := range ints.Units {
 		trimmed := strings.TrimPrefix(strings.TrimSpace(i.Name), "st0.")
 		unit, _ := strconv.Atoi(trimmed)
-		stInts[n] = unit
+		tunnelInts[n] = unit
 	}
 
-	total := len(stInts)
-	newst0 := fmt.Sprintf("st0.%d", stInts[total-1]+1)
+	total := len(tunnelInts)
+	newTunnelInt := fmt.Sprintf("st0.%d", tunnelInts[total-1]+1)
 
 	gateway = append(gateway, fmt.Sprintf("set security ike gateway %s address %s\n", name, peerip))
 	gateway = append(gateway, fmt.Sprintf("set security ike gateway %s external-interface %s\n", name, extinterface))
 	gateway = append(gateway, fmt.Sprintf("set security ike gateway %s ike-policy %s\n", name, name))
-	gateway = append(gateway, fmt.Sprintf("set security ike gateway %s local-address %s\n", name, localip))
+	gateway = append(gateway, fmt.Sprintf("set security ike gateway %s local-identity inet %s\n", name, localip))
+	gateway = append(gateway, fmt.Sprintf("set security ike gateway %s remote-identity inet %s\n", name, peerip))
 
 	return &IPsecVPN{
 		Name:              name,
 		Local:             localip,
 		Peer:              peerip,
 		ExternalInterface: extinterface,
-		St0:               newst0,
+		TunnelInterface:   newTunnelInt,
 		Zone:              zone,
 		PFS:               pfs,
 		Establish:         ontraffic[establish],
@@ -645,8 +646,8 @@ func (i *IPsecVPN) TrafficSelector(local, remote []string) {
 func (i *IPsecVPN) BuildIPsecVPN() []string {
 	config := []string{}
 
-	config = append(config, fmt.Sprintf("set interfaces %s family inet\n", i.St0))
-	config = append(config, fmt.Sprintf("set security zones security-zone %s interfaces %s\n", i.Zone, i.St0))
+	config = append(config, fmt.Sprintf("set interfaces %s family inet\n", i.TunnelInterface))
+	config = append(config, fmt.Sprintf("set security zones security-zone %s interfaces %s\n", i.Zone, i.TunnelInterface))
 
 	for _, p1 := range i.P1Proposals {
 		phase1 := []string{}
@@ -692,7 +693,7 @@ func (i *IPsecVPN) BuildIPsecVPN() []string {
 		config = append(config, fmt.Sprintf("set security ipsec policy %s perfect-forward-secrecy keys %s\n", i.Name, groups[i.PFS]))
 	}
 
-	config = append(config, fmt.Sprintf("set security ipsec vpn %s bind-interface %s\n", i.Name, i.St0))
+	config = append(config, fmt.Sprintf("set security ipsec vpn %s bind-interface %s\n", i.Name, i.TunnelInterface))
 	config = append(config, fmt.Sprintf("set security ipsec vpn %s ike gateway %s\n", i.Name, i.Name))
 	config = append(config, fmt.Sprintf("set security ipsec vpn %s ike idle-time 60\n", i.Name))
 	config = append(config, fmt.Sprintf("set security ipsec vpn %s ike ipsec-policy %s\n", i.Name, i.Name))
