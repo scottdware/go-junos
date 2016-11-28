@@ -463,32 +463,32 @@ func (j *Junos) Diff(rollback int) (string, error) {
 }
 
 // ConfigDiff compares the current active configuration to a given rollback (number) configuration.
-func (j *Junos) ConfigDiff(rollback int) (string, error) {
-	var rb diffXML
-	command := fmt.Sprintf(rpcGetRollbackCompare, rollback)
-	reply, err := j.Session.Exec(netconf.RawMethod(command))
-	if err != nil {
-		return "", err
-	}
+// func (j *Junos) ConfigDiff(rollback int) (string, error) {
+// 	var rb diffXML
+// 	command := fmt.Sprintf(rpcGetRollbackCompare, rollback)
+// 	reply, err := j.Session.Exec(netconf.RawMethod(command))
+// 	if err != nil {
+// 		return "", err
+// 	}
 
-	if reply.Errors != nil {
-		for _, m := range reply.Errors {
-			return "", errors.New(m.Message)
-		}
-	}
+// 	if reply.Errors != nil {
+// 		for _, m := range reply.Errors {
+// 			return "", errors.New(m.Message)
+// 		}
+// 	}
 
-	err = xml.Unmarshal([]byte(reply.Data), &rb)
-	if err != nil {
-		return "", err
-	}
+// 	err = xml.Unmarshal([]byte(reply.Data), &rb)
+// 	if err != nil {
+// 		return "", err
+// 	}
 
-	if rb.Error != "" {
-		errMessage := strings.Trim(rb.Error, "\r\n")
-		return "", errors.New(errMessage)
-	}
+// 	if rb.Error != "" {
+// 		errMessage := strings.Trim(rb.Error, "\r\n")
+// 		return "", errors.New(errMessage)
+// 	}
 
-	return rb.Config, nil
-}
+// 	return rb.Config, nil
+// }
 
 // GetConfig returns the configuration starting at the given section. If you do not specify anything
 // for section, then the entire configuration will be returned. Format must be "text" or "xml." You
