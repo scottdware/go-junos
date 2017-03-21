@@ -52,6 +52,7 @@ var (
 	rpcReboot              = "<request-reboot/>"
 	rpcCommitHistory       = "<get-commit-information/>"
 	rpcFileList            = "<file-list><detail/><path>%s</path></file-list>"
+	rpcInterfaces          = "<get-interface-information/>"
 )
 
 // Junos contains our session state.
@@ -141,28 +142,28 @@ type versionPackageInfo struct {
 }
 
 // FileList contains information about all files in a given path.
-type FileList struct {
-	XMLName xml.Name `xml:"directory-list"`
-	Path    string   `xml:"directory>directory-name"`
-	Total   string   `xml:"directory>total-files"`
-	Files   []File   `xml:"directory>file-information"`
-	Error   string   `xml:"output,omitempty"`
-}
+// type FileList struct {
+// 	XMLName xml.Name `xml:"directory-list"`
+// 	Path    string   `xml:"directory>directory-name"`
+// 	Total   string   `xml:"directory>total-files"`
+// 	Files   []File   `xml:"directory>file-information"`
+// 	Error   string   `xml:"output,omitempty"`
+// }
 
 // File contains information about each individual file on the system. Note that
 // "Permissions" and "Date" have sub-items that will better display the information.
-type File struct {
-	Name        string `xml:"file-name"`
-	Permissions struct {
-		Text string `xml:"format,attr"`
-	} `xml:"file-permissions"`
-	Owner string `xml:"file-owner"`
-	Group string `xml:"file-group"`
-	Size  string `xml:"file-size"`
-	Date  struct {
-		Text string `xml:"format,attr"`
-	} `xml:"file-date"`
-}
+// type File struct {
+// 	Name        string `xml:"file-name"`
+// 	Permissions struct {
+// 		Text string `xml:"format,attr"`
+// 	} `xml:"file-permissions"`
+// 	Owner string `xml:"file-owner"`
+// 	Group string `xml:"file-group"`
+// 	Size  string `xml:"file-size"`
+// 	Date  struct {
+// 		Text string `xml:"format,attr"`
+// 	} `xml:"file-date"`
+// }
 
 // NewSession establishes a new connection to a Junos device that we will use
 // to run our commands against. NewSession also gathers software information
@@ -681,8 +682,8 @@ func (j *Junos) Rescue(action string) error {
 	return nil
 }
 
-// RollbackConfig loads and commits the configuration of a given rollback number or rescue state, by specifying "rescue."
-func (j *Junos) RollbackConfig(option interface{}) error {
+// Rollback loads and commits the configuration of a given rollback number or rescue state, by specifying "rescue."
+func (j *Junos) Rollback(option interface{}) error {
 	var command = fmt.Sprintf(rpcRollbackConfig, option)
 
 	if option == "rescue" {
@@ -741,35 +742,35 @@ func (j *Junos) Reboot() error {
 }
 
 // Files will list all of the file and directory information in the given path.
-func (j *Junos) Files(path string) (*FileList, error) {
-	dir := strings.TrimRight(path, "/")
-	var files FileList
-	var command = fmt.Sprintf(rpcFileList, dir+"/")
-
-	reply, err := j.Session.Exec(netconf.RawMethod(command))
-	if err != nil {
-		return nil, err
-	}
-
-	if reply.Errors != nil {
-		for _, m := range reply.Errors {
-			return nil, errors.New(m.Message)
-		}
-	}
-
-	data := strings.Replace(reply.Data, "\n", "", -1)
-	err = xml.Unmarshal([]byte(data), &files)
-	if err != nil {
-		return nil, err
-	}
-
-	if len(files.Error) > 0 {
-		errMessage := fmt.Sprintf("%s: no such file or directory", path)
-		return nil, errors.New(errMessage)
-	}
-
-	return &files, nil
-}
+// func (j *Junos) Files(path string) (*FileList, error) {
+// 	dir := strings.TrimRight(path, "/")
+// 	var files FileList
+// 	var command = fmt.Sprintf(rpcFileList, dir+"/")
+//
+// 	reply, err := j.Session.Exec(netconf.RawMethod(command))
+// 	if err != nil {
+// 		return nil, err
+// 	}
+//
+// 	if reply.Errors != nil {
+// 		for _, m := range reply.Errors {
+// 			return nil, errors.New(m.Message)
+// 		}
+// 	}
+//
+// 	data := strings.Replace(reply.Data, "\n", "", -1)
+// 	err = xml.Unmarshal([]byte(data), &files)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+//
+// 	if len(files.Error) > 0 {
+// 		errMessage := fmt.Sprintf("%s: no such file or directory", path)
+// 		return nil, errors.New(errMessage)
+// 	}
+//
+// 	return &files, nil
+// }
 
 // CommitFull does a full commit on the configuration, which requires all daemons to
 // check and evaluate the new configuration. Useful for when you get an error with
