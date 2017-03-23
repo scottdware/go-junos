@@ -53,6 +53,7 @@ var (
 	rpcCommitHistory       = "<get-commit-information/>"
 	rpcFileList            = "<file-list><detail/><path>%s</path></file-list>"
 	rpcInterfaces          = "<get-interface-information/>"
+	// rpcView                = "<%s/>"
 )
 
 // Junos contains our session state.
@@ -83,6 +84,16 @@ type RoutingEngine struct {
 	Model   string
 	Version string
 }
+
+// View ...
+// type View struct {
+// 	RPC    string
+// 	Item   string
+// 	Fields string
+// }
+
+// ViewMap ...
+// type ViewMap map[string]interface{}
 
 type commandXML struct {
 	Config string `xml:",innerxml"`
@@ -140,30 +151,6 @@ type versionPackageInfo struct {
 	PackageName     []string `xml:"name"`
 	SoftwareVersion []string `xml:"comment"`
 }
-
-// FileList contains information about all files in a given path.
-// type FileList struct {
-// 	XMLName xml.Name `xml:"directory-list"`
-// 	Path    string   `xml:"directory>directory-name"`
-// 	Total   string   `xml:"directory>total-files"`
-// 	Files   []File   `xml:"directory>file-information"`
-// 	Error   string   `xml:"output,omitempty"`
-// }
-
-// File contains information about each individual file on the system. Note that
-// "Permissions" and "Date" have sub-items that will better display the information.
-// type File struct {
-// 	Name        string `xml:"file-name"`
-// 	Permissions struct {
-// 		Text string `xml:"format,attr"`
-// 	} `xml:"file-permissions"`
-// 	Owner string `xml:"file-owner"`
-// 	Group string `xml:"file-group"`
-// 	Size  string `xml:"file-size"`
-// 	Date  struct {
-// 		Text string `xml:"format,attr"`
-// 	} `xml:"file-date"`
-// }
 
 // NewSession establishes a new connection to a Junos device that we will use
 // to run our commands against. NewSession also gathers software information
@@ -463,37 +450,10 @@ func (j *Junos) Diff(rollback int) (string, error) {
 	return cd.Config, nil
 }
 
-// ConfigDiff compares the current active configuration to a given rollback (number) configuration.
-// func (j *Junos) ConfigDiff(rollback int) (string, error) {
-// 	var rb diffXML
-// 	command := fmt.Sprintf(rpcGetRollbackCompare, rollback)
-// 	reply, err := j.Session.Exec(netconf.RawMethod(command))
-// 	if err != nil {
-// 		return "", err
-// 	}
-
-// 	if reply.Errors != nil {
-// 		for _, m := range reply.Errors {
-// 			return "", errors.New(m.Message)
-// 		}
-// 	}
-
-// 	err = xml.Unmarshal([]byte(reply.Data), &rb)
-// 	if err != nil {
-// 		return "", err
-// 	}
-
-// 	if rb.Error != "" {
-// 		errMessage := strings.Trim(rb.Error, "\r\n")
-// 		return "", errors.New(errMessage)
-// 	}
-
-// 	return rb.Config, nil
-// }
-
 // GetConfig returns the configuration starting at the given section. If you do not specify anything
 // for section, then the entire configuration will be returned. Format must be "text" or "xml." You
 // can do sub-sections by separating the section path with a ">" symbol, i.e. "system>login" or "protocols>ospf>area."
+// The default option is to return the XML.
 func (j *Junos) GetConfig(format string, section ...string) (string, error) {
 	command := fmt.Sprintf("<get-configuration format=\"%s\"><configuration>", format)
 
@@ -533,7 +493,8 @@ func (j *Junos) GetConfig(format string, section ...string) (string, error) {
 		}
 	}
 
-	if format == "text" {
+	switch format {
+	case "text":
 		var output commandXML
 		err = xml.Unmarshal([]byte(reply.Data), &output)
 		if err != nil {
@@ -545,6 +506,8 @@ func (j *Junos) GetConfig(format string, section ...string) (string, error) {
 		}
 
 		return output.Config, nil
+	case "xml":
+		return reply.Data, nil
 	}
 
 	return reply.Data, nil
@@ -741,37 +704,6 @@ func (j *Junos) Reboot() error {
 	return nil
 }
 
-// Files will list all of the file and directory information in the given path.
-// func (j *Junos) Files(path string) (*FileList, error) {
-// 	dir := strings.TrimRight(path, "/")
-// 	var files FileList
-// 	var command = fmt.Sprintf(rpcFileList, dir+"/")
-//
-// 	reply, err := j.Session.Exec(netconf.RawMethod(command))
-// 	if err != nil {
-// 		return nil, err
-// 	}
-//
-// 	if reply.Errors != nil {
-// 		for _, m := range reply.Errors {
-// 			return nil, errors.New(m.Message)
-// 		}
-// 	}
-//
-// 	data := strings.Replace(reply.Data, "\n", "", -1)
-// 	err = xml.Unmarshal([]byte(data), &files)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-//
-// 	if len(files.Error) > 0 {
-// 		errMessage := fmt.Sprintf("%s: no such file or directory", path)
-// 		return nil, errors.New(errMessage)
-// 	}
-//
-// 	return &files, nil
-// }
-
 // CommitFull does a full commit on the configuration, which requires all daemons to
 // check and evaluate the new configuration. Useful for when you get an error with
 // a commit or when you've changed the configuration significantly.
@@ -789,3 +721,64 @@ func (j *Junos) CommitFull() error {
 
 	return nil
 }
+
+// Views...
+// func (j *Junos) Views(table *View) (*mxj.Map, error) {
+// 	command := fmt.Sprintf(rpcView, table.RPC)
+// 	// xmlroot := strings.Trim(table.RPC, "get-")
+// 	// fields := strings.Split(table.Fields, ", ")
+// 	// numfields := len(fields)
+//
+// 	reply, err := j.Session.Exec(netconf.RawMethod(command))
+// 	if err != nil {
+// 		return nil, err
+// 	}
+//
+// 	if reply.Errors != nil {
+// 		for _, m := range reply.Errors {
+// 			return nil, errors.New(m.Message)
+// 		}
+// 	}
+//
+// 	if reply.Data == "" {
+// 		return nil, errors.New("no output available - please check the syntax of your command")
+// 	}
+//
+// 	vm, err := mxj.NewMapXml([]byte(reply.Data))
+// 	if err != nil {
+// 		return nil, err
+// 	}
+//
+// 	jvm, err := vm.Json()
+// 	if err != nil {
+// 		return nil, err
+// 	}
+//
+// 	fmt.Printf("%+v\n", string(jvm))
+
+// vals4path, _ := vm.ValuesForPath(fmt.Sprintf("%s.%s", xmlroot, table.Item))
+// entries := len(vals4path)
+// fmt.Println(fmt.Sprintf("path: %s.%s; items/map length: %d", xmlroot, table.Item, entries))
+// for k, v := range vals4path {
+// 	fmt.Println(k, v)
+// }
+//
+// mxj.LeafUseDotNotation(true)
+// l := vm.LeafNodes()
+//
+// for _, leaf := range l {
+// 	fmt.Printf("path: %s, value: %s\n", leaf.Path, leaf.Value)
+// }
+
+// nodes := vm.LeafNodes(true)
+// for _, node := range nodes {
+// 	for i := 0; i < numfields; i++ {
+// 		if strings.Contains(node.Path, fmt.Sprintf(".%s", fields[i])) {
+// 			fmt.Println(node.Path, node.Value)
+// 		}
+// 	}
+// }
+
+// return &vm, nil
+// return reply.Data, nil
+// }
