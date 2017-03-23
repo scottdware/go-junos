@@ -30,25 +30,25 @@ import (
 // }
 
 // ExistingAddresses contains information about every global address-book entry.
-type ExistingAddresses struct {
-	XMLName             xml.Name             `xml:"configuration"`
-	ExistingAddresses   []ExistingAddress    `xml:"security>address-book>address"`
-	ExistingAddressSets []ExistingAddressSet `xml:"security>address-book>address-set"`
-}
+// type ExistingAddresses struct {
+// 	XMLName             xml.Name             `xml:"configuration"`
+// 	ExistingAddresses   []ExistingAddress    `xml:"security>address-book>address"`
+// 	ExistingAddressSets []ExistingAddressSet `xml:"security>address-book>address-set"`
+// }
 
 // ExistingAddress contains information about each individual address-book entry.
-type ExistingAddress struct {
-	Name     string `xml:"name"`
-	IP       string `xml:"ip-prefix,omitempty"`
-	DNSName  string `xml:"dns-name>name,omitempty"`
-	Wildcard string `xml:"wildcard-address>name,omitempty"`
-}
+// type ExistingAddress struct {
+// 	Name     string `xml:"name"`
+// 	IP       string `xml:"ip-prefix,omitempty"`
+// 	DNSName  string `xml:"dns-name>name,omitempty"`
+// 	Wildcard string `xml:"wildcard-address>name,omitempty"`
+// }
 
 // ExistingAddressSet contains all of the address-sets (groups) in the address-book.
-type ExistingAddressSet struct {
-	Name              string            `xml:"name"`
-	ExistingAddresses []ExistingAddress `xml:"address"`
-}
+// type ExistingAddressSet struct {
+// 	Name              string            `xml:"name"`
+// 	ExistingAddresses []ExistingAddress `xml:"address"`
+// }
 
 // ExistingApplications contains information about every application entry.
 // type ExistingApplications struct {
@@ -102,264 +102,264 @@ type ZoneInterface struct {
 }
 
 // IPsecVPN contains the necessary information when creating a new site-to-site VPN.
-type IPsecVPN struct {
-	Name              string
-	Local             string
-	Peer              string
-	ExternalInterface string
-	Zone              string
-	Mode              string
-	PSK               string
-	PFS               int
-	Establish         string
-	TunnelInterface   string
-	Gateway           []string
-	P1Proposals       []P1
-	P2Proposals       []P2
-	TrafficSelectors  []string
-}
+// type IPsecVPN struct {
+// 	Name              string
+// 	Local             string
+// 	Peer              string
+// 	ExternalInterface string
+// 	Zone              string
+// 	Mode              string
+// 	PSK               string
+// 	PFS               int
+// 	Establish         string
+// 	TunnelInterface   string
+// 	Gateway           []string
+// 	P1Proposals       []P1
+// 	P2Proposals       []P2
+// 	TrafficSelectors  []string
+// }
 
 // P1 contains any IKE phase 1 proposal information.
-type P1 struct {
-	P1Name           string
-	P1DiffeHellman   int
-	P1Authentication string
-	P1Encryption     string
-	P1Seconds        int
-}
+// type P1 struct {
+// 	P1Name           string
+// 	P1DiffeHellman   int
+// 	P1Authentication string
+// 	P1Encryption     string
+// 	P1Seconds        int
+// }
 
 // P2 contains any IKE phase 2 proposal information.
-type P2 struct {
-	P2Name           string
-	P2Authentication string
-	P2Encryption     string
-	P2Seconds        int
-	P2Protocol       string
-}
+// type P2 struct {
+// 	P2Name           string
+// 	P2Authentication string
+// 	P2Encryption     string
+// 	P2Seconds        int
+// 	P2Protocol       string
+// }
 
 // st0Interface holds all of the current st0 interfaces on the SRX.
-type tunnelInterface struct {
-	XMLName xml.Name `xml:"interface-information"`
-	Units   []unit   `xml:"physical-interface>logical-interface"`
-}
+// type tunnelInterface struct {
+// 	XMLName xml.Name `xml:"interface-information"`
+// 	Units   []unit   `xml:"physical-interface>logical-interface"`
+// }
 
 // unit contains each individual st0.<unit> name.
-type unit struct {
-	Name string `xml:"name"`
-}
+// type unit struct {
+// 	Name string `xml:"name"`
+// }
 
-var (
-	// These are the Junos default applications in an SRX
-	// junosDefaultApps = []string{
-	// 	"junos-aol",
-	// 	"junos-bgp",
-	// 	"junos-biff",
-	// 	"junos-bootpc",
-	// 	"junos-bootps",
-	// 	"junos-chargen",
-	// 	"junos-cifs",
-	// 	"junos-cvspserver",
-	// 	"junos-dhcp-client",
-	// 	"junos-dhcp-relay",
-	// 	"junos-dhcp-server",
-	// 	"junos-discard",
-	// 	"junos-dns-tcp",
-	// 	"junos-dns-udp",
-	// 	"junos-echo",
-	// 	"junos-finger",
-	// 	"junos-ftp",
-	// 	"junos-gnutella",
-	// 	"junos-gopher",
-	// 	"junos-gre",
-	// 	"junos-gtp",
-	// 	"junos-h323",
-	// 	"junos-http",
-	// 	"junos-http-ext",
-	// 	"junos-https",
-	// 	"junos-icmp-all",
-	// 	"junos-icmp-ping",
-	// 	"junos-icmp6-all",
-	// 	"junos-icmp6-dst-unreach-addr",
-	// 	"junos-icmp6-dst-unreach-admin",
-	// 	"junos-icmp6-dst-unreach-beyond",
-	// 	"junos-icmp6-dst-unreach-port",
-	// 	"junos-icmp6-dst-unreach-route",
-	// 	"junos-icmp6-echo-reply",
-	// 	"junos-icmp6-echo-request",
-	// 	"junos-icmp6-packet-too-big",
-	// 	"junos-icmp6-param-prob-header",
-	// 	"junos-icmp6-param-prob-nexthdr",
-	// 	"junos-icmp6-param-prob-option",
-	// 	"junos-icmp6-time-exceed-reassembly",
-	// 	"junos-icmp6-time-exceed-transit",
-	// 	"junos-ident",
-	// 	"junos-ike",
-	// 	"junos-ike-nat",
-	// 	"junos-imap",
-	// 	"junos-imaps",
-	// 	"junos-internet-locator-service",
-	// 	"junos-irc",
-	// 	"junos-l2tp",
-	// 	"junos-ldap",
-	// 	"junos-ldp-tcp",
-	// 	"junos-ldp-udp",
-	// 	"junos-lpr",
-	// 	"junos-mail",
-	// 	"junos-mgcp",
-	// 	"junos-mgcp-ca",
-	// 	"junos-mgcp-ua",
-	// 	"junos-ms-rpc",
-	// 	"junos-ms-rpc-any",
-	// 	"junos-ms-rpc-epm",
-	// 	"junos-ms-rpc-iis-com",
-	// 	"junos-ms-rpc-iis-com-1",
-	// 	"junos-ms-rpc-iis-com-adminbase",
-	// 	"junos-ms-rpc-msexchange",
-	// 	"junos-ms-rpc-msexchange-directory-nsp",
-	// 	"junos-ms-rpc-msexchange-directory-rfr",
-	// 	"junos-ms-rpc-msexchange-info-store",
-	// 	"junos-ms-rpc-tcp",
-	// 	"junos-ms-rpc-udp",
-	// 	"junos-ms-rpc-uuid-any-tcp",
-	// 	"junos-ms-rpc-uuid-any-udp",
-	// 	"junos-ms-rpc-wmic",
-	// 	"junos-ms-rpc-wmic-admin",
-	// 	"junos-ms-rpc-wmic-admin2",
-	// 	"junos-ms-rpc-wmic-mgmt",
-	// 	"junos-ms-rpc-wmic-webm-callresult",
-	// 	"junos-ms-rpc-wmic-webm-classobject",
-	// 	"junos-ms-rpc-wmic-webm-level1login",
-	// 	"junos-ms-rpc-wmic-webm-login-clientid",
-	// 	"junos-ms-rpc-wmic-webm-login-helper",
-	// 	"junos-ms-rpc-wmic-webm-objectsink",
-	// 	"junos-ms-rpc-wmic-webm-refreshing-services",
-	// 	"junos-ms-rpc-wmic-webm-remote-refresher",
-	// 	"junos-ms-rpc-wmic-webm-services",
-	// 	"junos-ms-rpc-wmic-webm-shutdown",
-	// 	"junos-ms-sql",
-	// 	"junos-msn",
-	// 	"junos-nbds",
-	// 	"junos-nbname",
-	// 	"junos-netbios-session",
-	// 	"junos-nfs",
-	// 	"junos-nfsd-tcp",
-	// 	"junos-nfsd-udp",
-	// 	"junos-nntp",
-	// 	"junos-ns-global",
-	// 	"junos-ns-global-pro",
-	// 	"junos-nsm",
-	// 	"junos-ntalk",
-	// 	"junos-ntp",
-	// 	"junos-ospf",
-	// 	"junos-pc-anywhere",
-	// 	"junos-persistent-nat",
-	// 	"junos-ping",
-	// 	"junos-pingv6",
-	// 	"junos-pop3",
-	// 	"junos-pptp",
-	// 	"junos-printer",
-	// 	"junos-r2cp",
-	// 	"junos-radacct",
-	// 	"junos-radius",
-	// 	"junos-realaudio",
-	// 	"junos-rip",
-	// 	"junos-routing-inbound",
-	// 	"junos-rsh",
-	// 	"junos-rtsp",
-	// 	"junos-sccp",
-	// 	"junos-sctp-any",
-	// 	"junos-sip",
-	// 	"junos-smb",
-	// 	"junos-smb-session",
-	// 	"junos-smtp",
-	// 	"junos-snmp-agentx",
-	// 	"junos-snpp",
-	// 	"junos-sql-monitor",
-	// 	"junos-sqlnet-v1",
-	// 	"junos-sqlnet-v2",
-	// 	"junos-ssh",
-	// 	"junos-stun",
-	// 	"junos-sun-rpc",
-	// 	"junos-sun-rpc-any",
-	// 	"junos-sun-rpc-any-tcp",
-	// 	"junos-sun-rpc-any-udp",
-	// 	"junos-sun-rpc-mountd",
-	// 	"junos-sun-rpc-mountd-tcp",
-	// 	"junos-sun-rpc-mountd-udp",
-	// 	"junos-sun-rpc-nfs",
-	// 	"junos-sun-rpc-nfs-access",
-	// 	"junos-sun-rpc-nfs-tcp",
-	// 	"junos-sun-rpc-nfs-udp",
-	// 	"junos-sun-rpc-nlockmgr",
-	// 	"junos-sun-rpc-nlockmgr-tcp",
-	// 	"junos-sun-rpc-nlockmgr-udp",
-	// 	"junos-sun-rpc-portmap",
-	// 	"junos-sun-rpc-portmap-tcp",
-	// 	"junos-sun-rpc-portmap-udp",
-	// 	"junos-sun-rpc-rquotad",
-	// 	"junos-sun-rpc-rquotad-tcp",
-	// 	"junos-sun-rpc-rquotad-udp",
-	// 	"junos-sun-rpc-ruserd",
-	// 	"junos-sun-rpc-ruserd-tcp",
-	// 	"junos-sun-rpc-ruserd-udp",
-	// 	"junos-sun-rpc-sadmind",
-	// 	"junos-sun-rpc-sadmind-tcp",
-	// 	"junos-sun-rpc-sadmind-udp",
-	// 	"junos-sun-rpc-sprayd",
-	// 	"junos-sun-rpc-sprayd-tcp",
-	// 	"junos-sun-rpc-sprayd-udp",
-	// 	"junos-sun-rpc-status",
-	// 	"junos-sun-rpc-status-tcp",
-	// 	"junos-sun-rpc-status-udp",
-	// 	"junos-sun-rpc-tcp",
-	// 	"junos-sun-rpc-udp",
-	// 	"junos-sun-rpc-walld",
-	// 	"junos-sun-rpc-walld-tcp",
-	// 	"junos-sun-rpc-walld-udp",
-	// 	"junos-sun-rpc-ypbind",
-	// 	"junos-sun-rpc-ypbind-tcp",
-	// 	"junos-sun-rpc-ypbind-udp",
-	// 	"junos-sun-rpc-ypserv",
-	// 	"junos-sun-rpc-ypserv-tcp",
-	// 	"junos-sun-rpc-ypserv-udp",
-	// 	"junos-syslog",
-	// 	"junos-tacacs",
-	// 	"junos-tacacs-ds",
-	// 	"junos-talk",
-	// 	"junos-tcp-any",
-	// 	"junos-telnet",
-	// 	"junos-tftp",
-	// 	"junos-udp-any",
-	// 	"junos-uucp",
-	// 	"junos-vdo-live",
-	// 	"junos-vnc",
-	// 	"junos-wais",
-	// 	"junos-who",
-	// 	"junos-whois",
-	// 	"junos-winframe",
-	// 	"junos-wxcontrol",
-	// 	"junos-x-windows",
-	// 	"junos-xnm-clear-text",
-	// 	"junos-xnm-ssl",
-	// 	"junos-ymsg",
-	// }
-	groups = map[int]string{
-		1:  "group1",
-		2:  "group2",
-		5:  "group5",
-		14: "group14",
-		19: "group19",
-		20: "group20",
-		24: "group24",
-	}
-	encrAlgorithm = map[string]string{
-		"3des":    "3des-cbc",
-		"aes-128": "aes-128-cbc",
-		"aes-192": "aes-192-cbc",
-		"aes-256": "aes-256-cbc",
-		"des":     "des-cbc",
-	}
-)
+// var (
+// These are the Junos default applications in an SRX
+// junosDefaultApps = []string{
+// 	"junos-aol",
+// 	"junos-bgp",
+// 	"junos-biff",
+// 	"junos-bootpc",
+// 	"junos-bootps",
+// 	"junos-chargen",
+// 	"junos-cifs",
+// 	"junos-cvspserver",
+// 	"junos-dhcp-client",
+// 	"junos-dhcp-relay",
+// 	"junos-dhcp-server",
+// 	"junos-discard",
+// 	"junos-dns-tcp",
+// 	"junos-dns-udp",
+// 	"junos-echo",
+// 	"junos-finger",
+// 	"junos-ftp",
+// 	"junos-gnutella",
+// 	"junos-gopher",
+// 	"junos-gre",
+// 	"junos-gtp",
+// 	"junos-h323",
+// 	"junos-http",
+// 	"junos-http-ext",
+// 	"junos-https",
+// 	"junos-icmp-all",
+// 	"junos-icmp-ping",
+// 	"junos-icmp6-all",
+// 	"junos-icmp6-dst-unreach-addr",
+// 	"junos-icmp6-dst-unreach-admin",
+// 	"junos-icmp6-dst-unreach-beyond",
+// 	"junos-icmp6-dst-unreach-port",
+// 	"junos-icmp6-dst-unreach-route",
+// 	"junos-icmp6-echo-reply",
+// 	"junos-icmp6-echo-request",
+// 	"junos-icmp6-packet-too-big",
+// 	"junos-icmp6-param-prob-header",
+// 	"junos-icmp6-param-prob-nexthdr",
+// 	"junos-icmp6-param-prob-option",
+// 	"junos-icmp6-time-exceed-reassembly",
+// 	"junos-icmp6-time-exceed-transit",
+// 	"junos-ident",
+// 	"junos-ike",
+// 	"junos-ike-nat",
+// 	"junos-imap",
+// 	"junos-imaps",
+// 	"junos-internet-locator-service",
+// 	"junos-irc",
+// 	"junos-l2tp",
+// 	"junos-ldap",
+// 	"junos-ldp-tcp",
+// 	"junos-ldp-udp",
+// 	"junos-lpr",
+// 	"junos-mail",
+// 	"junos-mgcp",
+// 	"junos-mgcp-ca",
+// 	"junos-mgcp-ua",
+// 	"junos-ms-rpc",
+// 	"junos-ms-rpc-any",
+// 	"junos-ms-rpc-epm",
+// 	"junos-ms-rpc-iis-com",
+// 	"junos-ms-rpc-iis-com-1",
+// 	"junos-ms-rpc-iis-com-adminbase",
+// 	"junos-ms-rpc-msexchange",
+// 	"junos-ms-rpc-msexchange-directory-nsp",
+// 	"junos-ms-rpc-msexchange-directory-rfr",
+// 	"junos-ms-rpc-msexchange-info-store",
+// 	"junos-ms-rpc-tcp",
+// 	"junos-ms-rpc-udp",
+// 	"junos-ms-rpc-uuid-any-tcp",
+// 	"junos-ms-rpc-uuid-any-udp",
+// 	"junos-ms-rpc-wmic",
+// 	"junos-ms-rpc-wmic-admin",
+// 	"junos-ms-rpc-wmic-admin2",
+// 	"junos-ms-rpc-wmic-mgmt",
+// 	"junos-ms-rpc-wmic-webm-callresult",
+// 	"junos-ms-rpc-wmic-webm-classobject",
+// 	"junos-ms-rpc-wmic-webm-level1login",
+// 	"junos-ms-rpc-wmic-webm-login-clientid",
+// 	"junos-ms-rpc-wmic-webm-login-helper",
+// 	"junos-ms-rpc-wmic-webm-objectsink",
+// 	"junos-ms-rpc-wmic-webm-refreshing-services",
+// 	"junos-ms-rpc-wmic-webm-remote-refresher",
+// 	"junos-ms-rpc-wmic-webm-services",
+// 	"junos-ms-rpc-wmic-webm-shutdown",
+// 	"junos-ms-sql",
+// 	"junos-msn",
+// 	"junos-nbds",
+// 	"junos-nbname",
+// 	"junos-netbios-session",
+// 	"junos-nfs",
+// 	"junos-nfsd-tcp",
+// 	"junos-nfsd-udp",
+// 	"junos-nntp",
+// 	"junos-ns-global",
+// 	"junos-ns-global-pro",
+// 	"junos-nsm",
+// 	"junos-ntalk",
+// 	"junos-ntp",
+// 	"junos-ospf",
+// 	"junos-pc-anywhere",
+// 	"junos-persistent-nat",
+// 	"junos-ping",
+// 	"junos-pingv6",
+// 	"junos-pop3",
+// 	"junos-pptp",
+// 	"junos-printer",
+// 	"junos-r2cp",
+// 	"junos-radacct",
+// 	"junos-radius",
+// 	"junos-realaudio",
+// 	"junos-rip",
+// 	"junos-routing-inbound",
+// 	"junos-rsh",
+// 	"junos-rtsp",
+// 	"junos-sccp",
+// 	"junos-sctp-any",
+// 	"junos-sip",
+// 	"junos-smb",
+// 	"junos-smb-session",
+// 	"junos-smtp",
+// 	"junos-snmp-agentx",
+// 	"junos-snpp",
+// 	"junos-sql-monitor",
+// 	"junos-sqlnet-v1",
+// 	"junos-sqlnet-v2",
+// 	"junos-ssh",
+// 	"junos-stun",
+// 	"junos-sun-rpc",
+// 	"junos-sun-rpc-any",
+// 	"junos-sun-rpc-any-tcp",
+// 	"junos-sun-rpc-any-udp",
+// 	"junos-sun-rpc-mountd",
+// 	"junos-sun-rpc-mountd-tcp",
+// 	"junos-sun-rpc-mountd-udp",
+// 	"junos-sun-rpc-nfs",
+// 	"junos-sun-rpc-nfs-access",
+// 	"junos-sun-rpc-nfs-tcp",
+// 	"junos-sun-rpc-nfs-udp",
+// 	"junos-sun-rpc-nlockmgr",
+// 	"junos-sun-rpc-nlockmgr-tcp",
+// 	"junos-sun-rpc-nlockmgr-udp",
+// 	"junos-sun-rpc-portmap",
+// 	"junos-sun-rpc-portmap-tcp",
+// 	"junos-sun-rpc-portmap-udp",
+// 	"junos-sun-rpc-rquotad",
+// 	"junos-sun-rpc-rquotad-tcp",
+// 	"junos-sun-rpc-rquotad-udp",
+// 	"junos-sun-rpc-ruserd",
+// 	"junos-sun-rpc-ruserd-tcp",
+// 	"junos-sun-rpc-ruserd-udp",
+// 	"junos-sun-rpc-sadmind",
+// 	"junos-sun-rpc-sadmind-tcp",
+// 	"junos-sun-rpc-sadmind-udp",
+// 	"junos-sun-rpc-sprayd",
+// 	"junos-sun-rpc-sprayd-tcp",
+// 	"junos-sun-rpc-sprayd-udp",
+// 	"junos-sun-rpc-status",
+// 	"junos-sun-rpc-status-tcp",
+// 	"junos-sun-rpc-status-udp",
+// 	"junos-sun-rpc-tcp",
+// 	"junos-sun-rpc-udp",
+// 	"junos-sun-rpc-walld",
+// 	"junos-sun-rpc-walld-tcp",
+// 	"junos-sun-rpc-walld-udp",
+// 	"junos-sun-rpc-ypbind",
+// 	"junos-sun-rpc-ypbind-tcp",
+// 	"junos-sun-rpc-ypbind-udp",
+// 	"junos-sun-rpc-ypserv",
+// 	"junos-sun-rpc-ypserv-tcp",
+// 	"junos-sun-rpc-ypserv-udp",
+// 	"junos-syslog",
+// 	"junos-tacacs",
+// 	"junos-tacacs-ds",
+// 	"junos-talk",
+// 	"junos-tcp-any",
+// 	"junos-telnet",
+// 	"junos-tftp",
+// 	"junos-udp-any",
+// 	"junos-uucp",
+// 	"junos-vdo-live",
+// 	"junos-vnc",
+// 	"junos-wais",
+// 	"junos-who",
+// 	"junos-whois",
+// 	"junos-winframe",
+// 	"junos-wxcontrol",
+// 	"junos-x-windows",
+// 	"junos-xnm-clear-text",
+// 	"junos-xnm-ssl",
+// 	"junos-ymsg",
+// }
+// groups = map[int]string{
+// 	1:  "group1",
+// 	2:  "group2",
+// 	5:  "group5",
+// 	14: "group14",
+// 	19: "group19",
+// 	20: "group20",
+// 	24: "group24",
+// }
+// encrAlgorithm = map[string]string{
+// 	"3des":    "3des-cbc",
+// 	"aes-128": "aes-128-cbc",
+// 	"aes-192": "aes-192-cbc",
+// 	"aes-256": "aes-256-cbc",
+// 	"des":     "des-cbc",
+// }
+// )
 
 // NewPolicy establishes a blank security policy that will hold any newly created rules.
 // func (j *Junos) NewPolicy() *FirewallPolicy {
@@ -538,170 +538,170 @@ func (j *Junos) ConvertAddressBook() []string {
 // where the VPN will reside), pfs (Perfect-Forward Secrecy group. Must be 1, 2, 5, 14, 19, 20, or 24. Use 0 to disable),
 // establish (when to establish the tunnel; must be "traffic" or "immediately"), mode ("main" or "aggressive"), psk (
 // pre-shared key).
-func (j *Junos) NewIPsecVPN(name, localip, peerip, extinterface, zone string, pfs int, establish string, mode, psk string) *IPsecVPN {
-	var ints tunnelInterface
-	gateway := []string{}
-	ontraffic := map[string]string{
-		"traffic":     "on-traffic",
-		"immediately": "immediately",
-	}
-	st0, _ := j.RunCommand("show interfaces st0", "xml")
-
-	if err := xml.Unmarshal([]byte(st0), &ints); err != nil {
-		fmt.Println(err)
-	}
-
-	tunnelInts := map[int]int{}
-
-	for n, i := range ints.Units {
-		trimmed := strings.TrimPrefix(strings.TrimSpace(i.Name), "st0.")
-		unit, _ := strconv.Atoi(trimmed)
-		tunnelInts[n] = unit
-	}
-
-	total := len(tunnelInts)
-	newTunnelInt := fmt.Sprintf("st0.%d", tunnelInts[total-1]+1)
-
-	gateway = append(gateway, fmt.Sprintf("set security ike gateway %s address %s\n", name, peerip))
-	gateway = append(gateway, fmt.Sprintf("set security ike gateway %s external-interface %s\n", name, extinterface))
-	gateway = append(gateway, fmt.Sprintf("set security ike gateway %s ike-policy %s\n", name, name))
-	gateway = append(gateway, fmt.Sprintf("set security ike gateway %s local-identity inet %s\n", name, localip))
-	gateway = append(gateway, fmt.Sprintf("set security ike gateway %s remote-identity inet %s\n", name, peerip))
-
-	return &IPsecVPN{
-		Name:              name,
-		Local:             localip,
-		Peer:              peerip,
-		ExternalInterface: extinterface,
-		TunnelInterface:   newTunnelInt,
-		Zone:              zone,
-		PFS:               pfs,
-		Establish:         ontraffic[establish],
-		Mode:              mode,
-		PSK:               psk,
-		Gateway:           gateway,
-	}
-}
+// func (j *Junos) NewIPsecVPN(name, localip, peerip, extinterface, zone string, pfs int, establish string, mode, psk string) *IPsecVPN {
+// 	var ints tunnelInterface
+// 	gateway := []string{}
+// 	ontraffic := map[string]string{
+// 		"traffic":     "on-traffic",
+// 		"immediately": "immediately",
+// 	}
+// 	st0, _ := j.RunCommand("show interfaces st0", "xml")
+//
+// 	if err := xml.Unmarshal([]byte(st0), &ints); err != nil {
+// 		fmt.Println(err)
+// 	}
+//
+// 	tunnelInts := map[int]int{}
+//
+// 	for n, i := range ints.Units {
+// 		trimmed := strings.TrimPrefix(strings.TrimSpace(i.Name), "st0.")
+// 		unit, _ := strconv.Atoi(trimmed)
+// 		tunnelInts[n] = unit
+// 	}
+//
+// 	total := len(tunnelInts)
+// 	newTunnelInt := fmt.Sprintf("st0.%d", tunnelInts[total-1]+1)
+//
+// 	gateway = append(gateway, fmt.Sprintf("set security ike gateway %s address %s\n", name, peerip))
+// 	gateway = append(gateway, fmt.Sprintf("set security ike gateway %s external-interface %s\n", name, extinterface))
+// 	gateway = append(gateway, fmt.Sprintf("set security ike gateway %s ike-policy %s\n", name, name))
+// 	gateway = append(gateway, fmt.Sprintf("set security ike gateway %s local-identity inet %s\n", name, localip))
+// 	gateway = append(gateway, fmt.Sprintf("set security ike gateway %s remote-identity inet %s\n", name, peerip))
+//
+// 	return &IPsecVPN{
+// 		Name:              name,
+// 		Local:             localip,
+// 		Peer:              peerip,
+// 		ExternalInterface: extinterface,
+// 		TunnelInterface:   newTunnelInt,
+// 		Zone:              zone,
+// 		PFS:               pfs,
+// 		Establish:         ontraffic[establish],
+// 		Mode:              mode,
+// 		PSK:               psk,
+// 		Gateway:           gateway,
+// 	}
+// }
 
 // Phase1 creates the IKE proposal to use for the site-to-site VPN. Options are as follows:
 // name (name of the proposal), dh (Diffe-Hellman group. Must be 1, 2, 5, 14, 19, 20 or 24), auth (
 // must be "md5" or "sha1"), encryption (must be "3des", "aes-128", "aes-192", "aes-256" or "des"),
 // lifetime (lifetime in seconds).
-func (i *IPsecVPN) Phase1(name string, dh int, auth, encryption string, lifetime int) {
-	authAlgorithm := map[string]string{
-		"md5":  "md5",
-		"sha1": "sha1",
-	}
-
-	p1 := P1{
-		P1Name:           name,
-		P1DiffeHellman:   dh,
-		P1Authentication: authAlgorithm[auth],
-		P1Encryption:     encrAlgorithm[encryption],
-		P1Seconds:        lifetime,
-	}
-
-	i.P1Proposals = append(i.P1Proposals, p1)
-}
+// func (i *IPsecVPN) Phase1(name string, dh int, auth, encryption string, lifetime int) {
+// 	authAlgorithm := map[string]string{
+// 		"md5":  "md5",
+// 		"sha1": "sha1",
+// 	}
+//
+// 	p1 := P1{
+// 		P1Name:           name,
+// 		P1DiffeHellman:   dh,
+// 		P1Authentication: authAlgorithm[auth],
+// 		P1Encryption:     encrAlgorithm[encryption],
+// 		P1Seconds:        lifetime,
+// 	}
+//
+// 	i.P1Proposals = append(i.P1Proposals, p1)
+// }
 
 // Phase2 creates the IPsec proposal to use for the site-to-site VPN. Options are as follows:
 // name (name of the proposal), auth (must be "md5" or "sha1"), encryption (must be "3des", "aes-128", "aes-192", "aes-256" or "des"),
 // lifetime (lifetime in seconds), protocol ("ah" or "esp").
-func (i *IPsecVPN) Phase2(name string, auth, encryption string, lifetime int, protocol string) {
-	authAlgorithm := map[string]string{
-		"md5":  "hmac-md5-96",
-		"sha1": "hmac-sha1-96",
-	}
-
-	p2 := P2{
-		P2Name:           name,
-		P2Authentication: authAlgorithm[auth],
-		P2Encryption:     encrAlgorithm[encryption],
-		P2Seconds:        lifetime,
-		P2Protocol:       protocol,
-	}
-
-	i.P2Proposals = append(i.P2Proposals, p2)
-}
+// func (i *IPsecVPN) Phase2(name string, auth, encryption string, lifetime int, protocol string) {
+// 	authAlgorithm := map[string]string{
+// 		"md5":  "hmac-md5-96",
+// 		"sha1": "hmac-sha1-96",
+// 	}
+//
+// 	p2 := P2{
+// 		P2Name:           name,
+// 		P2Authentication: authAlgorithm[auth],
+// 		P2Encryption:     encrAlgorithm[encryption],
+// 		P2Seconds:        lifetime,
+// 		P2Protocol:       protocol,
+// 	}
+//
+// 	i.P2Proposals = append(i.P2Proposals, p2)
+// }
 
 // TrafficSelector creates the security-association (SA) configuration needed when building
 // a site-to-site VPN. The local and remote IP addresses must be in a []string of IP addresses.
-func (i *IPsecVPN) TrafficSelector(local, remote []string) {
-	count := 1
-	ts := []string{}
-
-	for _, l := range local {
-		for _, r := range remote {
-			tsCfg := fmt.Sprintf("set security ipsec vpn %s traffic-selector ts%d local-ip %s remote-ip %s\n", i.Name, count, l, r)
-			ts = append(ts, tsCfg)
-
-			count++
-		}
-	}
-
-	i.TrafficSelectors = ts
-}
+// func (i *IPsecVPN) TrafficSelector(local, remote []string) {
+// 	count := 1
+// 	ts := []string{}
+//
+// 	for _, l := range local {
+// 		for _, r := range remote {
+// 			tsCfg := fmt.Sprintf("set security ipsec vpn %s traffic-selector ts%d local-ip %s remote-ip %s\n", i.Name, count, l, r)
+// 			ts = append(ts, tsCfg)
+//
+// 			count++
+// 		}
+// 	}
+//
+// 	i.TrafficSelectors = ts
+// }
 
 // BuildIPsecVPN creates the configuration of the site-to-site VPN to be commited.
-func (i *IPsecVPN) BuildIPsecVPN() []string {
-	config := []string{}
-
-	config = append(config, fmt.Sprintf("set interfaces %s family inet\n", i.TunnelInterface))
-	config = append(config, fmt.Sprintf("set security zones security-zone %s interfaces %s\n", i.Zone, i.TunnelInterface))
-
-	for _, p1 := range i.P1Proposals {
-		phase1 := []string{}
-		phase1 = append(phase1, fmt.Sprintf("set security ike proposal %s authentication-method pre-shared-keys\n", p1.P1Name))
-		phase1 = append(phase1, fmt.Sprintf("set security ike proposal %s dh-group %s\n", p1.P1Name, groups[p1.P1DiffeHellman]))
-		phase1 = append(phase1, fmt.Sprintf("set security ike proposal %s authentication-algorithm %s\n", p1.P1Name, p1.P1Authentication))
-		phase1 = append(phase1, fmt.Sprintf("set security ike proposal %s encryption-algorithm %s\n", p1.P1Name, p1.P1Encryption))
-		phase1 = append(phase1, fmt.Sprintf("set security ike proposal %s lifetime-seconds %d\n", p1.P1Name, p1.P1Seconds))
-
-		for _, p := range phase1 {
-			config = append(config, p)
-		}
-	}
-
-	config = append(config, fmt.Sprintf("set security ike policy %s mode %s\n", i.Name, i.Mode))
-	config = append(config, fmt.Sprintf("set security ike policy %s pre-shared-key ascii-text \"%s\"\n", i.Name, i.PSK))
-
-	for _, p1props := range i.P1Proposals {
-		config = append(config, fmt.Sprintf("set security ike policy %s proposals %s\n", i.Name, p1props.P1Name))
-	}
-
-	for _, g := range i.Gateway {
-		config = append(config, g)
-	}
-
-	for _, p2 := range i.P2Proposals {
-		phase2 := []string{}
-		phase2 = append(phase2, fmt.Sprintf("set security ipsec proposal %s protocol %s\n", p2.P2Name, p2.P2Protocol))
-		phase2 = append(phase2, fmt.Sprintf("set security ipsec proposal %s authentication-algorithm %s\n", p2.P2Name, p2.P2Authentication))
-		phase2 = append(phase2, fmt.Sprintf("set security ipsec proposal %s encryption-algorithm %s\n", p2.P2Name, p2.P2Encryption))
-		phase2 = append(phase2, fmt.Sprintf("set security ipsec proposal %s lifetime-seconds %d\n", p2.P2Name, p2.P2Seconds))
-
-		for _, p := range phase2 {
-			config = append(config, p)
-		}
-	}
-
-	for _, p2props := range i.P2Proposals {
-		config = append(config, fmt.Sprintf("set security ipsec policy %s proposals %s\n", i.Name, p2props.P2Name))
-	}
-
-	if i.PFS != 0 {
-		config = append(config, fmt.Sprintf("set security ipsec policy %s perfect-forward-secrecy keys %s\n", i.Name, groups[i.PFS]))
-	}
-
-	config = append(config, fmt.Sprintf("set security ipsec vpn %s bind-interface %s\n", i.Name, i.TunnelInterface))
-	config = append(config, fmt.Sprintf("set security ipsec vpn %s ike gateway %s\n", i.Name, i.Name))
-	config = append(config, fmt.Sprintf("set security ipsec vpn %s ike idle-time 60\n", i.Name))
-	config = append(config, fmt.Sprintf("set security ipsec vpn %s ike ipsec-policy %s\n", i.Name, i.Name))
-	config = append(config, fmt.Sprintf("set security ipsec vpn %s establish-tunnels %s\n", i.Name, i.Establish))
-
-	for _, ts := range i.TrafficSelectors {
-		config = append(config, ts)
-	}
-
-	return config
-}
+// func (i *IPsecVPN) BuildIPsecVPN() []string {
+// 	config := []string{}
+//
+// 	config = append(config, fmt.Sprintf("set interfaces %s family inet\n", i.TunnelInterface))
+// 	config = append(config, fmt.Sprintf("set security zones security-zone %s interfaces %s\n", i.Zone, i.TunnelInterface))
+//
+// 	for _, p1 := range i.P1Proposals {
+// 		phase1 := []string{}
+// 		phase1 = append(phase1, fmt.Sprintf("set security ike proposal %s authentication-method pre-shared-keys\n", p1.P1Name))
+// 		phase1 = append(phase1, fmt.Sprintf("set security ike proposal %s dh-group %s\n", p1.P1Name, groups[p1.P1DiffeHellman]))
+// 		phase1 = append(phase1, fmt.Sprintf("set security ike proposal %s authentication-algorithm %s\n", p1.P1Name, p1.P1Authentication))
+// 		phase1 = append(phase1, fmt.Sprintf("set security ike proposal %s encryption-algorithm %s\n", p1.P1Name, p1.P1Encryption))
+// 		phase1 = append(phase1, fmt.Sprintf("set security ike proposal %s lifetime-seconds %d\n", p1.P1Name, p1.P1Seconds))
+//
+// 		for _, p := range phase1 {
+// 			config = append(config, p)
+// 		}
+// 	}
+//
+// 	config = append(config, fmt.Sprintf("set security ike policy %s mode %s\n", i.Name, i.Mode))
+// 	config = append(config, fmt.Sprintf("set security ike policy %s pre-shared-key ascii-text \"%s\"\n", i.Name, i.PSK))
+//
+// 	for _, p1props := range i.P1Proposals {
+// 		config = append(config, fmt.Sprintf("set security ike policy %s proposals %s\n", i.Name, p1props.P1Name))
+// 	}
+//
+// 	for _, g := range i.Gateway {
+// 		config = append(config, g)
+// 	}
+//
+// 	for _, p2 := range i.P2Proposals {
+// 		phase2 := []string{}
+// 		phase2 = append(phase2, fmt.Sprintf("set security ipsec proposal %s protocol %s\n", p2.P2Name, p2.P2Protocol))
+// 		phase2 = append(phase2, fmt.Sprintf("set security ipsec proposal %s authentication-algorithm %s\n", p2.P2Name, p2.P2Authentication))
+// 		phase2 = append(phase2, fmt.Sprintf("set security ipsec proposal %s encryption-algorithm %s\n", p2.P2Name, p2.P2Encryption))
+// 		phase2 = append(phase2, fmt.Sprintf("set security ipsec proposal %s lifetime-seconds %d\n", p2.P2Name, p2.P2Seconds))
+//
+// 		for _, p := range phase2 {
+// 			config = append(config, p)
+// 		}
+// 	}
+//
+// 	for _, p2props := range i.P2Proposals {
+// 		config = append(config, fmt.Sprintf("set security ipsec policy %s proposals %s\n", i.Name, p2props.P2Name))
+// 	}
+//
+// 	if i.PFS != 0 {
+// 		config = append(config, fmt.Sprintf("set security ipsec policy %s perfect-forward-secrecy keys %s\n", i.Name, groups[i.PFS]))
+// 	}
+//
+// 	config = append(config, fmt.Sprintf("set security ipsec vpn %s bind-interface %s\n", i.Name, i.TunnelInterface))
+// 	config = append(config, fmt.Sprintf("set security ipsec vpn %s ike gateway %s\n", i.Name, i.Name))
+// 	config = append(config, fmt.Sprintf("set security ipsec vpn %s ike idle-time 60\n", i.Name))
+// 	config = append(config, fmt.Sprintf("set security ipsec vpn %s ike ipsec-policy %s\n", i.Name, i.Name))
+// 	config = append(config, fmt.Sprintf("set security ipsec vpn %s establish-tunnels %s\n", i.Name, i.Establish))
+//
+// 	for _, ts := range i.TrafficSelectors {
+// 		config = append(config, ts)
+// 	}
+//
+// 	return config
+// }
