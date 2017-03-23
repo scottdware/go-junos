@@ -233,9 +233,9 @@ func (j *Junos) Close() {
 	j.Session.Transport.Close()
 }
 
-// RunCommand executes any operational mode command, such as "show" or "request." If you wish to return the results
+// Command executes any operational mode command, such as "show" or "request." If you wish to return the results
 // of the command, specify the format, which must be "text" or "xml" as the second parameter.
-func (j *Junos) RunCommand(cmd string, format ...string) (string, error) {
+func (j *Junos) Command(cmd string, format ...string) (string, error) {
 	var command string
 	command = fmt.Sprintf(rpcCommand, cmd)
 
