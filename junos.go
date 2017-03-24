@@ -85,16 +85,6 @@ type RoutingEngine struct {
 	Version string
 }
 
-// View ...
-// type View struct {
-// 	RPC    string
-// 	Item   string
-// 	Fields string
-// }
-
-// ViewMap ...
-// type ViewMap map[string]interface{}
-
 type commandXML struct {
 	Config string `xml:",innerxml"`
 }
@@ -182,9 +172,11 @@ func NewSession(host, user, password string, logger ...interface{}) (*Junos, err
 		}
 	}
 
+	formatted := strings.Replace(reply.Data, "\n", "", -1)
+
 	if strings.Contains(reply.Data, "multi-routing-engine-results") {
 		var facts versionRouteEngines
-		err = xml.Unmarshal([]byte(reply.Data), &facts)
+		err = xml.Unmarshal([]byte(formatted), &facts)
 		if err != nil {
 			return nil, err
 		}
@@ -208,7 +200,7 @@ func NewSession(host, user, password string, logger ...interface{}) (*Junos, err
 	}
 
 	var facts versionRouteEngine
-	err = xml.Unmarshal([]byte(reply.Data), &facts)
+	err = xml.Unmarshal([]byte(formatted), &facts)
 	if err != nil {
 		return nil, err
 	}
@@ -289,7 +281,8 @@ func (j *Junos) CommitHistory() (*CommitHistory, error) {
 		return nil, errors.New("could not load commit history")
 	}
 
-	err = xml.Unmarshal([]byte(reply.Data), &history)
+	formatted := strings.Replace(reply.Data, "\n", "", -1)
+	err = xml.Unmarshal([]byte(formatted), &history)
 	if err != nil {
 		return nil, err
 	}
@@ -311,7 +304,8 @@ func (j *Junos) Commit() error {
 		}
 	}
 
-	err = xml.Unmarshal([]byte(reply.Data), &errs)
+	formatted := strings.Replace(reply.Data, "\n", "", -1)
+	err = xml.Unmarshal([]byte(formatted), &errs)
 	if err != nil {
 		return err
 	}
@@ -346,7 +340,8 @@ func (j *Junos) CommitAt(time string, message ...string) error {
 		}
 	}
 
-	err = xml.Unmarshal([]byte(reply.Data), &errs)
+	formatted := strings.Replace(reply.Data, "\n", "", -1)
+	err = xml.Unmarshal([]byte(formatted), &errs)
 	if err != nil {
 		return err
 	}
@@ -374,7 +369,8 @@ func (j *Junos) CommitCheck() error {
 		}
 	}
 
-	err = xml.Unmarshal([]byte(reply.Data), &errs)
+	formatted := strings.Replace(reply.Data, "\n", "", -1)
+	err = xml.Unmarshal([]byte(formatted), &errs)
 	if err != nil {
 		return err
 	}
@@ -403,7 +399,8 @@ func (j *Junos) CommitConfirm(delay int) error {
 		}
 	}
 
-	err = xml.Unmarshal([]byte(reply.Data), &errs)
+	formatted := strings.Replace(reply.Data, "\n", "", -1)
+	err = xml.Unmarshal([]byte(formatted), &errs)
 	if err != nil {
 		return err
 	}
@@ -437,7 +434,8 @@ func (j *Junos) Diff(rollback int) (string, error) {
 		}
 	}
 
-	err = xml.Unmarshal([]byte(reply.Data), &cd)
+	formatted := strings.Replace(reply.Data, "\n", "", -1)
+	err = xml.Unmarshal([]byte(formatted), &cd)
 	if err != nil {
 		return "", err
 	}
@@ -496,7 +494,8 @@ func (j *Junos) GetConfig(format string, section ...string) (string, error) {
 	switch format {
 	case "text":
 		var output commandXML
-		err = xml.Unmarshal([]byte(reply.Data), &output)
+		formatted := strings.Replace(reply.Data, "\n", "", -1)
+		err = xml.Unmarshal([]byte(formatted), &output)
 		if err != nil {
 			return "", err
 		}
@@ -721,64 +720,3 @@ func (j *Junos) CommitFull() error {
 
 	return nil
 }
-
-// Views...
-// func (j *Junos) Views(table *View) (*mxj.Map, error) {
-// 	command := fmt.Sprintf(rpcView, table.RPC)
-// 	// xmlroot := strings.Trim(table.RPC, "get-")
-// 	// fields := strings.Split(table.Fields, ", ")
-// 	// numfields := len(fields)
-//
-// 	reply, err := j.Session.Exec(netconf.RawMethod(command))
-// 	if err != nil {
-// 		return nil, err
-// 	}
-//
-// 	if reply.Errors != nil {
-// 		for _, m := range reply.Errors {
-// 			return nil, errors.New(m.Message)
-// 		}
-// 	}
-//
-// 	if reply.Data == "" {
-// 		return nil, errors.New("no output available - please check the syntax of your command")
-// 	}
-//
-// 	vm, err := mxj.NewMapXml([]byte(reply.Data))
-// 	if err != nil {
-// 		return nil, err
-// 	}
-//
-// 	jvm, err := vm.Json()
-// 	if err != nil {
-// 		return nil, err
-// 	}
-//
-// 	fmt.Printf("%+v\n", string(jvm))
-
-// vals4path, _ := vm.ValuesForPath(fmt.Sprintf("%s.%s", xmlroot, table.Item))
-// entries := len(vals4path)
-// fmt.Println(fmt.Sprintf("path: %s.%s; items/map length: %d", xmlroot, table.Item, entries))
-// for k, v := range vals4path {
-// 	fmt.Println(k, v)
-// }
-//
-// mxj.LeafUseDotNotation(true)
-// l := vm.LeafNodes()
-//
-// for _, leaf := range l {
-// 	fmt.Printf("path: %s, value: %s\n", leaf.Path, leaf.Value)
-// }
-
-// nodes := vm.LeafNodes(true)
-// for _, node := range nodes {
-// 	for i := 0; i < numfields; i++ {
-// 		if strings.Contains(node.Path, fmt.Sprintf(".%s", fields[i])) {
-// 			fmt.Println(node.Path, node.Value)
-// 		}
-// 	}
-// }
-
-// return &vm, nil
-// return reply.Data, nil
-// }
