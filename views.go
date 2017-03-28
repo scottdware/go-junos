@@ -10,7 +10,7 @@ import (
 
 // ArpTable contains the ARP table on the device.
 type ArpTable struct {
-	Count   string     `xml:"arp-entry-count"`
+	Count   int        `xml:"arp-entry-count"`
 	Entries []ArpEntry `xml:"arp-table-entry"`
 }
 
