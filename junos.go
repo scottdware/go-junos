@@ -10,6 +10,7 @@ import (
 	"log"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/Juniper/go-netconf/netconf"
 )
@@ -53,7 +54,6 @@ var (
 	rpcCommitHistory       = "<get-commit-information/>"
 	rpcFileList            = "<file-list><detail/><path>%s</path></file-list>"
 	rpcInterfaces          = "<get-interface-information/>"
-	// rpcView                = "<%s/>"
 )
 
 // Junos contains our session state.
@@ -62,6 +62,7 @@ type Junos struct {
 	Hostname       string
 	RoutingEngines int
 	Platform       []RoutingEngine
+	CommitDelay    time.Duration
 }
 
 // CommitHistory holds all of the commit entries.
@@ -196,6 +197,7 @@ func NewSession(host, user, password string, logger ...interface{}) (*Junos, err
 			Hostname:       hostname,
 			RoutingEngines: numRE,
 			Platform:       res,
+			CommitDelay:    0,
 		}, nil
 	}
 
@@ -217,6 +219,7 @@ func NewSession(host, user, password string, logger ...interface{}) (*Junos, err
 		Hostname:       hostname,
 		RoutingEngines: 1,
 		Platform:       res,
+		CommitDelay:    0,
 	}, nil
 }
 
@@ -226,7 +229,7 @@ func (j *Junos) Close() {
 }
 
 // Command executes any operational mode command, such as "show" or "request." If you wish to return the results
-// of the command, specify the format, which must be "text" or "xml" as the second parameter.
+// of the command, specify the format, which must be "text" or "xml" as the second parameter (optional).
 func (j *Junos) Command(cmd string, format ...string) (string, error) {
 	var command string
 	command = fmt.Sprintf(rpcCommand, cmd)
@@ -314,6 +317,10 @@ func (j *Junos) Commit() error {
 		for _, m := range errs.Errors {
 			return errors.New(strings.Trim(m.Message, "[\r\n]"))
 		}
+	}
+
+	if j.CommitDelay > 0 {
+		time.Sleep(j.CommitDelay * time.Second)
 	}
 
 	return nil
@@ -434,8 +441,8 @@ func (j *Junos) Diff(rollback int) (string, error) {
 		}
 	}
 
-	formatted := strings.Replace(reply.Data, "\n", "", -1)
-	err = xml.Unmarshal([]byte(formatted), &cd)
+	// formatted := strings.Replace(reply.Data, "\n", "", -1)
+	err = xml.Unmarshal([]byte(reply.Data), &cd)
 	if err != nil {
 		return "", err
 	}
@@ -494,8 +501,8 @@ func (j *Junos) GetConfig(format string, section ...string) (string, error) {
 	switch format {
 	case "text":
 		var output commandXML
-		formatted := strings.Replace(reply.Data, "\n", "", -1)
-		err = xml.Unmarshal([]byte(formatted), &output)
+		// formatted := strings.Replace(reply.Data, "\n", "", -1)
+		err = xml.Unmarshal([]byte(reply.Data), &output)
 		if err != nil {
 			return "", err
 		}
@@ -615,6 +622,10 @@ func (j *Junos) Lock() error {
 		}
 	}
 
+	if j.CommitDelay > 0 {
+		time.Sleep(j.CommitDelay * time.Second)
+	}
+
 	return nil
 }
 
@@ -684,6 +695,10 @@ func (j *Junos) Unlock() error {
 		}
 	}
 
+	if j.CommitDelay > 0 {
+		time.Sleep(j.CommitDelay * time.Second)
+	}
+
 	return nil
 }
 
@@ -719,4 +734,13 @@ func (j *Junos) CommitFull() error {
 	}
 
 	return nil
+}
+
+// SetCommitDelay will add the given delay time (in seconds) to the following commit functions: Lock(),
+// Commit() and Unlock(). When configuring multiple devices, or having a large configuration to push, this can
+// greatly reduce errors (especially if you're dealing with latency).
+func (j *Junos) SetCommitDelay(delay int) {
+	d := time.Duration(delay)
+
+	j.CommitDelay = d
 }
