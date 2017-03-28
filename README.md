@@ -127,6 +127,41 @@ view that you want to see, it's possible to do this for anything you want.
 I will be adding more views over time, but feel free to request ones you'd like to see by [emailing](mailto:scottdware@gmail.com) me, or drop
 me a line on [Twitter](https://twitter.com/scottdware).
 
+**Example:** View the ARP table on a device
+```Go
+views, err := jnpr.Views("arp")
+if err != nil {
+    fmt.Println(err)
+}
+
+fmt.Printf("# ARP entries: %d\n\n", views.Arp.Count)
+for _, a := range views.Arp.Entries {
+    fmt.Printf("MAC: %s\n", a.MACAddress)
+    fmt.Printf("IP: %s\n", a.IPAddress)
+    fmt.Printf("Interface: %s\n\n", a.Interface)
+}
+
+// Will print out the following
+
+# ARP entries: 4
+
+MAC: 00:01:ab:cd:4d:73
+IP: 10.1.1.28
+Interface: reth0.1
+
+MAC: 00:01:ab:cd:0a:93
+IP: 10.1.1.30
+Interface: reth0.1
+
+MAC: 00:01:ab:cd:4f:8c
+IP: 10.1.1.33
+Interface: reth0.1
+
+MAC: 00:01:ab:cd:f8:30
+IP: 10.1.1.36
+Interface: reth0.1
+```
+
 [netconf-rfc]: https://tools.ietf.org/html/rfc6241
 [go-netconf]: https://github.com/Juniper/go-netconf
 [juniper]: http://www.juniper.net
