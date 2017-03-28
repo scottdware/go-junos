@@ -180,6 +180,17 @@ type SubModule struct {
 
 // SubSubModule contains information about each sub-sub module, such as SFP's.
 type SubSubModule struct {
+	Name             string            `xml:"name"`
+	Version          string            `xml:"version,omitempty"`
+	PartNumber       string            `xml:"part-number"`
+	SerialNumber     string            `xml:"serial-number"`
+	Description      string            `xml:"description"`
+	SubSubSubModules []SubSubSubModule `xml:"chassis-sub-sub-sub-module"`
+}
+
+// SubSubSubModule contains information about each sub-sub-sub module, such as SFP's on a
+// PIC, which is tied to a MIC on an MX.
+type SubSubSubModule struct {
 	Name         string `xml:"name"`
 	Version      string `xml:"version,omitempty"`
 	PartNumber   string `xml:"part-number"`
