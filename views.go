@@ -225,6 +225,31 @@ type VCMemberNeighbor struct {
 	Interface string `xml:"neighbor-interface"`
 }
 
+// BGPTable contains information about every BGP peer configured on the device.
+type BGPTable struct {
+	TotalGroups int       `xml:"group-count"`
+	TotalPeers  int       `xml:"peer-count"`
+	DownPeers   int       `xml:"down-peer-count"`
+	Entries     []BGPPeer `xml:"bgp-peer"`
+}
+
+// BGPPeer contains information about each individual BGP peer.
+type BGPPeer struct {
+	Address            string `xml:"peer-address"`
+	ASN                int    `xml:"peer-as"`
+	InputMessages      int    `xml:"input-messages"`
+	OutputMessages     int    `xml:"output-messages"`
+	QueuedRoutes       int    `xml:"route-queue-count"`
+	Flaps              int    `xml:"flap-count"`
+	ElapsedTime        string `xml:"elapsed-time"`
+	State              string `xml:"peer-state"`
+	RoutingTable       string `xml:"bgp-rib>name"`
+	ActivePrefixes     int    `xml:"bgp-rib>active-prefix-count"`
+	ReceivedPrefixes   int    `xml:"bgp-rib>received-prefix-count"`
+	AcceptedPrefixes   int    `xml:"bgp-rib>accepted-prefix-count"`
+	SuppressedPrefixes int    `xml:"bgp-rib>suppressed-prefix-count"`
+}
+
 // Views contains the information for the specific views. Note that some views aren't available for specific
 // hardware platforms, such as the "VirtualChassis" view on an SRX.
 type Views struct {
@@ -235,6 +260,7 @@ type Views struct {
 	EthernetSwitch EthernetSwitchingTable
 	Inventory      HardwareInventory
 	VirtualChassis VirtualChassis
+	BGP            BGPTable
 }
 
 var (
@@ -246,6 +272,7 @@ var (
 		"ethernetswitch": "<get-ethernet-switching-table-information/>",
 		"inventory":      "<get-chassis-inventory/>",
 		"virtualchassis": "<get-virtual-chassis-information/>",
+		"bgp":            "<get-bgp-summary-information/>",
 	}
 )
 
@@ -371,6 +398,15 @@ func (j *Junos) Views(view string) (*Views, error) {
 		}
 
 		results.VirtualChassis = vc
+	case "bgp":
+		var bgpTable BGPTable
+		formatted := strings.Replace(reply.Data, "\n", "", -1)
+
+		if err := xml.Unmarshal([]byte(formatted), &bgpTable); err != nil {
+			return nil, err
+		}
+
+		results.BGP = bgpTable
 	}
 
 	return &results, nil
