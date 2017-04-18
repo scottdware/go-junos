@@ -109,6 +109,8 @@ Current out-of-the-box built-in views are:
     * Same as `show arp`
 * `route`: Gathers the routing table (for all routing-instances) on the device.
     * Same as `show route`
+* `bgp`: Gathers information about every BGP peer configured on the device.
+    * Same as `show bgp summary`
 * `interface`: Gathers the interface listing as well as statistics and settings on the device.
     * Same as `show interfaces`
 * `vlan`: Gathers the VLAN table on the device.
