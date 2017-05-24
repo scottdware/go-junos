@@ -250,6 +250,24 @@ type BGPPeer struct {
 	SuppressedPrefixes int    `xml:"bgp-rib>suppressed-prefix-count"`
 }
 
+// StaticNat contains the static NATs configured on the device.
+type StaticNats struct {
+	Count   int        		`xml:"total-static-nat-rules>total-rules"`
+	Entries []StaticNatEntry	`xml:"static-nat-rule-entry"`
+}
+
+// StaticNatEntry holds each individual static NAT entry.
+type StaticNatEntry struct {
+	Name        string `xml:"rule-name"`
+	SetName     string `xml:"rule-set-name"`
+	ID          string `xml:"rule-id"`
+	FromZone    string `xml:"rule-from-context-name"`
+	FakePrefix  string `xml:"rule-destination-address-prefix"`
+	RealPrefix  string `xml:"rule-host-address-prefix"`
+	Mask        string `xml:"rule-address-netmask"`
+	Hits        string `xml:"succ-hits"`
+}
+
 // Views contains the information for the specific views. Note that some views aren't available for specific
 // hardware platforms, such as the "VirtualChassis" view on an SRX.
 type Views struct {
@@ -261,6 +279,7 @@ type Views struct {
 	Inventory      HardwareInventory
 	VirtualChassis VirtualChassis
 	BGP            BGPTable
+	StaticNat      StaticNats
 }
 
 var (
@@ -273,6 +292,7 @@ var (
 		"inventory":      "<get-chassis-inventory/>",
 		"virtualchassis": "<get-virtual-chassis-information/>",
 		"bgp":            "<get-bgp-summary-information/>",
+		"staticnat":      "<get-static-nat-rule-information><all/></get-static-nat-rule-information>",
 	}
 )
 
@@ -407,7 +427,17 @@ func (j *Junos) Views(view string) (*Views, error) {
 		}
 
 		results.BGP = bgpTable
+	case "staticnat":
+		var staticnats StaticNats
+		formatted := strings.Replace(reply.Data, "\n", "", -1)
+
+		if err := xml.Unmarshal([]byte(formatted), &staticnats); err != nil {
+			return nil, err
+		}
+
+		results.StaticNat = staticnats
 	}
+
 
 	return &results, nil
 }
