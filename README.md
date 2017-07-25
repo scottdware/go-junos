@@ -12,7 +12,7 @@ A Go package that interacts with Junos devices, as well as Junos Space, and allo
 * [Device views][views] - This will allow you to quickly get all the information on the device given a specific view.
 * [SRX] Convert from a zone-based address book to a global one.
 
-Junos Space
+Junos Space <= 15.2
 
 * Get information from Junos Space managed devices.
 * Add/remove devices from Junos Space.
