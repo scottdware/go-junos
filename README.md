@@ -121,6 +121,8 @@ Current out-of-the-box built-in views are:
     * Same as `show chassis hardware`
 * `virtualchassis`: Gathers the virtual-chassis configuration on the device.
     * Same as `show virtual-chassis status`
+* `staticnat`: Gathers the static nats configuration on the device.
+    * Same as `show security nat static rule all`
 
 You can even create your own views by creating a `struct` that models the XML output from using the `GetConfig()` function. Granted,
 this is a little more work, and requires you to know a bit more about the Go language (such as unmarshalling XML), but if there's a custom
