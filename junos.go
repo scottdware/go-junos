@@ -62,7 +62,7 @@ type Junos struct {
 	Hostname       string
 	RoutingEngines int
 	Platform       []RoutingEngine
-	CommitDelay    time.Duration
+	CommitTimeout  time.Duration
 }
 
 // CommitHistory holds all of the commit entries.
@@ -197,7 +197,7 @@ func NewSession(host, user, password string, logger ...interface{}) (*Junos, err
 			Hostname:       hostname,
 			RoutingEngines: numRE,
 			Platform:       res,
-			CommitDelay:    0,
+			CommitTimeout:  0,
 		}, nil
 	}
 
@@ -219,7 +219,7 @@ func NewSession(host, user, password string, logger ...interface{}) (*Junos, err
 		Hostname:       hostname,
 		RoutingEngines: 1,
 		Platform:       res,
-		CommitDelay:    0,
+		CommitTimeout:  0,
 	}, nil
 }
 
@@ -319,8 +319,8 @@ func (j *Junos) Commit() error {
 		}
 	}
 
-	if j.CommitDelay > 0 {
-		time.Sleep(j.CommitDelay * time.Second)
+	if j.CommitTimeout > 0 {
+		time.Sleep(j.CommitTimeout * time.Second)
 	}
 
 	return nil
@@ -622,8 +622,8 @@ func (j *Junos) Lock() error {
 		}
 	}
 
-	if j.CommitDelay > 0 {
-		time.Sleep(j.CommitDelay * time.Second)
+	if j.CommitTimeout > 0 {
+		time.Sleep(j.CommitTimeout * time.Second)
 	}
 
 	return nil
@@ -695,8 +695,8 @@ func (j *Junos) Unlock() error {
 		}
 	}
 
-	if j.CommitDelay > 0 {
-		time.Sleep(j.CommitDelay * time.Second)
+	if j.CommitTimeout > 0 {
+		time.Sleep(j.CommitTimeout * time.Second)
 	}
 
 	return nil
@@ -736,11 +736,11 @@ func (j *Junos) CommitFull() error {
 	return nil
 }
 
-// SetCommitDelay will add the given delay time (in seconds) to the following commit functions: Lock(),
+// SetCommitTimeout will add the given delay time (in seconds) to the following commit functions: Lock(),
 // Commit() and Unlock(). When configuring multiple devices, or having a large configuration to push, this can
 // greatly reduce errors (especially if you're dealing with latency).
-func (j *Junos) SetCommitDelay(delay int) {
+func (j *Junos) SetCommitTimeout(delay int) {
 	d := time.Duration(delay)
 
-	j.CommitDelay = d
+	j.CommitTimeout = d
 }
