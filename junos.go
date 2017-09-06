@@ -65,6 +65,17 @@ type Junos struct {
 	CommitTimeout  time.Duration
 }
 
+// AuthMethod defines how we want to authenticate to the device. If using a
+// username and password to authenticate, the Credentials field must contain the username and password
+//, respectively (i.e. []string{"admin", "password"}). If you are using an SSH key file for
+// authentication, provide SSH username, passphrase and the path to the file for their respective fields.
+// type AuthMethod struct {
+// 	Credentials   []string
+// 	SSHUsername   string
+// 	SSHPassphrase string
+// 	SSHKeyFile    string
+// }
+
 // CommitHistory holds all of the commit entries.
 type CommitHistory struct {
 	Entries []CommitEntry `xml:"commit-history"`
@@ -145,7 +156,7 @@ type versionPackageInfo struct {
 
 // NewSession establishes a new connection to a Junos device that we will use
 // to run our commands against. NewSession also gathers software information
-// about the device.  logger is optional for additonal NETCONF logging
+// about the device. Logger is optional for additonal NETCONF logging
 // logger is any logger that implements the netconf.Logger interface (ex: logrus)
 func NewSession(host, user, password string, logger ...interface{}) (*Junos, error) {
 	rex := regexp.MustCompile(`^.*\[(.*)\]`)
