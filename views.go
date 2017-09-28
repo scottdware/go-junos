@@ -258,8 +258,7 @@ type StaticNats struct {
 
 // srxStaticNats contains static NATs configured across a clustered-mode SRX
 type srxStaticNats struct {
-	Count   int              `xml:"multi-routing-engine-item>static-nat-rule-information>total-static-nat-rules>total-rules"`
-	Entries []StaticNatEntry `xml:"multi-routing-engine-item>static-nat-rule-information"`
+	Entries []StaticNatEntry `xml:"multi-routing-engine-item>static-nat-rule-information>static-nat-rule-entry"`
 }
 
 // StaticNatEntry holds each individual static NAT entry.
@@ -445,6 +444,7 @@ func (j *Junos) Views(view string) (*Views, error) {
 			}
 
 			for _, c := range srxstaticnats.Entries {
+				if strings.Contains(c.Name)
 				staticnats.Entries = append(staticnats.Entries, c)
 			}
 
