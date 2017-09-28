@@ -62,8 +62,19 @@ type Junos struct {
 	Hostname       string
 	RoutingEngines int
 	Platform       []RoutingEngine
-	CommitDelay    time.Duration
+	CommitTimeout  time.Duration
 }
+
+// AuthMethod defines how we want to authenticate to the device. If using a
+// username and password to authenticate, the Credentials field must contain the username and password
+//, respectively (i.e. []string{"admin", "password"}). If you are using an SSH key file for
+// authentication, provide SSH username, passphrase and the path to the file for their respective fields.
+// type AuthMethod struct {
+// 	Credentials   []string
+// 	SSHUsername   string
+// 	SSHPassphrase string
+// 	SSHKeyFile    string
+// }
 
 // CommitHistory holds all of the commit entries.
 type CommitHistory struct {
@@ -145,7 +156,7 @@ type versionPackageInfo struct {
 
 // NewSession establishes a new connection to a Junos device that we will use
 // to run our commands against. NewSession also gathers software information
-// about the device.  logger is optional for additonal NETCONF logging
+// about the device. Logger is optional for additonal NETCONF logging
 // logger is any logger that implements the netconf.Logger interface (ex: logrus)
 func NewSession(host, user, password string, logger ...interface{}) (*Junos, error) {
 	rex := regexp.MustCompile(`^.*\[(.*)\]`)
@@ -197,7 +208,7 @@ func NewSession(host, user, password string, logger ...interface{}) (*Junos, err
 			Hostname:       hostname,
 			RoutingEngines: numRE,
 			Platform:       res,
-			CommitDelay:    0,
+			CommitTimeout:  0,
 		}, nil
 	}
 
@@ -219,7 +230,7 @@ func NewSession(host, user, password string, logger ...interface{}) (*Junos, err
 		Hostname:       hostname,
 		RoutingEngines: 1,
 		Platform:       res,
-		CommitDelay:    0,
+		CommitTimeout:  0,
 	}, nil
 }
 
@@ -319,8 +330,8 @@ func (j *Junos) Commit() error {
 		}
 	}
 
-	if j.CommitDelay > 0 {
-		time.Sleep(j.CommitDelay * time.Second)
+	if j.CommitTimeout > 0 {
+		time.Sleep(j.CommitTimeout * time.Second)
 	}
 
 	return nil
@@ -622,8 +633,8 @@ func (j *Junos) Lock() error {
 		}
 	}
 
-	if j.CommitDelay > 0 {
-		time.Sleep(j.CommitDelay * time.Second)
+	if j.CommitTimeout > 0 {
+		time.Sleep(j.CommitTimeout * time.Second)
 	}
 
 	return nil
@@ -695,8 +706,8 @@ func (j *Junos) Unlock() error {
 		}
 	}
 
-	if j.CommitDelay > 0 {
-		time.Sleep(j.CommitDelay * time.Second)
+	if j.CommitTimeout > 0 {
+		time.Sleep(j.CommitTimeout * time.Second)
 	}
 
 	return nil
@@ -736,11 +747,11 @@ func (j *Junos) CommitFull() error {
 	return nil
 }
 
-// SetCommitDelay will add the given delay time (in seconds) to the following commit functions: Lock(),
+// SetCommitTimeout will add the given delay time (in seconds) to the following commit functions: Lock(),
 // Commit() and Unlock(). When configuring multiple devices, or having a large configuration to push, this can
 // greatly reduce errors (especially if you're dealing with latency).
-func (j *Junos) SetCommitDelay(delay int) {
+func (j *Junos) SetCommitTimeout(delay int) {
 	d := time.Duration(delay)
 
-	j.CommitDelay = d
+	j.CommitTimeout = d
 }
