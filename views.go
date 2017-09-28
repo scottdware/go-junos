@@ -444,7 +444,6 @@ func (j *Junos) Views(view string) (*Views, error) {
 			}
 
 			for _, c := range srxstaticnats.Entries {
-				if strings.Contains(c.Name)
 				staticnats.Entries = append(staticnats.Entries, c)
 			}
 
