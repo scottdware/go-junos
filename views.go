@@ -256,6 +256,11 @@ type StaticNats struct {
 	Entries []StaticNatEntry `xml:"static-nat-rule-entry"`
 }
 
+// srxStaticNats contains static NATs configured across a clustered-mode SRX
+type srxStaticNats struct {
+	Entries []StaticNatEntry `xml:"multi-routing-engine-item>static-nat-rule-information>static-nat-rule-entry"`
+}
+
 // StaticNatEntry holds each individual static NAT entry.
 type StaticNatEntry struct {
 	Name       string `xml:"rule-name"`
@@ -313,7 +318,7 @@ func validatePlatform(j *Junos, v string) error {
 
 // Views gathers information on the device given the "view" specified. These views can be interrated/looped over to view the
 // data (i.e. ARP table entries, interface details/statistics, routing tables, etc.). Supported views are:
-// arp, route, interface, vlan, ethernetswitch, inventory.
+// arp, route, interface, vlan, ethernetswitch, inventory, staticnat.
 func (j *Junos) Views(view string) (*Views, error) {
 	var results Views
 
@@ -431,11 +436,25 @@ func (j *Junos) Views(view string) (*Views, error) {
 		var staticnats StaticNats
 		formatted := strings.Replace(reply.Data, "\n", "", -1)
 
-		if err := xml.Unmarshal([]byte(formatted), &staticnats); err != nil {
-			return nil, err
-		}
+		if strings.Contains(reply.Data, "multi-routing-engine-results") {
+			var srxstaticnats srxStaticNats
 
-		results.StaticNat = staticnats
+			if err := xml.Unmarshal([]byte(formatted), &srxstaticnats); err != nil {
+				return nil, err
+			}
+
+			for _, c := range srxstaticnats.Entries {
+				staticnats.Entries = append(staticnats.Entries, c)
+			}
+
+			results.StaticNat = staticnats
+		} else {
+			if err := xml.Unmarshal([]byte(formatted), &staticnats); err != nil {
+				return nil, err
+			}
+
+			results.StaticNat = staticnats
+		}
 	}
 
 	return &results, nil
