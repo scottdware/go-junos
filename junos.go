@@ -159,7 +159,7 @@ func NewSession(host, user, password string, logger ...interface{}) (*Junos, err
 
 	s, err := netconf.DialSSH(host, netconf.SSHConfigPassword(user, password))
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("%s - %s\n", host, err)
 	}
 
 	reply, err := s.Exec(netconf.RawMethod(rpcVersion))
