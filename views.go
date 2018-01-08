@@ -145,8 +145,8 @@ type srxHardwareInventory struct {
 	Chassis []Chassis `xml:"multi-routing-engine-item>chassis-inventory>chassis"`
 }
 
-// FileSystemStorage contains information about all of the file systems on the device.
-type FileSystemStorage struct {
+// Storage contains information about all of the file systems on the device.
+type Storage struct {
 	FileSystems []FileSystem `xml:"system-storage-information>filesystem"`
 }
 
@@ -295,16 +295,16 @@ type StaticNatEntry struct {
 // Views contains the information for the specific views. Note that some views aren't available for specific
 // hardware platforms, such as the "VirtualChassis" view on an SRX.
 type Views struct {
-	Arp               ArpTable
-	Route             RoutingTable
-	Interface         Interfaces
-	Vlan              Vlans
-	EthernetSwitch    EthernetSwitchingTable
-	Inventory         HardwareInventory
-	VirtualChassis    VirtualChassis
-	BGP               BGPTable
-	StaticNat         StaticNats
-	FileSystemStorage FileSystemStorage
+	Arp            ArpTable
+	Route          RoutingTable
+	Interface      Interfaces
+	Vlan           Vlans
+	EthernetSwitch EthernetSwitchingTable
+	Inventory      HardwareInventory
+	VirtualChassis VirtualChassis
+	BGP            BGPTable
+	StaticNat      StaticNats
+	Storage        Storage
 }
 
 var (
@@ -477,7 +477,7 @@ func (j *Junos) View(view string) (*Views, error) {
 			results.StaticNat = staticnats
 		}
 	case "storage":
-		var fsstorage FileSystemStorage
+		var storage Storage
 		formatted := strings.Replace(reply.Data, "\n", "", -1)
 
 		if strings.Contains(reply.Data, "multi-routing-engine-results") {
@@ -488,16 +488,16 @@ func (j *Junos) View(view string) (*Views, error) {
 			}
 
 			for _, s := range multistorage.FileSystems {
-				fsstorage.FileSystems = append(fsstorage.FileSystems, s)
+				storage.FileSystems = append(storage.FileSystems, s)
 			}
 
-			results.FileSystemStorage = fsstorage
+			results.Storage = storage
 		} else {
-			if err := xml.Unmarshal([]byte(formatted), &fsstorage); err != nil {
+			if err := xml.Unmarshal([]byte(formatted), &storage); err != nil {
 				return nil, err
 			}
 
-			results.FileSystemStorage = fsstorage
+			results.Storage = storage
 		}
 	}
 
