@@ -1,6 +1,5 @@
 ## go-junos
 [![GoDoc](https://godoc.org/github.com/scottdware/go-junos?status.svg)](https://godoc.org/github.com/scottdware/go-junos) [![Travis-CI](https://travis-ci.org/scottdware/go-junos.svg?branch=master)](https://travis-ci.org/scottdware/go-junos)
-[![license](http://img.shields.io/badge/license-MIT-red.svg?style=flat)](https://raw.githubusercontent.com/scottdware/go-junos/master/LICENSE)
 
 A Go package that interacts with Junos devices, as well as Junos Space, and allows you to do the following:
 
@@ -123,6 +122,8 @@ Current out-of-the-box built-in views are:
     * Same as `show virtual-chassis status`
 * `staticnat`: Gathers the static nats configuration on the device.
     * Same as `show security nat static rule all`
+* `storage`: Gathers all of the file system information on the device.
+    * Same as `show system storage`
 
 You can even create your own views by creating a `struct` that models the XML output from using the `GetConfig()` function. Granted,
 this is a little more work, and requires you to know a bit more about the Go language (such as unmarshalling XML), but if there's a custom
@@ -170,5 +171,4 @@ Interface: reth0.1
 [go-netconf]: https://github.com/Juniper/go-netconf
 [juniper]: http://www.juniper.net
 [godoc-go-junos]: https://godoc.org/github.com/scottdware/go-junos
-[license]: https://github.com/scottdware/go-junos/blob/master/LICENSE
 [views]: https://github.com/scottdware/go-junos#views
