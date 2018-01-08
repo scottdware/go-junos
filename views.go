@@ -145,6 +145,25 @@ type srxHardwareInventory struct {
 	Chassis []Chassis `xml:"multi-routing-engine-item>chassis-inventory>chassis"`
 }
 
+// FileSystemStorage contains information about all of the file systems on the device.
+type FileSystemStorage struct {
+	FileSystems []FileSystem `xml:"system-storage-information>filesystem"`
+}
+
+type multiStorage struct {
+	FileSystems []FileSystem `xml:"multi-routing-engine-item>system-storage-information>filesystem"`
+}
+
+// FileSystem contains the information for each partition.
+type FileSystem struct {
+	Name            string `xml:"filesystem-name"`
+	TotalBlocks     int    `xml:"total-blocks"`
+	UsedBlocks      int    `xml:"used-blocks"`
+	AvailableBlocks int    `xml:"available-blocks"`
+	UsedPercent     string `xml:"used-percent"`
+	MountedOn       string `xml:"mounted-on"`
+}
+
 // Chassis contains all of the hardware information for each chassis, such as a clustered pair of SRX's or a
 // virtual-chassis configuration.
 type Chassis struct {
@@ -276,15 +295,16 @@ type StaticNatEntry struct {
 // Views contains the information for the specific views. Note that some views aren't available for specific
 // hardware platforms, such as the "VirtualChassis" view on an SRX.
 type Views struct {
-	Arp            ArpTable
-	Route          RoutingTable
-	Interface      Interfaces
-	Vlan           Vlans
-	EthernetSwitch EthernetSwitchingTable
-	Inventory      HardwareInventory
-	VirtualChassis VirtualChassis
-	BGP            BGPTable
-	StaticNat      StaticNats
+	Arp               ArpTable
+	Route             RoutingTable
+	Interface         Interfaces
+	Vlan              Vlans
+	EthernetSwitch    EthernetSwitchingTable
+	Inventory         HardwareInventory
+	VirtualChassis    VirtualChassis
+	BGP               BGPTable
+	StaticNat         StaticNats
+	FileSystemStorage FileSystemStorage
 }
 
 var (
@@ -298,6 +318,7 @@ var (
 		"virtualchassis": "<get-virtual-chassis-information/>",
 		"bgp":            "<get-bgp-summary-information/>",
 		"staticnat":      "<get-static-nat-rule-information><all/></get-static-nat-rule-information>",
+		"storage":        "<get-system-storage/>",
 	}
 )
 
@@ -316,10 +337,10 @@ func validatePlatform(j *Junos, v string) error {
 	return nil
 }
 
-// Views gathers information on the device given the "view" specified. These views can be interrated/looped over to view the
+// View gathers information on the device given the "view" specified. These views can be interrated/looped over to view the
 // data (i.e. ARP table entries, interface details/statistics, routing tables, etc.). Supported views are:
 // arp, route, interface, vlan, ethernetswitch, inventory, staticnat.
-func (j *Junos) Views(view string) (*Views, error) {
+func (j *Junos) View(view string) (*Views, error) {
 	var results Views
 
 	if strings.Contains(j.Platform[0].Model, "SRX") || strings.Contains(j.Platform[0].Model, "MX") {
@@ -454,6 +475,29 @@ func (j *Junos) Views(view string) (*Views, error) {
 			}
 
 			results.StaticNat = staticnats
+		}
+	case "storage":
+		var fsstorage FileSystemStorage
+		formatted := strings.Replace(reply.Data, "\n", "", -1)
+
+		if strings.Contains(reply.Data, "multi-routing-engine-results") {
+			var multistorage multiStorage
+
+			if err := xml.Unmarshal([]byte(formatted), &multistorage); err != nil {
+				return nil, err
+			}
+
+			for _, s := range multistorage.FileSystems {
+				fsstorage.FileSystems = append(fsstorage.FileSystems, s)
+			}
+
+			results.FileSystemStorage = fsstorage
+		} else {
+			if err := xml.Unmarshal([]byte(formatted), &fsstorage); err != nil {
+				return nil, err
+			}
+
+			results.FileSystemStorage = fsstorage
 		}
 	}
 
