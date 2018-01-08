@@ -104,26 +104,19 @@ then iterate over that view to see statistics, interface settings, etc.
 > **Note:** Some of the views aren't available for all platforms, such as the `ethernetswitch` and `virtualchassis` on an SRX or MX.
 
 Current out-of-the-box built-in views are:
-* `arp`: Gathers the ARP table on the device.
-    * Same as `show arp`
-* `route`: Gathers the routing table (for all routing-instances) on the device.
-    * Same as `show route`
-* `bgp`: Gathers information about every BGP peer configured on the device.
-    * Same as `show bgp summary`
-* `interface`: Gathers the interface listing as well as statistics and settings on the device.
-    * Same as `show interfaces`
-* `vlan`: Gathers the VLAN table on the device.
-    * Same as `show vlans`
-* `ethernetswitch`: Gathers the ethernet-switching table on the device.
-    * Same as `show ethernet-switching table`
-* `inventory`: Gathers the physical inventory on the device.
-    * Same as `show chassis hardware`
-* `virtualchassis`: Gathers the virtual-chassis configuration on the device.
-    * Same as `show virtual-chassis status`
-* `staticnat`: Gathers the static nats configuration on the device.
-    * Same as `show security nat static rule all`
-* `storage`: Gathers all of the file system information on the device.
-    * Same as `show system storage`
+
+Views | CLI equivilent
+--- | ---
+`arp` | `show arp`
+`route` | `show route`
+`bgp` | `show bgp summary`
+`interface` | `show interfaces`
+`vlan` | `show vlans`
+`ethernetswitch` | `show ethernet-switching table`
+`inventory` | `show chassis hardware`
+`virtualchassis` | `show virtual-chassis status`
+`staticnat` | `show security nat static rule all`
+`storage` | `show system storage`
 
 You can even create your own views by creating a `struct` that models the XML output from using the `GetConfig()` function. Granted,
 this is a little more work, and requires you to know a bit more about the Go language (such as unmarshalling XML), but if there's a custom
