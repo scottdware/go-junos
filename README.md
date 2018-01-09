@@ -8,7 +8,7 @@ A Go package that interacts with Junos devices, as well as Junos Space, and allo
 * Rollback the configuration to a given state or a "rescue" config.
 * Configure devices by submitting commands, uploading a local file or from a remote FTP/HTTP server.
 * Commit operations: lock, unlock, commit, commit-at, commit-confirmed, etc.
-* [Device views][views] - This will allow you to quickly get all the information on the device given a specific view.
+* [Device views][views] - This will allow you to quickly get all the information on the device for the specified view.
 * [SRX] Convert from a zone-based address book to a global one.
 
 Junos Space <= 15.2
