@@ -147,11 +147,16 @@ type srxHardwareInventory struct {
 
 // Storage contains information about all of the file systems on the device.
 type Storage struct {
-	FileSystems []FileSystem `xml:"system-storage-information>filesystem"`
+	Entries []SystemStorage `xml:"system-storage-information"`
 }
 
 type multiStorage struct {
-	FileSystems []FileSystem `xml:"multi-routing-engine-item>system-storage-information>filesystem"`
+	Entries []SystemStorage `xml:"multi-routing-engine-item>system-storage-information"`
+}
+
+// SystemStorage stores the file system information for each node, routing-engine, etc. on the device.
+type SystemStorage struct {
+	FileSystems []FileSystem `xml:"filesystem"`
 }
 
 // FileSystem contains the information for each partition.
@@ -487,15 +492,18 @@ func (j *Junos) View(view string) (*Views, error) {
 				return nil, err
 			}
 
-			for _, s := range multistorage.FileSystems {
-				storage.FileSystems = append(storage.FileSystems, s)
+			for _, s := range multistorage.Entries {
+				storage.Entries = append(storage.Entries, s)
 			}
 
 			results.Storage = storage
 		} else {
-			if err := xml.Unmarshal([]byte(formatted), &storage); err != nil {
+			var sysstorage SystemStorage
+			if err := xml.Unmarshal([]byte(formatted), &sysstorage); err != nil {
 				return nil, err
 			}
+
+			storage.Entries = append(storage.Entries, sysstorage)
 
 			results.Storage = storage
 		}
