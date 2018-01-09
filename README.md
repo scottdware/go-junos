@@ -97,13 +97,13 @@ routing-instances {
 ```
 
 ### Views
-Device views allow you to quickly gather information regarding a specific "view", so that you may use that information
+Device views allow you to quickly gather information regarding a specific "view," so that you may use that information
 however you wish. A good example, is using the "interface" view to gather all of the interface information on the device,
 then iterate over that view to see statistics, interface settings, etc.
 
 > **Note:** Some of the views aren't available for all platforms, such as the `ethernetswitch` and `virtualchassis` on an SRX or MX.
 
-Current out-of-the-box built-in views are:
+Current out-of-the-box, built-in views are:
 
 Views | CLI equivilent
 --- | ---
@@ -116,6 +116,7 @@ Views | CLI equivilent
 `inventory` | `show chassis hardware`
 `virtualchassis` | `show virtual-chassis status`
 `staticnat` | `show security nat static rule all`
+`sourcenat` | `show security nat source rule all`
 `storage` | `show system storage`
 
 You can even create your own views by creating a `struct` that models the XML output from using the `GetConfig()` function. Granted,
