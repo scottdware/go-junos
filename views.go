@@ -287,14 +287,64 @@ type srxStaticNats struct {
 
 // StaticNatEntry holds each individual static NAT entry.
 type StaticNatEntry struct {
-	Name       string `xml:"rule-name"`
-	SetName    string `xml:"rule-set-name"`
-	ID         string `xml:"rule-id"`
-	FromZone   string `xml:"rule-from-context-name"`
-	FakePrefix string `xml:"rule-destination-address-prefix"`
-	RealPrefix string `xml:"rule-host-address-prefix"`
-	Mask       string `xml:"rule-address-netmask"`
-	Hits       string `xml:"succ-hits"`
+	Name                    string `xml:"rule-name"`
+	SetName                 string `xml:"rule-set-name"`
+	ID                      string `xml:"rule-id"`
+	RuleMatchingPosition    int    `xml:"rule-matching-position"`
+	FromContext             string `xml:"rule-from-context"`
+	FromZone                string `xml:"rule-from-context-name"`
+	SourceAddressLowRange   string `xml:"static-source-address-range-entry>rule-source-address-low-range"`
+	SourceAddressHighRange  string `xml:"static-source-address-range-entry>rule-source-address-high-range"`
+	DestinaionAddressPrefix string `xml:"rule-destination-address-prefix"`
+	DestinationPortLow      int    `xml:"rule-destination-port-low"`
+	DestinationPortHigh     int    `xml:"rule-destination-port-high"`
+	HostAddressPrefix       string `xml:"rule-host-address-prefix"`
+	HostPortLow             int    `xml:"rule-host-port-low"`
+	HostPortHigh            int    `xml:"rule-host-port-high"`
+	Netmask                 string `xml:"rule-address-netmask"`
+	RoutingInstance         string `xml:"rule-host-routing-instance"`
+	TranslationHits         int    `xml:"rule-translation-hits"`
+	SuccessfulSessions      int    `xml:"succ-hits"`
+	ConcurrentHits          int    `xml:"concurrent-hits"`
+}
+
+// SourceNats contains the source NATs configured on the device.
+type SourceNats struct {
+	Count   int              `xml:"total-source-nat-rules>total-rules"`
+	Entries []SourceNatEntry `xml:"source-nat-rule-entry"`
+}
+
+type srxSourceNats struct {
+	Entries []SourceNatEntry `xml:"multi-routing-engine-item>source-nat-rule-detail-information>source-nat-rule-entry"`
+}
+
+// SourceNatEntry holds each individual source NAT entry.
+type SourceNatEntry struct {
+	Name                     string   `xml:"rule-name"`
+	SetName                  string   `xml:"rule-set-name"`
+	ID                       string   `xml:"rule-id"`
+	RuleMatchingPosition     int      `xml:"rule-matching-position"`
+	FromContext              string   `xml:"rule-from-context"`
+	FromZone                 string   `xml:"rule-from-context-name"`
+	ToContext                string   `xml:"rule-to-context"`
+	ToZone                   string   `xml:"rule-to-context-name"`
+	SourceAddressLowRange    string   `xml:"source-address-range-entry>rule-source-address-low-range"`
+	SourceAddressHighRange   string   `xml:"source-address-range-entryrule-source-address-high-range"`
+	SourceAddresses          []string `xml:"source-address-range-entry>rule-source-address"`
+	DestinationAddresses     []string `xml:"destination-address-range-entry>rule-destination-address"`
+	DestinationPortLow       int      `xml:"destination-port-entry>rule-destination-port-low"`
+	DestinationPortHigh      int      `xml:"destination-port-entry>rule-destination-port-high"`
+	SourcePortLow            int      `xml:"source-port-entry>rule-source-port-low"`
+	SourcePortHigh           int      `xml:"source-port-entry>rule-source-port-high"`
+	SourceNatProtocol        string   `xml:"src-nat-protocol-entry"`
+	RuleAction               string   `xml:"source-nat-rule-action-entry>source-nat-rule-action"`
+	PersistentNatType        string   `xml:"source-nat-rule-action-entry>persistent-nat-type"`
+	PersistentNatMappingType string   `xml:"source-nat-rule-action-entry>persistent-nat-mapping-type"`
+	PersistentNatTimeout     int      `xml:"source-nat-rule-action-entry>persistent-nat-timeout"`
+	PersistentNatMaxSession  int      `xml:"source-nat-rule-action-entry>persistent-nat-max-session"`
+	TranslationHits          int      `xml:"source-nat-rule-hits-entry>rule-translation-hits"`
+	SuccessfulSessions       int      `xml:"source-nat-rule-hits-entry>succ-hits"`
+	ConcurrentHits           int      `xml:"source-nat-rule-hits-entry>concurrent-hits"`
 }
 
 // Views contains the information for the specific views. Note that some views aren't available for specific
@@ -309,6 +359,7 @@ type Views struct {
 	VirtualChassis VirtualChassis
 	BGP            BGPTable
 	StaticNat      StaticNats
+	SourceNat      SourceNats
 	Storage        Storage
 }
 
@@ -323,6 +374,7 @@ var (
 		"virtualchassis": "<get-virtual-chassis-information/>",
 		"bgp":            "<get-bgp-summary-information/>",
 		"staticnat":      "<get-static-nat-rule-information><all/></get-static-nat-rule-information>",
+		"sourcenat":      "<get-source-nat-rule-sets-information><all/></get-source-nat-rule-sets-information>",
 		"storage":        "<get-system-storage/>",
 	}
 )
@@ -480,6 +532,29 @@ func (j *Junos) View(view string) (*Views, error) {
 			}
 
 			results.StaticNat = staticnats
+		}
+	case "sourcenat":
+		var sourcenats SourceNats
+		formatted := strings.Replace(reply.Data, "\n", "", -1)
+
+		if strings.Contains(reply.Data, "multi-routing-engine-results") {
+			var srxsourcenats srxSourceNats
+
+			if err := xml.Unmarshal([]byte(formatted), &srxsourcenats); err != nil {
+				return nil, err
+			}
+
+			for _, c := range srxsourcenats.Entries {
+				sourcenats.Entries = append(sourcenats.Entries, c)
+			}
+
+			results.SourceNat = sourcenats
+		} else {
+			if err := xml.Unmarshal([]byte(formatted), &sourcenats); err != nil {
+				return nil, err
+			}
+
+			results.SourceNat = sourcenats
 		}
 	case "storage":
 		var storage Storage
