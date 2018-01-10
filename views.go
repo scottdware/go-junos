@@ -276,7 +276,7 @@ type BGPPeer struct {
 
 // StaticNats contains the static NATs configured on the device.
 type StaticNats struct {
-	Count   int              `xml:"total-static-nat-rules>total-rules"`
+	Count   int
 	Entries []StaticNatEntry `xml:"static-nat-rule-entry"`
 }
 
@@ -310,7 +310,7 @@ type StaticNatEntry struct {
 
 // SourceNats contains the source NATs configured on the device.
 type SourceNats struct {
-	Count   int              `xml:"total-source-nat-rules>total-rules"`
+	Count   int
 	Entries []SourceNatEntry `xml:"source-nat-rule-entry"`
 }
 
@@ -347,6 +347,41 @@ type SourceNatEntry struct {
 	ConcurrentHits           int      `xml:"source-nat-rule-hits-entry>concurrent-hits"`
 }
 
+// FirewallPolicy contains the entire firewall policy for the device.
+type FirewallPolicy struct {
+	XMLName xml.Name          `xml:"security-policies"`
+	Entries []SecurityContext `xml:"security-context"`
+}
+
+type srxFirewallPolicy struct {
+	Entries []SecurityContext `xml:"multi-routing-engine-item>security-policies>security-context"`
+}
+
+// SecurityContext contains the policies for each context, such as rules from trust to untrust zones.
+type SecurityContext struct {
+	SourceZone      string `xml:"context-information>source-zone-name"`
+	DestinationZone string `xml:"context-information>destination-zone-name"`
+	Rules           []Rule `xml:"policies>policy-information"`
+}
+
+// Rule contains each individual element that makes up a security policy rule.
+type Rule struct {
+	Name                 string   `xml:"policy-name"`
+	State                string   `xml:"policy-state"`
+	Identifier           int      `xml:"policy-identifier"`
+	ScopeIdentifier      int      `xml:"scope-policy-identifier"`
+	SequenceNumber       int      `xml:"policy-sequence-number"`
+	SourceAddresses      []string `xml:"source-addresses>source-address>address-name"`
+	DestinationAddresses []string `xml:"destination-addresses>destination-address>address-name"`
+	Applications         []string `xml:"applications>application>application-name"`
+	SourceIdentities     []string `xml:"source-identities>source-identity>role-name"`
+	PolicyAction         string   `xml:"policy-action>action-type"`
+	PolicyTCPOptions     struct {
+		SYNCheck      string `xml:"policy-tcp-options-syn-check"`
+		SequenceCheck string `xml:"policy-tcp-options-sequence-check"`
+	} `xml:"policy-action>policy-tcp-options"`
+}
+
 // Views contains the information for the specific views. Note that some views aren't available for specific
 // hardware platforms, such as the "VirtualChassis" view on an SRX.
 type Views struct {
@@ -361,6 +396,7 @@ type Views struct {
 	StaticNat      StaticNats
 	SourceNat      SourceNats
 	Storage        Storage
+	FirewallPolicy FirewallPolicy
 }
 
 var (
@@ -376,6 +412,7 @@ var (
 		"staticnat":      "<get-static-nat-rule-information><all/></get-static-nat-rule-information>",
 		"sourcenat":      "<get-source-nat-rule-sets-information><all/></get-source-nat-rule-sets-information>",
 		"storage":        "<get-system-storage/>",
+		"firewallpolicy": "<get-firewall-policies/>",
 	}
 )
 
@@ -521,15 +558,28 @@ func (j *Junos) View(view string) (*Views, error) {
 				return nil, err
 			}
 
-			for _, c := range srxstaticnats.Entries {
-				staticnats.Entries = append(staticnats.Entries, c)
+			actualrules := len(srxstaticnats.Entries) / 2
+			staticnats.Count = actualrules
+
+			for i, c := range srxstaticnats.Entries {
+				if i < actualrules {
+					staticnats.Entries = append(staticnats.Entries, c)
+				}
+
+				i++
 			}
 
 			results.StaticNat = staticnats
 		} else {
+			var staticnatentry StaticNatEntry
 			if err := xml.Unmarshal([]byte(formatted), &staticnats); err != nil {
 				return nil, err
 			}
+
+			actualrules := len(staticnats.Entries)
+			staticnats.Count = actualrules
+
+			staticnats.Entries = append(staticnats.Entries, staticnatentry)
 
 			results.StaticNat = staticnats
 		}
@@ -544,15 +594,28 @@ func (j *Junos) View(view string) (*Views, error) {
 				return nil, err
 			}
 
-			for _, c := range srxsourcenats.Entries {
-				sourcenats.Entries = append(sourcenats.Entries, c)
+			actualrules := len(srxsourcenats.Entries) / 2
+			sourcenats.Count = actualrules
+
+			for i, c := range srxsourcenats.Entries {
+				if i < actualrules {
+					sourcenats.Entries = append(sourcenats.Entries, c)
+				}
+
+				i++
 			}
 
 			results.SourceNat = sourcenats
 		} else {
+			var sourcenatentry SourceNatEntry
 			if err := xml.Unmarshal([]byte(formatted), &sourcenats); err != nil {
 				return nil, err
 			}
+
+			actualrules := len(sourcenats.Entries)
+			sourcenats.Count = actualrules
+
+			sourcenats.Entries = append(sourcenats.Entries, sourcenatentry)
 
 			results.SourceNat = sourcenats
 		}
@@ -581,6 +644,29 @@ func (j *Junos) View(view string) (*Views, error) {
 			storage.Entries = append(storage.Entries, sysstorage)
 
 			results.Storage = storage
+		}
+	case "firewallpolicy":
+		var fwpolicy FirewallPolicy
+		formatted := strings.Replace(reply.Data, "\n", "", -1)
+
+		if strings.Contains(reply.Data, "multi-routing-engine-results") {
+			var multifwpolicy srxFirewallPolicy
+
+			if err := xml.Unmarshal([]byte(formatted), &multifwpolicy); err != nil {
+				return nil, err
+			}
+
+			for _, s := range multifwpolicy.Entries {
+				fwpolicy.Entries = append(fwpolicy.Entries, s)
+			}
+
+			results.FirewallPolicy = fwpolicy
+		} else {
+			if err := xml.Unmarshal([]byte(formatted), &fwpolicy); err != nil {
+				return nil, err
+			}
+
+			results.FirewallPolicy = fwpolicy
 		}
 	}
 
