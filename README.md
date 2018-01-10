@@ -115,9 +115,12 @@ Views | CLI equivilent
 `ethernetswitch` | `show ethernet-switching table`
 `inventory` | `show chassis hardware`
 `virtualchassis` | `show virtual-chassis status`
-`staticnat` | `show security nat static rule all`
-`sourcenat` | `show security nat source rule all`
+* `staticnat` | `show security nat static rule all`
+* `sourcenat` | `show security nat source rule all`
 `storage` | `show system storage`
+`firewallpolicy` | `show security policies` (SRX only)
+
+>NOTE: * Clustered SRX's will only show the NAT rules from one of the nodes, since they are duplicated on the other.
 
 You can even create your own views by creating a `struct` that models the XML output from using the `GetConfig()` function. Granted,
 this is a little more work, and requires you to know a bit more about the Go language (such as unmarshalling XML), but if there's a custom
