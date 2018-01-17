@@ -1,5 +1,5 @@
 ## go-junos
-[![GoDoc](https://godoc.org/github.com/scottdware/go-junos?status.svg)](https://godoc.org/github.com/scottdware/go-junos) [![Travis-CI](https://travis-ci.org/scottdware/go-junos.svg?branch=master)](https://travis-ci.org/scottdware/go-junos)
+[![GoDoc](https://godoc.org/github.com/scottdware/go-junos?status.svg)](https://godoc.org/github.com/scottdware/go-junos) [![Travis-CI](https://travis-ci.org/scottdware/go-junos.svg?branch=master)](https://travis-ci.org/scottdware/go-junos) [![Go Report Card](https://goreportcard.com/badge/github.com/scottdware/go-junos)](https://goreportcard.com/report/github.com/scottdware/go-junos)
 
 A Go package that interacts with Junos devices, as well as Junos Space, and allows you to do the following:
 
