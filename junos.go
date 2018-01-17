@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"regexp"
 	"strings"
 	"time"
@@ -170,7 +169,7 @@ func NewSession(host, user, password string, logger ...interface{}) (*Junos, err
 
 	s, err := netconf.DialSSH(host, netconf.SSHConfigPassword(user, password))
 	if err != nil {
-		log.Fatalf("%s - %s\n", host, err)
+		panic(fmt.Errorf("error connecting to %s - %s", host, err))
 	}
 
 	reply, err := s.Exec(netconf.RawMethod(rpcVersion))
