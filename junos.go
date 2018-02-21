@@ -155,8 +155,7 @@ type versionPackageInfo struct {
 
 // NewSession establishes a new connection to a Junos device that we will use
 // to run our commands against. NewSession also gathers software information
-// about the device. Logger is optional for additonal NETCONF logging
-// logger is any logger that implements the netconf.Logger interface (ex: logrus)
+// about the device.
 func NewSession(host, user, password string) (*Junos, error) {
 	rex := regexp.MustCompile(`^.*\[(.*)\]`)
 
