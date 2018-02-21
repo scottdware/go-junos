@@ -157,15 +157,8 @@ type versionPackageInfo struct {
 // to run our commands against. NewSession also gathers software information
 // about the device. Logger is optional for additonal NETCONF logging
 // logger is any logger that implements the netconf.Logger interface (ex: logrus)
-func NewSession(host, user, password string, logger ...interface{}) (*Junos, error) {
+func NewSession(host, user, password string) (*Junos, error) {
 	rex := regexp.MustCompile(`^.*\[(.*)\]`)
-
-	if logger != nil {
-		l, ok := logger[0].(netconf.Logger)
-		if ok {
-			netconf.SetLog(l)
-		}
-	}
 
 	s, err := netconf.DialSSH(host, netconf.SSHConfigPassword(user, password))
 	if err != nil {
