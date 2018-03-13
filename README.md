@@ -7,7 +7,7 @@ A Go package that interacts with Junos devices, as well as Junos Space, and allo
 * Compare the active configuration to a rollback configuration (diff).
 * Rollback the configuration to a given state or a "rescue" config.
 * Configure devices by submitting commands, uploading a local file or from a remote FTP/HTTP server.
-* Commit operations: lock, unlock, commit, commit-at, commit-confirmed, etc.
+* Commit operations: lock, unlock, commit, commit at, commit confirmed, commit full.
 * [Device views][views] - This will allow you to quickly get all the information on the device for the specified view.
 * [SRX] Convert from a zone-based address book to a global one.
 
@@ -33,12 +33,56 @@ set system services netconf ssh
 set security zones security-zone <xxx> interfaces <xxx> host-inbound-traffic system-services netconf
 ```
 
-### Examples & Documentation
+### Authentication Methods
+There are two different ways you can authenticate against to device. Standard username/password combination, or use SSH keys.
+There is an [AuthMethod][authmethod] struct which defines these methods that you will need to use in your code. Here is an example of 
+connecting to a device using only a username and password.
+
+```Go
+auth := &junos.AuthMethod{
+    Credentials: []string{"scott", "deathstar"},
+}
+
+jnpr, err := junos.NewSession("srx.company.com", auth)
+if err != nil {
+    fmt.Println(err)
+}
+```
+
+If you are using SSH keys, here is an example of how to connect:
+
+```Go
+auth := &junos.AuthMethod{
+    Username:   "scott",
+    PrivateKey: "/home/scott/.ssh/id_rsa",
+    Passphrase: "mysecret",
+}
+
+jnpr, err := junos.NewSession("srx.company.com", auth)
+if err != nil {
+    fmt.Println(err)
+}
+```
+
+If you do not have a passphrase tied to your private key, then you can omit the `Passphrase` field entirely. In the above example,
+we are connecting from a *nix/Mac device, as shown by the private key path. No matter the OS, as long as you provide the location of the
+private key file, you should be fine.
+
+If you are running Windows, and using PuTTY for all your SSH needs, then you will need to generate a public/private key pair by using
+Puttygen. Once you have generated it, you will need to export your private key using the OpenSSH format, and save it somewhere as shown below:
+
+![alt-text](https://raw.githubusercontent.com/scottdware/images/master/puttygen-export-openssh.png "Puttygen private key export")
+
+### Examples
 Visit the [GoDoc][godoc-go-junos] page for package documentation and examples.
 
 Connect to a device, and view the current config to rollback 1.
 ```Go
-jnpr, err := junos.NewSession("qfx-switch.company.com", "admin", "Juniper123!")
+auth := &junos.AuthMethod{
+    Credentials: []string{"admin", "Juniper123!"},
+}
+
+jnpr, err := junos.NewSession("qfx-switch.company.com", auth)
 if err != nil {
     fmt.Println(err)
 }
@@ -65,7 +109,12 @@ fmt.Println(diff)
 
 View the routing-instance configuration.
 ```Go
-jnpr, err := junos.NewSession("srx.company.com", "admin", "Juniper123!")
+auth := &junos.AuthMethod{
+    Username:   "admin",
+    PrivateKey: "/home/scott/.ssh/id_rsa",
+}
+
+jnpr, err := junos.NewSession("srx.company.com", auth)
 if err != nil {
     fmt.Println(err)
 }
@@ -169,3 +218,4 @@ Interface: reth0.1
 [juniper]: http://www.juniper.net
 [godoc-go-junos]: https://godoc.org/github.com/scottdware/go-junos
 [views]: https://github.com/scottdware/go-junos#views
+[authmethod]: https://godoc.org/github.com/scottdware/go-junos#AuthMethod
