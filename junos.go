@@ -674,14 +674,15 @@ func (j *Junos) Lock() error {
 
 // Rescue will create or delete the rescue configuration given "save" or "delete" for the action.
 func (j *Junos) Rescue(action string) error {
-	if action != "save" || action != "delete" {
-		return errors.New("you must specify save or delete for a rescue config action")
-	}
+	var command string
 
-	command := fmt.Sprintf(rpcRescueSave)
-
-	if action == "delete" {
+	switch action {
+	case "save":
+		command = fmt.Sprintf(rpcRescueSave)
+	case "delete":
 		command = fmt.Sprintf(rpcRescueDelete)
+	default:
+		return errors.New("you must specify save or delete for a rescue config action")
 	}
 
 	reply, err := j.Session.Exec(netconf.RawMethod(command))
