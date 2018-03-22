@@ -97,6 +97,7 @@ type LogicalInterface struct {
 	OutputPackets      int    `xml:"traffic-statistics>output-packets"`
 	AddressFamily      string `xml:"address-family>address-family-name"`
 	AggregatedEthernet string `xml:"address-family>ae-bundle-name,omitempty"`
+	LinkAddress        string `xml:"link-address,omitempty"`
 }
 
 // Vlans contains all of the VLAN information on the device.
