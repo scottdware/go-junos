@@ -84,17 +84,17 @@ type LogicalInterface struct {
 	LocalIndex         int    `xml:"local-index"`
 	SNMPIndex          int    `xml:"snmp-index"`
 	Encapsulation      string `xml:"encapsulation"`
-	LAGInputPackets    int    `xml:"lag-traffic-statistics>lag-bundle>input-packets"`
+	LAGInputPackets    uint64 `xml:"lag-traffic-statistics>lag-bundle>input-packets"`
 	LAGInputPps        int    `xml:"lag-traffic-statistics>lag-bundle>input-pps"`
 	LAGInputBytes      int    `xml:"lag-traffic-statistics>lag-bundle>input-bytes"`
 	LAGInputBps        int    `xml:"lag-traffic-statistics>lag-bundle>input-bps"`
-	LAGOutputPackets   int    `xml:"lag-traffic-statistics>lag-bundle>output-packets"`
+	LAGOutputPackets   uint64 `xml:"lag-traffic-statistics>lag-bundle>output-packets"`
 	LAGOutputPps       int    `xml:"lag-traffic-statistics>lag-bundle>output-pps"`
 	LAGOutputBytes     int    `xml:"lag-traffic-statistics>lag-bundle>output-bytes"`
 	LAGOutputBps       int    `xml:"lag-traffic-statistics>lag-bundle>output-bps"`
 	ZoneName           string `xml:"logical-interface-zone-name"`
-	InputPackets       int    `xml:"traffic-statistics>input-packets"`
-	OutputPackets      int    `xml:"traffic-statistics>output-packets"`
+	InputPackets       uint64 `xml:"traffic-statistics>input-packets"`
+	OutputPackets      uint64 `xml:"traffic-statistics>output-packets"`
 	AddressFamily      string `xml:"address-family>address-family-name"`
 	AggregatedEthernet string `xml:"address-family>ae-bundle-name,omitempty"`
 	LinkAddress        string `xml:"link-address,omitempty"`
