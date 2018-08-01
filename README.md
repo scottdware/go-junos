@@ -180,13 +180,13 @@ me a line on [Twitter](https://twitter.com/scottdware).
 
 **Example:** View the ARP table on a device
 ```Go
-views, err := jnpr.Views("arp")
+view, err := jnpr.View("arp")
 if err != nil {
     fmt.Println(err)
 }
 
-fmt.Printf("# ARP entries: %d\n\n", views.Arp.Count)
-for _, a := range views.Arp.Entries {
+fmt.Printf("# ARP entries: %d\n\n", view.Arp.Count)
+for _, a := range view.Arp.Entries {
     fmt.Printf("MAC: %s\n", a.MACAddress)
     fmt.Printf("IP: %s\n", a.IPAddress)
     fmt.Printf("Interface: %s\n\n", a.Interface)
