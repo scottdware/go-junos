@@ -434,7 +434,8 @@ func validatePlatform(j *Junos, v string) error {
 
 // View gathers information on the device given the "view" specified. These views can be interrated/looped over to view the
 // data (i.e. ARP table entries, interface details/statistics, routing tables, etc.). Supported views are:
-// arp, route, interface, vlan, ethernetswitch, inventory, staticnat.
+//
+// arp, route, bgp, interface, vlan, ethernetswitch, inventory, virtualchassis, staticnat, sourcenat, storage, fireawllpolicy
 func (j *Junos) View(view string) (*Views, error) {
 	var results Views
 
