@@ -3,6 +3,7 @@ package junos
 import (
 	"encoding/xml"
 	"errors"
+	"fmt"
 	"strings"
 
 	"github.com/Juniper/go-netconf/netconf"
@@ -436,8 +437,15 @@ func validatePlatform(j *Junos, v string) error {
 // data (i.e. ARP table entries, interface details/statistics, routing tables, etc.). Supported views are:
 //
 // arp, route, bgp, interface, vlan, ethernetswitch, inventory, virtualchassis, staticnat, sourcenat, storage, fireawllpolicy
-func (j *Junos) View(view string) (*Views, error) {
+//
+// By default, the interface view will return all interfaces on the device. If you wish to only see a particular physical interface,
+// and all logical interfaces underneath it, you can use the option parameter to specify the name of the interface, e.g.:
+//
+// View("interface", "ge-0/0/0")
+func (j *Junos) View(view string, option ...string) (*Views, error) {
 	var results Views
+	var reply *netconf.RPCReply
+	var err error
 
 	if strings.Contains(j.Platform[0].Model, "SRX") || strings.Contains(j.Platform[0].Model, "MX") {
 		err := validatePlatform(j, view)
@@ -447,9 +455,18 @@ func (j *Junos) View(view string) (*Views, error) {
 		}
 	}
 
-	reply, err := j.Session.Exec(netconf.RawMethod(viewCategories[view]))
-	if err != nil {
-		return nil, err
+	fmt.Println(len(option))
+	if view == "interface" && len(option) > 0 {
+		rpcIntName := fmt.Sprintf("<get-interface-information><interface-name>%s</interface-name></get-interface-information>", option[0])
+		reply, err = j.Session.Exec(netconf.RawMethod(rpcIntName))
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		reply, err = j.Session.Exec(netconf.RawMethod(viewCategories[view]))
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	if reply.Errors != nil {
