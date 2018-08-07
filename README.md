@@ -171,7 +171,14 @@ Views | CLI equivilent
 
 >**NOTE**: Clustered SRX's will only show the NAT rules from one of the nodes, since they are duplicated on the other.
 
-You can even create your own views by creating a `struct` that models the XML output from using the `GetConfig()` function. Granted,
+When using the `interface` view, by default it will return all of the interfaces on the device. If you wish to see only a particular
+interface and all of it's logical interfaces, you can optionally specify the name of an interface using the `option` parameter, e.g.:
+
+`jnpr.View("interface", "ge-0/0/0")`
+
+##### Creating Custom Views
+
+You can even create a custom view by creating a `struct` that models the XML output from using the `GetConfig()` function. Granted,
 this is a little more work, and requires you to know a bit more about the Go language (such as unmarshalling XML), but if there's a custom
 view that you want to see, it's possible to do this for anything you want.
 
