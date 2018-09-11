@@ -376,7 +376,7 @@ func (j *Junos) CommitAt(time string, message ...string) error {
 	command := fmt.Sprintf(rpcCommitAt, time)
 
 	if len(message) > 0 {
-		command = fmt.Sprintf(rpcCommitAtLog, time)
+		command = fmt.Sprintf(rpcCommitAtLog, time, message[0])
 	}
 
 	reply, err := j.Session.Exec(netconf.RawMethod(command))
