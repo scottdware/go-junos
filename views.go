@@ -455,7 +455,6 @@ func (j *Junos) View(view string, option ...string) (*Views, error) {
 		}
 	}
 
-	fmt.Println(len(option))
 	if view == "interface" && len(option) > 0 {
 		rpcIntName := fmt.Sprintf("<get-interface-information><interface-name>%s</interface-name></get-interface-information>", option[0])
 		reply, err = j.Session.Exec(netconf.RawMethod(rpcIntName))
