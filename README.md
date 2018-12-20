@@ -168,6 +168,7 @@ Views | CLI equivilent
 `sourcenat` | `show security nat source rule all`
 `storage` | `show system storage`
 `firewallpolicy` | `show security policies` (SRX only)
+`lldp` | `show lldp neighbors`
 
 >**NOTE**: Clustered SRX's will only show the NAT rules from one of the nodes, since they are duplicated on the other.
 
