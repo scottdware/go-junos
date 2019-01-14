@@ -35,7 +35,7 @@ var (
 	rpcConfigURLText       = "<load-configuration format=\"text\" url=\"%s\"/>"
 	rpcConfigURLXML        = "<load-configuration format=\"xml\" url=\"%s\"/>"
 	rpcConfigStringSet     = "<load-configuration action=\"set\" format=\"text\"><configuration-set>%s</configuration-set></load-configuration>"
-	rpcConfigStringText    = "<load-configuration format=\"text\"><configuration-text>%s</configuration-text></load-configuration>"
+	rpcConfigStringText    = "<load-configuration action=\"replace\" format=\"text\"><configuration-text>%s</configuration-text></load-configuration>"
 	rpcConfigStringXML     = "<load-configuration format=\"xml\"><configuration>%s</configuration></load-configuration>"
 	rpcGetRescue           = "<get-rescue-information><format>text</format></get-rescue-information>"
 	rpcGetRollback         = "<get-rollback-information><rollback>%d</rollback><format>text</format></get-rollback-information>"
