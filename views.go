@@ -81,6 +81,7 @@ type PhysicalInterface struct {
 type LogicalInterface struct {
 	Name               string `xml:"name"`
 	MTU                string `xml:"address-family>mtu"`
+	CIDR               string `xml:"address-family>interface-address>ifa-destination"`
 	IPAddress          string `xml:"address-family>interface-address>ifa-local"`
 	LocalIndex         int    `xml:"local-index"`
 	SNMPIndex          int    `xml:"snmp-index"`
