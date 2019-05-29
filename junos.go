@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"net"
 	"regexp"
 	"strings"
 	"time"
@@ -190,32 +191,82 @@ func genSSHClientConfig(auth *AuthMethod) (*ssh.ClientConfig, error) {
 }
 
 // NewSession establishes a new connection to a Junos device that we will use
-// to run our commands against, as well as gathers basic information about the device.
+// to run our commands against.
 // Authentication methods are defined using the AuthMethod struct, and are as follows:
 //
 // username and password, SSH private key (with or without passphrase)
 //
 // Please view the package documentation for AuthMethod on how to use these methods.
+//
+// NOTE: most users should use this function, instead of the other NewSession* functions
 func NewSession(host string, auth *AuthMethod) (*Junos, error) {
-	rex := regexp.MustCompile(`^.*\[(.*)\]`)
 	clientConfig, err := genSSHClientConfig(auth)
 	if err != nil {
 		return nil, err
 	}
 
+	return NewSessionWithConfig(host, clientConfig)
+}
+
+// NewSessionWithConfig establishes a new connection to a Junos device that we will use
+// to run our commands against.
+//
+// This is especially useful if you need to customize the SSH connection beyond
+// what's supported in NewSession().
+func NewSessionWithConfig(host string, clientConfig *ssh.ClientConfig) (*Junos, error) {
 	s, err := netconf.DialSSH(host, clientConfig)
 	if err != nil {
 		return nil, errors.New(fmt.Sprintf("error connecting to %s - %s", host, err))
 	}
 
+	return NewSessionFromNetconf(s)
+}
+
+// NewSessionFromNetConn uses an existing net.Conn to establish a netconf.Session
+//
+// This is especially useful if you need to customize the SSH connection beyond
+// what's supported in NewSession().
+func NewSessionFromNetConn(host string, nc net.Conn, clientConfig *ssh.ClientConfig) (*Junos, error) {
+	s, err := netconf.NewSSHSession(nc, clientConfig)
+
+	if err != nil {
+		return nil, errors.New(fmt.Sprintf("error connecting to %s - %s", host, err))
+	}
+
+	return NewSessionFromNetconf(s)
+}
+
+// NewSessionFromNetconf uses an existing netconf.Session to run our commands against
+//
+// This is especially useful if you need to customize the SSH connection beyond
+// what's supported in NewSession().
+func NewSessionFromNetconf(s *netconf.Session) (*Junos, error) {
+	j := &Junos{
+		Session: s,
+	}
+
+	return j, j.GatherFacts()
+}
+
+// GatherFacts gathers basic information about the device.
+//
+// It's automatically called when using the provided NewSession* functions, but can be
+// used if you create your own Junos sessions.
+func (j *Junos) GatherFacts() error {
+	if j == nil {
+		return errors.New("attempt to call GatherFacts on nil Junos object")
+	}
+	s := j.Session
+	rex := regexp.MustCompile(`^.*\[(.*)\]`)
+
 	reply, err := s.Exec(netconf.RawMethod(rpcVersion))
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	if reply.Errors != nil {
 		for _, m := range reply.Errors {
-			return nil, errors.New(m.Message)
+			return errors.New(m.Message)
 		}
 	}
 
@@ -225,7 +276,7 @@ func NewSession(host string, auth *AuthMethod) (*Junos, error) {
 		var facts versionRouteEngines
 		err = xml.Unmarshal([]byte(formatted), &facts)
 		if err != nil {
-			return nil, err
+			return err
 		}
 
 		numRE := len(facts.RE)
@@ -238,19 +289,17 @@ func NewSession(host string, auth *AuthMethod) (*Junos, error) {
 			res = append(res, RoutingEngine{Model: model, Version: version[1]})
 		}
 
-		return &Junos{
-			Session:        s,
-			Hostname:       hostname,
-			RoutingEngines: numRE,
-			Platform:       res,
-			CommitTimeout:  0,
-		}, nil
+		j.Hostname = hostname
+		j.RoutingEngines = numRE
+		j.Platform = res
+		j.CommitTimeout = 0
+		return nil
 	}
 
 	var facts versionRouteEngine
 	err = xml.Unmarshal([]byte(formatted), &facts)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	// res := make([]RoutingEngine, 0)
@@ -260,13 +309,11 @@ func NewSession(host string, auth *AuthMethod) (*Junos, error) {
 	model := strings.ToUpper(facts.Platform)
 	res = append(res, RoutingEngine{Model: model, Version: version[1]})
 
-	return &Junos{
-		Session:        s,
-		Hostname:       hostname,
-		RoutingEngines: 1,
-		Platform:       res,
-		CommitTimeout:  0,
-	}, nil
+	j.Hostname = hostname
+	j.RoutingEngines = 1
+	j.Platform = res
+	j.CommitTimeout = 0
+	return nil
 }
 
 // Close disconnects our session to the device.
