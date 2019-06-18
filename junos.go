@@ -187,7 +187,7 @@ func genSSHClientConfig(auth *AuthMethod) (*ssh.ClientConfig, error) {
 		return config, nil
 	}
 
-	return config, nil
+	return config, errors.New("no credentials/keys available")
 }
 
 // NewSession establishes a new connection to a Junos device that we will use
