@@ -1,0 +1,13 @@
+github.com/Juniper/go-netconf v0.1.1 h1:5fx/T7L2Fwq51UnESPOP1CXgGCs7IYxR/pnyC5quu/k=
+github.com/Juniper/go-netconf v0.1.1/go.mod h1:2Fy6tQTWnL//D/Ll1hb0RYXN4jndcTyneRn6xj5E1VE=
+github.com/scottdware/go-rested v0.0.0-20160313143639-93e152ef32a6 h1:299Uob4OQNsj4PcX5Lz0zrEUA3QJQR7cUb0QGKOCCMA=
+github.com/scottdware/go-rested v0.0.0-20160313143639-93e152ef32a6/go.mod h1:Pb2bmyrwODgla27iei9cFCcCyVCly15wW4rLEbd0RdM=
+github.com/ziutek/telnet v0.0.0-20180329124119-c3b780dc415b h1:VfPXB/wCGGt590QhD1bOpv2J/AmC/RJNTg/Q59HKSB0=
+github.com/ziutek/telnet v0.0.0-20180329124119-c3b780dc415b/go.mod h1:IZpXDfkJ6tWD3PhBK5YzgQT+xJWh7OsdwiG8hA2MkO4=
+golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2/go.mod h1:djNgcEr1/C05ACkg1iLfiJU5Ep61QUkGW8qpdssI0+w=
+golang.org/x/crypto v0.0.0-20190701094942-4def268fd1a4 h1:HuIa8hRrWRSrqYzx1qI49NNxhdi2PrY7gxVSq1JjLDc=
+golang.org/x/crypto v0.0.0-20190701094942-4def268fd1a4/go.mod h1:yigFU9vqHzYiE8UmvKecakEJjdnWj3jj499lnFckfCI=
+golang.org/x/net v0.0.0-20190404232315-eb5bcb51f2a3/go.mod h1:t9HGtf8HONx5eT2rtn7q6eTqICYqUVnKs3thJo3Qplg=
+golang.org/x/sys v0.0.0-20190215142949-d0b11bdaac8a/go.mod h1:STP8DvDyc/dI5b8T5hshtkjS+E42TnysNCUPdjciGhY=
+golang.org/x/sys v0.0.0-20190412213103-97732733099d/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
+golang.org/x/text v0.3.0/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=
