@@ -63,6 +63,7 @@ type PhysicalInterface struct {
 	LocalIndex              int                `xml:"local-index"`
 	SNMPIndex               int                `xml:"snmp-index"`
 	LinkLevelType           string             `xml:"link-level-type"`
+	InterfaceType           string             `xml:"if-type"`
 	MTU                     string             `xml:"mtu"`
 	LinkMode                string             `xml:"link-mode"`
 	Speed                   string             `xml:"speed"`
