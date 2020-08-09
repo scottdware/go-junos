@@ -286,7 +286,14 @@ func (j *Junos) GatherFacts() error {
 		for i := 0; i < numRE; i++ {
 			version := rex.FindStringSubmatch(facts.RE[i].PackageInfo[0].SoftwareVersion[0])
 			model := strings.ToUpper(facts.RE[i].Platform)
-			res = append(res, RoutingEngine{Model: model, Version: version[1]})
+
+			switch len(version) {
+			case 1:
+				res = append(res, RoutingEngine{Model: model, Version: version[0]})
+			case 2:
+				res = append(res, RoutingEngine{Model: model, Version: version[1]})
+			default:
+			}
 		}
 
 		j.Hostname = hostname
