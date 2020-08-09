@@ -80,27 +80,31 @@ type PhysicalInterface struct {
 
 // LogicalInterface contains information about the logical interfaces tied to a physical interface.
 type LogicalInterface struct {
-	Name               string `xml:"name"`
-	MTU                string `xml:"address-family>mtu"`
-	CIDR               string `xml:"address-family>interface-address>ifa-destination"`
-	IPAddress          string `xml:"address-family>interface-address>ifa-local"`
-	LocalIndex         int    `xml:"local-index"`
-	SNMPIndex          int    `xml:"snmp-index"`
-	Encapsulation      string `xml:"encapsulation"`
-	LAGInputPackets    uint64 `xml:"lag-traffic-statistics>lag-bundle>input-packets"`
-	LAGInputPps        int    `xml:"lag-traffic-statistics>lag-bundle>input-pps"`
-	LAGInputBytes      int    `xml:"lag-traffic-statistics>lag-bundle>input-bytes"`
-	LAGInputBps        int    `xml:"lag-traffic-statistics>lag-bundle>input-bps"`
-	LAGOutputPackets   uint64 `xml:"lag-traffic-statistics>lag-bundle>output-packets"`
-	LAGOutputPps       int    `xml:"lag-traffic-statistics>lag-bundle>output-pps"`
-	LAGOutputBytes     int    `xml:"lag-traffic-statistics>lag-bundle>output-bytes"`
-	LAGOutputBps       int    `xml:"lag-traffic-statistics>lag-bundle>output-bps"`
-	ZoneName           string `xml:"logical-interface-zone-name"`
-	InputPackets       uint64 `xml:"traffic-statistics>input-packets"`
-	OutputPackets      uint64 `xml:"traffic-statistics>output-packets"`
-	AddressFamily      string `xml:"address-family>address-family-name"`
-	AggregatedEthernet string `xml:"address-family>ae-bundle-name,omitempty"`
-	LinkAddress        string `xml:"link-address,omitempty"`
+	Name             string          `xml:"name"`
+	LocalIndex       int             `xml:"local-index"`
+	SNMPIndex        int             `xml:"snmp-index"`
+	Encapsulation    string          `xml:"encapsulation"`
+	LAGInputPackets  uint64          `xml:"lag-traffic-statistics>lag-bundle>input-packets"`
+	LAGInputPps      int             `xml:"lag-traffic-statistics>lag-bundle>input-pps"`
+	LAGInputBytes    int             `xml:"lag-traffic-statistics>lag-bundle>input-bytes"`
+	LAGInputBps      int             `xml:"lag-traffic-statistics>lag-bundle>input-bps"`
+	LAGOutputPackets uint64          `xml:"lag-traffic-statistics>lag-bundle>output-packets"`
+	LAGOutputPps     int             `xml:"lag-traffic-statistics>lag-bundle>output-pps"`
+	LAGOutputBytes   int             `xml:"lag-traffic-statistics>lag-bundle>output-bytes"`
+	LAGOutputBps     int             `xml:"lag-traffic-statistics>lag-bundle>output-bps"`
+	ZoneName         string          `xml:"logical-interface-zone-name"`
+	InputPackets     uint64          `xml:"traffic-statistics>input-packets"`
+	OutputPackets    uint64          `xml:"traffic-statistics>output-packets"`
+	AddressFamilies  []AddressFamily `xml:"address-family"`
+	LinkAddress      string          `xml:"link-address,omitempty"`
+}
+
+type AddressFamily struct {
+	Name               string `xml:"address-family-name"`
+	AggregatedEthernet string `xml:"ae-bundle-name,omitempty"`
+	CIDR               string `xml:"interface-address>ifa-destination"`
+	IPAddress          string `xml:"interface-address>ifa-local"`
+	MTU                string `xml:"mtu"`
 }
 
 // Vlans contains all of the VLAN information on the device.
